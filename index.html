@@ -351,7 +351,7 @@ const CONFIG = {
   SHEET_ID: '1zAVdzy9RvRKcm4mlHpaiBk-FISS8lrLhlGEfFU5SumA',
 
   // 2. Numer zakładki (0 = pierwsza zakładka)
-  GID: '0',
+  GID: '32007859',
 
   // 3. Numer kolumny z imionami graczy (A=0, B=1, C=2, …)
   SHEET_COLUMN: 8,
@@ -394,7 +394,7 @@ const REFRESH_SEC = 30; // 5 minut
 const $ = id => document.getElementById(id);
 
 function csvURL() {
-  return `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=${CONFIG.GID}`;
+  return `https://docs.google.com/spreadsheets/d/e/2PACX-1vT4MLkw50iP2O1GC7fgLaKUbK2oD9aOgRDhVd85J1WelK0bJx1Zja7s_F968UnhAaBoOBRyv3JuA_V-/pub?output=csv&gid=${CONFIG.GID}&_=${Date.now()}`;
 }
 
 async function fetchPlayers() {
