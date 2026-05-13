@@ -102,25 +102,21 @@
 <script>
 /* ════════ KONFIGURACJA ════════ */
 const CONFIG = {
-  // Opublikowany URL (z "Plik → Udostępnij → Opublikuj w sieci")
   PUBLISHED_BASE: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT4MLkw50iP2O1GC7fgLaKUbK2oD9aOgRDhVd85J1WelK0bJx1Zja7s_F968UnhAaBoOBRyv3JuA_V-/pub',
+  GID:          '32007859',
 
-  // GID zakładki (z URL arkusza po #gid=)
-  GID: '32007859',
+  FIRST_NAME_COL: 5,   // kolumna F (imię)
+  LAST_NAME_COL:  6,   // kolumna G (nazwisko)
 
-  // Kolumna J = indeks 9 (A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9)
-  SHEET_COLUMN: 9,
-
-  // Ile wierszy pominąć od góry (dane od wiersza 3 → pomijamy 2 wiersze)
+  // Wiersze z danymi: 3–16 → pomijamy 2 wiersze nagłówka
   SKIP_ROWS: 2,
+  // Maksymalny wiersz z danymi (16 − 2 nagłówki = 14 wierszy)
+  MAX_ROWS: 14,
 
-  // Podtytuł strony
   SUBTITLE: 'Czwartek 14.05',
-
-  // Linki
   LINKS: [
-    { label: 'Zapisz się',     url: 'https://forms.gle/3YWDogdP5g2cQxXXA',   emoji: '📋', primary: true  },
-    { label: 'Nasz Instagram', url: 'https://instagram.com/ligasquashawpc',    emoji: '📸', primary: false },
+    { label: 'Zapisz się',     url: 'https://forms.gle/3YWDogdP5g2cQxXXA',  emoji: '📋', primary: true  },
+    { label: 'Nasz Instagram', url: 'https://instagram.com/ligasquashawpc',   emoji: '📸', primary: false },
   ],
 };
 /* ════════ KONIEC KONFIGURACJI ════════ */
@@ -128,28 +124,28 @@ const CONFIG = {
 const REFRESH_SEC = 30;
 const $ = id => document.getElementById(id);
 
-// ── Porządny parser CSV (obsługuje cudzysłowy i przecinki wewnątrz komórek) ──
+// Parser CSV obsługujący cudzysłowy i nowe linie wewnątrz komórek
 function parseCSV(text) {
   const rows = [];
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQ && line[i+1] === '"') { cur += '"'; i++; } // escaped quote
-        else { inQ = !inQ; }
-      } else if (ch === ',' && !inQ) {
-        cols.push(cur); cur = '';
-      } else {
-        cur += ch;
-      }
+  let cur = '', inQ = false, cols = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      if (inQ && text[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (ch === ',' && !inQ) {
+      cols.push(cur); cur = '';
+    } else if ((ch === '\n' || ch === '\r') && !inQ) {
+      if (ch === '\r' && text[i+1] === '\n') i++;
+      cols.push(cur); cur = '';
+      if (cols.some(c => c !== '')) rows.push(cols);
+      cols = [];
+    } else {
+      cur += ch;
     }
-    cols.push(cur);
-    rows.push(cols);
   }
+  cols.push(cur);
+  if (cols.some(c => c !== '')) rows.push(cols);
   return rows;
 }
 
@@ -161,9 +157,14 @@ async function fetchPlayers() {
   const res = await fetch(csvURL());
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const text = await res.text();
-  const rows = parseCSV(text).slice(CONFIG.SKIP_ROWS);
+  const rows = parseCSV(text).slice(CONFIG.SKIP_ROWS, CONFIG.SKIP_ROWS + CONFIG.MAX_ROWS);
+
   return rows
-    .map(cols => (cols[CONFIG.SHEET_COLUMN] || '').trim())
+    .map(cols => {
+      const first = (cols[CONFIG.FIRST_NAME_COL] || '').trim();
+      const last  = (cols[CONFIG.LAST_NAME_COL]  || '').trim();
+      return [first, last].filter(Boolean).join(' ');
+    })
     .filter(Boolean);
 }
 
@@ -213,15 +214,10 @@ function tick() {
 }
 
 async function load() {
-  try {
-    renderPlayers(await fetchPlayers());
-  } catch(e) {
-    console.error(e);
-    renderError();
-  }
+  try { renderPlayers(await fetchPlayers()); }
+  catch(e) { console.error(e); renderError(); }
 }
 
-// ── start ──
 document.title = 'Lista Graczy';
 $('subtitle').textContent = CONFIG.SUBTITLE;
 renderLinks();
