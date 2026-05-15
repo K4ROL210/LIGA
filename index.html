@@ -107,7 +107,7 @@
     background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
   .day-label  { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); letter-spacing: .5px; }
-  .date-label { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .date-label { font-size: 15px; color: #fff; margin-top: 1px; }
 
   /* ── player list ── */
   .player-list { flex: 1; min-height: 60px; }
@@ -217,10 +217,10 @@
 <script>
 // ── helpers ──────────────────────────────────────────────────────
 const DAYS = [
+  { key:"mon", label:"Poniedziałek", short:"Pn",  dow:1 },
   { key:"tue", label:"Wtorek",       short:"Wt",  dow:2 },
   { key:"thu", label:"Czwartek",     short:"Czw", dow:4 },
   { key:"sat", label:"Sobota",       short:"Sob", dow:6 },
-  { key:"mon", label:"Poniedziałek", short:"Pn",  dow:1 },
 ];
 const COLORS = ["#e8ff47","#47ffe8","#ff8547","#a847ff"];
 
