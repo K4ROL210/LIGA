@@ -441,9 +441,9 @@ function renderAdminBar() {
 function renderGrid() {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
-  for (const day of state.days) {
-    grid.appendChild(mkCard(day));
-  }
+  for (const day of [...state.days].sort((a, b) => a.date - b.date)) {
+  grid.appendChild(mkCard(day));
+}
 }
 
 function mkCard(day) {
