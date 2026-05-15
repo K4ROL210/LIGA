@@ -198,7 +198,7 @@
 </head>
 <body>
 
-<!-- ═══ KONFIGURACJA ═══════════════════════════════════════════ -->
+<!-- ═══ KONFIGURACJA ════════════════════════════════���══════════ -->
 <script>
   // ⬇ Wklej tutaj URL swojego Web Appa z Google Apps Script
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA8mq9U43Sad1_wgDCUl5t4X90GQzkvwGpC2P8gvWBSZBWgS6S7-1DlijV0qQkoVXOxQ/exec";
@@ -210,14 +210,15 @@
 const today = new Date();
 const day = String(today.getDate()).padStart(2, '0');
 const month = String(today.getMonth() + 1).padStart(2, '0');
-document.getElementById('todayDate').textContent = `DZISIAJ ${day}.${month}`;
+const todayDateStr = `DZISIAJ ${day}.${month}`;
 </script>
 <!-- ══════════════════════════════════════════════════════════════ -->
 
 <div class="header">
   <div class="pill">🎾 Liga Squasha WPC</div>
   <h1>ZAPISY NA <span>LIGĘ</span></h1>
-  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link">SMS ✉︎ 511915628</a><br><span id="todayDate" class="today-date"></span></p>
+  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link">SMS ✉︎ 511 915 628</a> <br> <span class="today-date" id="todayDate"></span>
+  </p>
 </div>
 
 <div class="top-bar" id="topBar"></div>
@@ -333,6 +334,14 @@ function render() {
   renderLoginBox();
   renderAdminBar();
   renderGrid();
+  renderTodayDate();
+}
+
+function renderTodayDate() {
+  const el = document.getElementById("todayDate");
+  if (el) {
+    el.textContent = todayDateStr;
+  }
 }
 
 function renderTopBar() {
