@@ -10,7 +10,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:        #778899;
+    --bg:        #696969;
     --surface:   #12151f;
     --border:    #1f2333;
     --muted:     #434968;
@@ -164,6 +164,20 @@
     border-radius: 50%; animation: spin .6s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── facebook link ── */
+.fb-link {
+  color: var(--c0);
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 1px solid var(--c0);
+  transition: opacity .15s;
+  cursor: pointer;
+}
+.fb-link:hover {
+  opacity: .85;
+}
+  
 </style>
 </head>
 <body>
@@ -179,9 +193,9 @@
 <!-- ══════════════════════════════════════════════════════════════ -->
 
 <div class="header">
-  <div class="pill">🎾 Liga Squasha</div>
+  <div class="pill">🎾 Liga Squasha WPC</div>
   <h1>ZAPISY NA <span>LIGĘ</span></h1>
-  <p class="sub">Liga Squasha WPC</p>
+  <p class="sub">Pierwszy raz na lidze?  Odezwij sie na nr tel. 511915628 lub <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">NAPISZ NA FB </a></p>
 </div>
 
 <div class="top-bar" id="topBar"></div>
