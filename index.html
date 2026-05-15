@@ -105,9 +105,21 @@
     padding: 12px 14px;
     border-bottom: 2px solid var(--accent);
     background: color-mix(in srgb, var(--accent) 10%, transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
   }
+  .card-head-text { flex: 1; }
   .day-label  { font-family: 'Bebas Neue', sans-serif; font-size: 35px; color: var(--accent); letter-spacing: .5px; }
   .date-label { font-size: 35px; color: #fff; margin-top: 1px; }
+
+  /* ── lock button ── */
+  .lock-btn {
+    background: transparent; border: none; cursor: pointer;
+    font-size: 18px; padding: 4px 8px; transition: opacity .15s;
+    color: var(--accent);
+  }
+  .lock-btn:hover { opacity: .75; }
 
   /* ── player list ── */
   .player-list { flex: 1; min-height: 60px; }
@@ -123,6 +135,7 @@
   .pname { flex: 1; font-size: 13px; font-weight: 500; }
   .empty { text-align: center; padding: 18px 8px; color: var(--muted); font-size: 12px; }
   .loading-txt { text-align: center; padding: 18px 8px; color: var(--muted); font-size: 11px; }
+  .closed-txt { text-align: center; padding: 18px 8px; color: var(--red); font-size: 12px; font-weight: 700; }
 
   /* ── icon buttons ── */
   .icon-btn {
@@ -138,6 +151,7 @@
 
   /* ── input row ── */
   .input-row { padding: 10px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+  .input-row.closed { opacity: 0.5; pointer-events: none; }
   .field {
     flex: 1; background: #0d1020; border: 1px solid var(--border);
     border-radius: 8px; color: var(--text); padding: 7px 10px;
@@ -279,7 +293,25 @@ let state = {
   showLogin: false,
   passInput: "",
   passErr:   false,
+  locked:    {},   // dayKey → bool (jeśli zapisy są zamknięte)
 };
+
+// Load locked state from localStorage
+function loadLockedState() {
+  const saved = localStorage.getItem('lockedDays');
+  if (saved) {
+    try {
+      state.locked = JSON.parse(saved);
+    } catch (e) {
+      state.locked = {};
+    }
+  }
+}
+
+// Save locked state to localStorage
+function saveLockedState() {
+  localStorage.setItem('lockedDays', JSON.stringify(state.locked));
+}
 
 // ── api (JSONP — omija CORS) ──────────────────────────────────────
 function api(params) {
@@ -317,6 +349,7 @@ async function loadDay(day) {
 }
 
 async function addPlayer(dayKey) {
+  if (state.locked[dayKey]) return;
   const day  = state.days.find(d => d.key === dayKey);
   const name = (state.inputs[dayKey]||"").trim();
   if (!name) return;
@@ -337,6 +370,12 @@ async function saveEdit(dayKey) {
   const day = state.days.find(d => d.key === dayKey);
   const res = await api({ action:"edit", dayKey, dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:ADMIN_PASSWORD });
   if (res.ok) { state.lists[dayKey] = res.players; state.editing = null; render(); }
+}
+
+function toggleLocked(dayKey) {
+  state.locked[dayKey] = !state.locked[dayKey];
+  saveLockedState();
+  render();
 }
 
 // ── render ───────────────────────────────────────────────────────
@@ -395,7 +434,7 @@ function renderLoginBox() {
 function renderAdminBar() {
   const el = document.getElementById("adminBar");
   el.innerHTML = state.adminMode
-    ? '<div class="admin-bar">✓ Tryb administratora — możesz edytować i usuwać wpisy</div>'
+    ? '<div class="admin-bar">✓ Tryb administratora — możesz edytować, usuwać wpisy i zamykać zapisy</div>'
     : "";
 }
 
@@ -411,23 +450,40 @@ function mkCard(day) {
   const players = state.lists[day.key] || [];
   const loading = state.loading[day.key];
   const saving  = state.saving[day.key];
+  const isClosed = state.locked[day.key];
 
   const card = document.createElement("div");
   card.className = "card";
   card.style.setProperty("--accent", day.color);
 
   // head
-  card.innerHTML = `
-    <div class="card-head">
-      <div class="day-label">${day.label}</div>
-      <div class="date-label">${formatPL(day.date)}</div>
-    </div>`;
+  const headDiv = document.createElement("div");
+  headDiv.className = "card-head";
+
+  const textDiv = document.createElement("div");
+  textDiv.className = "card-head-text";
+  textDiv.innerHTML = `
+    <div class="day-label">${day.label}</div>
+    <div class="date-label">${formatPL(day.date)}</div>`;
+  headDiv.appendChild(textDiv);
+
+  if (state.adminMode) {
+    const lockBtn = document.createElement("button");
+    lockBtn.className = "lock-btn";
+    lockBtn.textContent = isClosed ? "🔒" : "🔓";
+    lockBtn.addEventListener("click", () => toggleLocked(day.key));
+    headDiv.appendChild(lockBtn);
+  }
+
+  card.appendChild(headDiv);
 
   // player list
   const list = document.createElement("div");
   list.className = "player-list";
 
-  if (loading) {
+  if (isClosed) {
+    list.innerHTML = `<div class="closed-txt">Zapisy zamknięte</div>`;
+  } else if (loading) {
     list.innerHTML = `<div class="loading-txt"><span class="spinner"></span></div>`;
   } else if (players.length === 0) {
     list.innerHTML = `<div class="empty">Brak zapisanych</div>`;
@@ -473,20 +529,21 @@ function mkCard(day) {
 
   // input row
   const inputRow = document.createElement("div");
-  inputRow.className = "input-row";
+  inputRow.className = "input-row" + (isClosed ? " closed" : "");
 
   const inp = document.createElement("input");
   inp.className = "field";
   inp.type = "text";
-  inp.placeholder = "Imię i nazwisko…";
+  inp.placeholder = isClosed ? "Zapisy zamknięte" : "Imię i nazwisko…";
   inp.value = state.inputs[day.key] || "";
+  inp.disabled = isClosed;
   inp.addEventListener("input",  e => state.inputs[day.key] = e.target.value);
-  inp.addEventListener("keydown", e => { if(e.key==="Enter") addPlayer(day.key); });
+  inp.addEventListener("keydown", e => { if(e.key==="Enter" && !isClosed) addPlayer(day.key); });
 
   const addB = document.createElement("button");
   addB.className = "add-btn";
   addB.style.background = day.color;
-  addB.disabled = !!saving;
+  addB.disabled = !!saving || isClosed;
   addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
   addB.addEventListener("click", () => addPlayer(day.key));
 
@@ -520,6 +577,7 @@ function tryLogin() {
 }
 
 // ── init ─────────────────────────────────────────────────────────
+loadLockedState();
 render();
 Promise.all(state.days.map(loadDay));
 </script>
