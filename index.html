@@ -188,6 +188,12 @@
   opacity: .85;
 }
   
+  .today-date {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 13px;
+}
+  
 </style>
 </head>
 <body>
@@ -199,13 +205,19 @@
 
   const ADMIN_PASSWORD = "squash2024"; // ← to samo co w Kod.gs
   const CUTOFF_HOUR    = 22;           // o której rotuje się lista
+
+  // Wyświetl dzisiejszą datę
+const today = new Date();
+const day = String(today.getDate()).padStart(2, '0');
+const month = String(today.getMonth() + 1).padStart(2, '0');
+document.getElementById('todayDate').textContent = `DZISIAJ ${day}.${month}`;
 </script>
 <!-- ══════════════════════════════════════════════════════════════ -->
 
 <div class="header">
   <div class="pill">🎾 Liga Squasha WPC</div>
   <h1>ZAPISY NA <span>LIGĘ</span></h1>
-  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link"> SMS ✉︎ 511915628</a></p>
+  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link">SMS ✉︎ 511915628</a><br><span id="todayDate" class="today-date"></span></p>
 </div>
 
 <div class="top-bar" id="topBar"></div>
