@@ -1,229 +1,446 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lista Graczy</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg:      #0d0f14;
-      --surface: #13161f;
-      --card:    #1a1e2a;
-      --border:  #252a38;
-      --accent:  #e8ff47;
-      --accent2: #47ffe8;
-      --text:    #eef0f6;
-      --muted:   #6b7394;
-      --radius:  14px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; padding: 32px 16px 64px;
-      position: relative; overflow-x: hidden;
-    }
-    body::before, body::after {
-      content: ''; position: fixed; border-radius: 50%;
-      filter: blur(120px); opacity: .18; pointer-events: none; z-index: 0;
-    }
-    body::before { width:600px;height:600px;background:var(--accent);top:-200px;left:-200px; }
-    body::after  { width:500px;height:500px;background:var(--accent2);bottom:-150px;right:-150px; }
-    .wrapper { position:relative;z-index:1;width:100%;max-width:520px;display:flex;flex-direction:column;gap:24px; }
-    header { text-align:center;padding-top:8px; }
-    .logo-tag { display:inline-block;background:var(--accent);color:#000;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;padding:4px 12px;border-radius:4px;margin-bottom:12px; }
-    h1 { font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,10vw,68px);line-height:1;letter-spacing:2px; }
-    h1 span { color:var(--accent); }
-    .subtitle { color:var(--muted);font-size:14px;margin-top:6px; }
-    .status-bar { display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px; }
-    .live-badge { display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.5px; }
-    .live-dot { width:9px;height:9px;background:#3ddc84;border-radius:50%;animation:pulse 1.8s infinite; }
-    @keyframes pulse {
-      0%  { box-shadow:0 0 0 0 rgba(61,220,132,.5); }
-      70% { box-shadow:0 0 0 8px rgba(61,220,132,0); }
-      100%{ box-shadow:0 0 0 0 rgba(61,220,132,0); }
-    }
-    .countdown { font-size:12px;color:var(--muted); }
-    .countdown strong { color:var(--accent2);font-variant-numeric:tabular-nums; }
-    .links-section { display:flex;flex-direction:column;gap:10px; }
-    .link-btn { display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;color:var(--text);text-decoration:none;font-weight:500;font-size:15px;transition:border-color .2s,transform .15s,background .2s; }
-    .link-btn:hover { border-color:var(--accent);background:#1f2433;transform:translateY(-2px); }
-    .link-btn .icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
-    .link-btn.primary .icon   { background:var(--accent); }
-    .link-btn.secondary .icon { background:#1e2d4a; }
-    .link-btn .arrow { margin-left:auto;opacity:.4;font-size:18px; }
-    .players-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden; }
-    .card-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
-    .card-title { font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px; }
-    .player-count { background:var(--accent);color:#000;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px; }
-    .players-list { list-style:none;padding:8px 0; }
-    .players-list li { display:flex;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--border);animation:fadeIn .35s ease forwards;opacity:0; }
-    .players-list li:last-child { border-bottom:none; }
-    @keyframes fadeIn { from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)} }
-    .player-num { font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);width:24px;text-align:right;flex-shrink:0; }
-    .player-name { font-size:15px;font-weight:500; }
-    .state-msg { text-align:center;padding:40px 20px;color:var(--muted);font-size:14px; }
-    .state-msg .emoji { font-size:32px;display:block;margin-bottom:10px; }
-    footer { text-align:center;font-size:12px;color:var(--muted);margin-top:8px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Liga Squasha — Zapisy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* ── reset & tokens ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0d13;
+    --surface:   #12151f;
+    --border:    #1f2333;
+    --muted:     #434968;
+    --text:      #dde1f0;
+    --c0: #e8ff47;
+    --c1: #47ffe8;
+    --c2: #ff8547;
+    --c3: #a847ff;
+    --green: #3ddc84;
+    --red:   #ff4757;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+
+  /* ── header ── */
+  .header { text-align: center; margin-bottom: 28px; }
+  .pill {
+    display: inline-block;
+    background: var(--c0);
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 3px 12px;
+    border-radius: 100px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(38px, 9vw, 72px);
+    line-height: .95;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+  h1 span { color: var(--c0); }
+  .sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* ── top bar ── */
+  .top-bar { display: flex; justify-content: flex-end; margin-bottom: 14px; gap: 8px; }
+  .btn {
+    border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 12px;
+    padding: 7px 14px; transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-dark   { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-yellow { background: var(--c0); color: #000; }
+  .btn-red    { background: #1f0d0d; color: var(--red); border: 1px solid var(--red); }
+
+  /* ── login box ── */
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-bottom: 14px;
+  }
+  .login-box p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .login-row { display: flex; gap: 8px; }
+  .login-row input { flex: 1; }
+  .err-msg { font-size: 11px; color: var(--red); margin-top: 8px; }
+
+  /* ── admin bar ── */
+  .admin-bar {
+    background: #081a10; border: 1px solid var(--green);
+    border-radius: 8px; padding: 8px 14px; margin-bottom: 14px;
+    font-size: 12px; color: var(--green);
+  }
+
+  /* ── grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+
+  /* ── card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .card-head {
+    padding: 12px 14px;
+    border-bottom: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .day-label  { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); letter-spacing: .5px; }
+  .date-label { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* ── player list ── */
+  .player-list { flex: 1; min-height: 60px; }
+  .player-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn .2s ease;
+  }
+  .player-row:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .num { font-size: 11px; color: var(--accent); min-width: 18px; text-align: right; font-weight: 700; opacity: .7; }
+  .pname { flex: 1; font-size: 13px; font-weight: 500; }
+  .empty { text-align: center; padding: 18px 8px; color: var(--muted); font-size: 12px; }
+  .loading-txt { text-align: center; padding: 18px 8px; color: var(--muted); font-size: 11px; }
+
+  /* ── icon buttons ── */
+  .icon-btn {
+    background: transparent; border-radius: 5px; cursor: pointer;
+    width: 22px; height: 22px; font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .15s; padding: 0; font-family: inherit;
+  }
+  .icon-btn:hover { opacity: .75; }
+  .icon-edit { color: var(--c0); border: 1px solid var(--c0); }
+  .icon-del  { color: var(--red); border: 1px solid var(--red); }
+  .icon-ok   { color: var(--green); border: 1px solid var(--green); }
+
+  /* ── input row ── */
+  .input-row { padding: 10px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+  .field {
+    flex: 1; background: #0d1020; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 7px 10px;
+    font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border-color .15s;
+  }
+  .field:focus { border-color: var(--accent); }
+  .field.err   { border-color: var(--red); }
+  .add-btn {
+    background: var(--accent); color: #000; border: none; border-radius: 8px;
+    padding: 7px 12px; font-weight: 900; cursor: pointer; font-size: 16px;
+    transition: opacity .15s; line-height: 1;
+  }
+  .add-btn:hover   { opacity: .85; }
+  .add-btn:disabled { opacity: .4; cursor: default; }
+
+  /* ── footer ── */
+  footer { text-align: center; font-size: 11px; color: #2b3050; margin-top: 28px; }
+
+  /* ── spinner ── */
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid #fff4; border-top-color: #fff;
+    border-radius: 50%; animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
-<div class="wrapper">
 
-  <header>
-    <div class="logo-tag">🎾 ZAPISY</div>
-    <h1>LISTA<br/><span>GRACZY</span></h1>
-    <p class="subtitle" id="subtitle"></p>
-  </header>
+<!-- ═══ KONFIGURACJA ═══════════════════════════════════════════ -->
+<script>
+  // ⬇ Wklej tutaj URL swojego Web Appa z Google Apps Script
+  const APPS_SCRIPT_URL = "WSTAW_TUTAJ_URL_WEB_APPA";
 
-  <div class="status-bar">
-    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    <div class="countdown">Odświeżenie za <strong id="timer">0:30</strong></div>
-  </div>
+  const ADMIN_PASSWORD = "squash2024"; // ← to samo co w Kod.gs
+  const CUTOFF_HOUR    = 22;           // o której rotuje się lista
+</script>
+<!-- ══════════════════════════════════════════════════════════════ -->
 
-  <div class="links-section" id="linksSection"></div>
-
-  <div class="players-card">
-    <div class="card-header">
-      <div class="card-title">Zapisani gracze</div>
-      <div class="player-count" id="playerCount">–</div>
-    </div>
-    <div id="listContainer">
-      <div class="state-msg"><span class="emoji">⏳</span>Ładowanie listy…</div>
-    </div>
-  </div>
-
-  <footer>Strona odświeża się automatycznie • Dane z Google Sheets</footer>
+<div class="header">
+  <div class="pill">🎾 Liga Squasha</div>
+  <h1>ZAPISY NA <span>MECZE</span></h1>
+  <p class="sub">Lista rotuje się automatycznie o 22:00 każdego tygodnia</p>
 </div>
 
+<div class="top-bar" id="topBar"></div>
+<div id="loginBox"></div>
+<div id="adminBar"></div>
+<div class="grid" id="grid"></div>
+<footer>Dane zapisywane w Google Sheets • Automatyczna rotacja o 22:00</footer>
+
 <script>
-/* ════════ KONFIGURACJA ════════ */
-const CONFIG = {
-  PUBLISHED_BASE: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT4MLkw50iP2O1GC7fgLaKUbK2oD9aOgRDhVd85J1WelK0bJx1Zja7s_F968UnhAaBoOBRyv3JuA_V-/pub',
-  GID:          '32007859',
+// ── helpers ──────────────────────────────────────────────────────
+const DAYS = [
+  { key:"tue", label:"Wtorek",       short:"Wt",  dow:2 },
+  { key:"thu", label:"Czwartek",     short:"Czw", dow:4 },
+  { key:"sat", label:"Sobota",       short:"Sob", dow:6 },
+  { key:"mon", label:"Poniedziałek", short:"Pn",  dow:1 },
+];
+const COLORS = ["#e8ff47","#47ffe8","#ff8547","#a847ff"];
 
-  FIRST_NAME_COL: 5,   // kolumna F (imię)
-  LAST_NAME_COL:  6,   // kolumna G (nazwisko)
+function getNextDate(dow) {
+  const now   = new Date();
+  const today = now.getDay();
+  const hour  = now.getHours();
+  let diff = (dow - today + 7) % 7;
+  if (diff === 0 && hour >= CUTOFF_HOUR) diff = 7;
+  const d = new Date(now);
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
 
-  // Wiersze z danymi: 3–16 → pomijamy 2 wiersze nagłówka
-  SKIP_ROWS: 2,
-  // Maksymalny wiersz z danymi (16 − 2 nagłówki = 14 wierszy)
-  MAX_ROWS: 14,
+function dateKey(d) { return d.toISOString().split("T")[0]; }
 
-  SUBTITLE: 'Czwartek 14.05',
-  LINKS: [
-    { label: 'Zapisz się',     url: 'https://forms.gle/3YWDogdP5g2cQxXXA',  emoji: '📋', primary: true  },
-    { label: 'Nasz Instagram', url: 'https://instagram.com/ligasquashawpc',   emoji: '📸', primary: false },
-  ],
+function formatPL(d) {
+  return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+
+// ── state ────────────────────────────────────────────────────────
+let state = {
+  days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow), color: COLORS[i] })),
+  lists:     {},   // dayKey → string[]
+  loading:   {},   // dayKey → bool
+  inputs:    {},   // dayKey → string
+  saving:    {},   // dayKey → bool
+  editing:   null, // { dayKey, idx } | null
+  editVal:   "",
+  adminMode: false,
+  showLogin: false,
+  passInput: "",
+  passErr:   false,
 };
-/* ════════ KONIEC KONFIGURACJI ════════ */
 
-const REFRESH_SEC = 30;
-const $ = id => document.getElementById(id);
+// ── api ──────────────────────────────────────────────────────────
+async function api(params) {
+  const url = APPS_SCRIPT_URL + "?" + new URLSearchParams(params).toString();
+  const r   = await fetch(url);
+  return r.json();
+}
 
-// Parser CSV obsługujący cudzysłowy i nowe linie wewnątrz komórek
-function parseCSV(text) {
-  const rows = [];
-  let cur = '', inQ = false, cols = [];
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"') {
-      if (inQ && text[i+1] === '"') { cur += '"'; i++; }
-      else inQ = !inQ;
-    } else if (ch === ',' && !inQ) {
-      cols.push(cur); cur = '';
-    } else if ((ch === '\n' || ch === '\r') && !inQ) {
-      if (ch === '\r' && text[i+1] === '\n') i++;
-      cols.push(cur); cur = '';
-      if (cols.some(c => c !== '')) rows.push(cols);
-      cols = [];
-    } else {
-      cur += ch;
-    }
+async function loadDay(day) {
+  state.loading[day.key] = true; render();
+  const res = await api({ action:"list", dayKey:day.key, dateStr:dateKey(day.date) });
+  state.lists[day.key]   = res.ok ? res.players : [];
+  state.loading[day.key] = false; render();
+}
+
+async function addPlayer(dayKey) {
+  const day  = state.days.find(d => d.key === dayKey);
+  const name = (state.inputs[dayKey]||"").trim();
+  if (!name) return;
+  state.saving[dayKey] = true; render();
+  const res = await api({ action:"add", dayKey, dateStr:dateKey(day.date), name });
+  if (res.ok) { state.lists[dayKey] = res.players; state.inputs[dayKey] = ""; }
+  state.saving[dayKey] = false; render();
+}
+
+async function removePlayer(dayKey, idx) {
+  const day = state.days.find(d => d.key === dayKey);
+  const res = await api({ action:"remove", dayKey, dateStr:dateKey(day.date), idx, password:ADMIN_PASSWORD });
+  if (res.ok) { state.lists[dayKey] = res.players; render(); }
+}
+
+async function saveEdit(dayKey) {
+  if (!state.editing) return;
+  const day = state.days.find(d => d.key === dayKey);
+  const res = await api({ action:"edit", dayKey, dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:ADMIN_PASSWORD });
+  if (res.ok) { state.lists[dayKey] = res.players; state.editing = null; render(); }
+}
+
+// ── render ───────────────────────────────────────────────────────
+function render() {
+  renderTopBar();
+  renderLoginBox();
+  renderAdminBar();
+  renderGrid();
+}
+
+function renderTopBar() {
+  const el = document.getElementById("topBar");
+  el.innerHTML = "";
+  if (state.adminMode) {
+    const b = mkBtn("Wyłącz admina","btn btn-red", () => { state.adminMode=false; render(); });
+    el.appendChild(b);
+  } else {
+    const b = mkBtn("🔐 Admin","btn btn-dark", () => { state.showLogin=!state.showLogin; render(); });
+    el.appendChild(b);
   }
-  cols.push(cur);
-  if (cols.some(c => c !== '')) rows.push(cols);
-  return rows;
 }
 
-function csvURL() {
-  return `${CONFIG.PUBLISHED_BASE}?output=csv&gid=${CONFIG.GID}&_=${Date.now()}`;
+function renderLoginBox() {
+  const el = document.getElementById("loginBox");
+  if (!state.showLogin || state.adminMode) { el.innerHTML=""; return; }
+  el.innerHTML = `
+    <div class="login-box">
+      <p>Hasło administratora:</p>
+      <div class="login-row">
+        <input class="field${state.passErr?" err":""}" id="passInp" type="password" placeholder="Wpisz hasło…" value="${esc(state.passInput)}" />
+        <button class="btn btn-yellow" id="passOk">OK</button>
+        <button class="btn btn-dark"   id="passX">✕</button>
+      </div>
+      ${state.passErr ? '<p class="err-msg">Błędne hasło</p>' : ""}
+    </div>`;
+  const inp = el.querySelector("#passInp");
+  inp.addEventListener("input", e => { state.passInput=e.target.value; state.passErr=false; });
+  inp.addEventListener("keydown", e => { if(e.key==="Enter") tryLogin(); });
+  el.querySelector("#passOk").addEventListener("click", tryLogin);
+  el.querySelector("#passX").addEventListener("click", () => { state.showLogin=false; state.passInput=""; state.passErr=false; render(); });
+  inp.focus();
 }
 
-async function fetchPlayers() {
-  const res = await fetch(csvURL());
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
-  const rows = parseCSV(text).slice(CONFIG.SKIP_ROWS, CONFIG.SKIP_ROWS + CONFIG.MAX_ROWS);
-
-  return rows
-    .map(cols => {
-      const first = (cols[CONFIG.FIRST_NAME_COL] || '').trim();
-      const last  = (cols[CONFIG.LAST_NAME_COL]  || '').trim();
-      return [first, last].filter(Boolean).join(' ');
-    })
-    .filter(Boolean);
+function renderAdminBar() {
+  const el = document.getElementById("adminBar");
+  el.innerHTML = state.adminMode
+    ? '<div class="admin-bar">✓ Tryb administratora — możesz edytować i usuwać wpisy</div>'
+    : "";
 }
 
-function renderPlayers(players) {
-  $('playerCount').textContent = players.length;
-  const container = $('listContainer');
-  if (players.length === 0) {
-    container.innerHTML = `<div class="state-msg"><span class="emoji">😴</span>Brak zapisanych graczy</div>`;
-    return;
+function renderGrid() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  for (const day of state.days) {
+    grid.appendChild(mkCard(day));
   }
-  const ul = document.createElement('ul');
-  ul.className = 'players-list';
-  players.forEach((name, i) => {
-    const li = document.createElement('li');
-    li.style.animationDelay = (i * 40) + 'ms';
-    li.innerHTML = `<span class="player-num">${i+1}</span><span class="player-name">${escHtml(name)}</span>`;
-    ul.appendChild(li);
-  });
-  container.innerHTML = '';
-  container.appendChild(ul);
 }
 
-function renderError() {
-  $('listContainer').innerHTML = `<div class="state-msg"><span class="emoji">❌</span>Nie można pobrać danych.<br/>Sprawdź czy arkusz jest publiczny.</div>`;
+function mkCard(day) {
+  const players = state.lists[day.key] || [];
+  const loading = state.loading[day.key];
+  const saving  = state.saving[day.key];
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.style.setProperty("--accent", day.color);
+
+  // head
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="day-label">${day.label}</div>
+      <div class="date-label">${formatPL(day.date)}</div>
+    </div>`;
+
+  // player list
+  const list = document.createElement("div");
+  list.className = "player-list";
+
+  if (loading) {
+    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span></div>`;
+  } else if (players.length === 0) {
+    list.innerHTML = `<div class="empty">Brak zapisanych</div>`;
+  } else {
+    players.forEach((name, i) => {
+      const isEdit = state.editing && state.editing.dayKey === day.key && state.editing.idx === i;
+      const row = document.createElement("div");
+      row.className = "player-row";
+      row.innerHTML = `<span class="num">${i+1}</span>`;
+
+      if (state.adminMode && isEdit) {
+        const inp = document.createElement("input");
+        inp.className = "field";
+        inp.value = state.editVal;
+        inp.style.flex = "1";
+        inp.addEventListener("input", e => state.editVal = e.target.value);
+        inp.addEventListener("keydown", e => {
+          if (e.key==="Enter")  saveEdit(day.key);
+          if (e.key==="Escape") { state.editing=null; render(); }
+        });
+        row.appendChild(inp);
+        setTimeout(() => inp.focus(), 0);
+        const ok = mkIconBtn("✓","icon-btn icon-ok", () => saveEdit(day.key));
+        row.appendChild(ok);
+      } else {
+        const span = document.createElement("span");
+        span.className = "pname";
+        span.textContent = name;
+        row.appendChild(span);
+        if (state.adminMode) {
+          const btnEdit = mkIconBtn("✎","icon-btn icon-edit", () => { state.editing={dayKey:day.key,idx:i}; state.editVal=name; render(); });
+          const btnDel  = mkIconBtn("✕","icon-btn icon-del",  () => removePlayer(day.key, i));
+          const wrap = document.createElement("div");
+          wrap.style.display="flex"; wrap.style.gap="4px";
+          wrap.appendChild(btnEdit); wrap.appendChild(btnDel);
+          row.appendChild(wrap);
+        }
+      }
+      list.appendChild(row);
+    });
+  }
+  card.appendChild(list);
+
+  // input row
+  const inputRow = document.createElement("div");
+  inputRow.className = "input-row";
+
+  const inp = document.createElement("input");
+  inp.className = "field";
+  inp.type = "text";
+  inp.placeholder = "Imię i nazwisko…";
+  inp.value = state.inputs[day.key] || "";
+  inp.addEventListener("input",  e => state.inputs[day.key] = e.target.value);
+  inp.addEventListener("keydown", e => { if(e.key==="Enter") addPlayer(day.key); });
+
+  const addB = document.createElement("button");
+  addB.className = "add-btn";
+  addB.style.background = day.color;
+  addB.disabled = !!saving;
+  addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
+  addB.addEventListener("click", () => addPlayer(day.key));
+
+  inputRow.appendChild(inp);
+  inputRow.appendChild(addB);
+  card.appendChild(inputRow);
+
+  return card;
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// ── utils ────────────────────────────────────────────────────────
+function mkBtn(label, cls, onClick) {
+  const b = document.createElement("button");
+  b.className = cls; b.textContent = label;
+  b.addEventListener("click", onClick);
+  return b;
+}
+function mkIconBtn(label, cls, onClick) {
+  const b = document.createElement("button");
+  b.className = cls; b.textContent = label;
+  b.addEventListener("click", onClick);
+  return b;
+}
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
+
+function tryLogin() {
+  if (state.passInput === ADMIN_PASSWORD) {
+    state.adminMode=true; state.showLogin=false; state.passInput=""; state.passErr=false;
+  } else { state.passErr=true; }
+  render();
 }
 
-function renderLinks() {
-  const sec = $('linksSection');
-  CONFIG.LINKS.forEach(link => {
-    const a = document.createElement('a');
-    a.href = link.url; a.target = '_blank'; a.rel = 'noopener';
-    a.className = 'link-btn ' + (link.primary ? 'primary' : 'secondary');
-    a.innerHTML = `<div class="icon">${link.emoji}</div>${escHtml(link.label)}<span class="arrow">›</span>`;
-    sec.appendChild(a);
-  });
-}
-
-let remaining = REFRESH_SEC;
-function tick() {
-  remaining--;
-  if (remaining < 0) { remaining = REFRESH_SEC; load(); }
-  $('timer').textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
-}
-
-async function load() {
-  try { renderPlayers(await fetchPlayers()); }
-  catch(e) { console.error(e); renderError(); }
-}
-
-document.title = 'Lista Graczy';
-$('subtitle').textContent = CONFIG.SUBTITLE;
-renderLinks();
-load();
-setInterval(tick, 1000);
-setInterval(load, REFRESH_SEC * 1000);
+// ── init ─────────────────────────────────────────────────────────
+render();
+Promise.all(state.days.map(loadDay));
 </script>
 </body>
 </html>
