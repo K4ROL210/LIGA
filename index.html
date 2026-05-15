@@ -171,7 +171,7 @@
 <!-- ═══ KONFIGURACJA ═══════════════════════════════════════════ -->
 <script>
   // ⬇ Wklej tutaj URL swojego Web Appa z Google Apps Script
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOlmCH-qOWRAwidPMxXOwkFVvxPuiX0A4xsY74Eef6Yerm3sBCe3TzGofQfDCk7ngVbw/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz60-UDYebUfuzUH-JBcTQNwiT6L04vBf6cPZnc8wgaL5q_1vh8xlSVSDYvldyVX_LWOA/exec";
 
   const ADMIN_PASSWORD = "squash2024"; // ← to samo co w Kod.gs
   const CUTOFF_HOUR    = 22;           // o której rotuje się lista
@@ -233,11 +233,32 @@ let state = {
   passErr:   false,
 };
 
-// ── api ──────────────────────────────────────────────────────────
-async function api(params) {
-  const url = APPS_SCRIPT_URL + "?" + new URLSearchParams(params).toString();
-  const r   = await fetch(url);
-  return r.json();
+// ── api (JSONP — omija CORS) ──────────────────────────────────────
+function api(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = "jsonp_" + Math.random().toString(36).slice(2);
+    let script;
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      if (script) script.remove();
+      reject(new Error("timeout"));
+    }, 10000);
+    window[cbName] = (data) => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      if (script) script.remove();
+      resolve(data);
+    };
+    script = document.createElement("script");
+    const p = { ...params, callback: cbName };
+    script.src = APPS_SCRIPT_URL + "?" + new URLSearchParams(p).toString();
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      reject(new Error("script error"));
+    };
+    document.head.appendChild(script);
+  });
 }
 
 async function loadDay(day) {
