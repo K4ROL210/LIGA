@@ -274,7 +274,12 @@ function getNextDate(dow) {
   return d;
 }
 
-function dateKey(d) { return d.toISOString().split("T")[0]; }
+function dateKey(d) {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${year}-${month}-${day}`;
+}
 
 function formatPL(d) {
   return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit",year:"numeric"});
