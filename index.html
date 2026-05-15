@@ -188,17 +188,26 @@
   opacity: .85;
 }
   
+  .today-label {
+    font-family: 'Bebas Neue', sans-serif;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
   .today-date {
-  color: var(--red);
-  font-weight: 700;
-  font-size: 13px;
-}
+    color: var(--red);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
   
 </style>
 </head>
 <body>
 
-<!-- ═══ KONFIGURACJA ════════════════════════════════���══════════ -->
+<!-- ═══ KONFIGURACJA ════════════════════════════════════════════ -->
 <script>
   // ⬇ Wklej tutaj URL swojego Web Appa z Google Apps Script
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA8mq9U43Sad1_wgDCUl5t4X90GQzkvwGpC2P8gvWBSZBWgS6S7-1DlijV0qQkoVXOxQ/exec";
@@ -210,14 +219,14 @@
 const today = new Date();
 const day = String(today.getDate()).padStart(2, '0');
 const month = String(today.getMonth() + 1).padStart(2, '0');
-const todayDateStr = `DZISIAJ ${day}.${month}`;
+const todayDateStr = `${day}.${month}`;
 </script>
 <!-- ══════════════════════════════════════════════════════════════ -->
 
 <div class="header">
   <div class="pill">🎾 Liga Squasha WPC</div>
   <h1>ZAPISY NA <span>LIGĘ</span></h1>
-  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link">SMS ✉︎ 511 915 628</a> <br> <span class="today-date" id="todayDate"></span>
+  <p class="sub">Pierwszy raz na lidze? <br> <a href="https://m.me/karol.kreczmanski" class="fb-link" target="_blank">Napisz do nas</a> <br> <a href="tel:+48511915628" class="phone-link">SMS ✉︎ 511 915 628</a> <br> <span class="today-label" id="todayLabel"></span><span class="today-date" id="todayDate"></span>
   </p>
 </div>
 
@@ -338,9 +347,13 @@ function render() {
 }
 
 function renderTodayDate() {
-  const el = document.getElementById("todayDate");
-  if (el) {
-    el.textContent = todayDateStr;
+  const label = document.getElementById("todayLabel");
+  const date = document.getElementById("todayDate");
+  if (label) {
+    label.textContent = "DZISIAJ ";
+  }
+  if (date) {
+    date.textContent = todayDateStr;
   }
 }
 
