@@ -299,6 +299,7 @@ let state = {
   passInput: "",
   passErr:   false,
   locked:    {},   // dayKey → bool (jeśli zapisy są zamknięte)
+  adminPassword: "",
 };
 
 // Load locked state from localStorage
@@ -366,14 +367,14 @@ async function addPlayer(dayKey) {
 
 async function removePlayer(dayKey, idx) {
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"remove", dayKey, dateStr:dateKey(day.date), idx, password:ADMIN_PASSWORD });
+  const res = await api({ action:"remove", dayKey, dateStr:dateKey(day.date), idx, password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = res.players; render(); }
 }
 
 async function saveEdit(dayKey) {
   if (!state.editing) return;
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"edit", dayKey, dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:ADMIN_PASSWORD });
+  const res = await api({ action:"edit", dayKey, dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = res.players; state.editing = null; render(); }
 }
 
@@ -577,8 +578,11 @@ function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
 async function tryLogin() {
   const res = await api({ action:"checkPassword", password: state.passInput });
   if (res.ok) {
-    state.adminMode = true; state.showLogin = false;
-    state.passInput = ""; state.passErr = false;
+    state.adminMode     = true;
+    state.adminPassword = state.passInput; // ← zapisuje hasło
+    state.showLogin     = false;
+    state.passInput     = "";
+    state.passErr       = false;
   } else {
     state.passErr = true;
   }
