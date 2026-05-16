@@ -226,7 +226,7 @@
 <!-- ═══ KONFIGURACJA ════════════════════════════════════════════ -->
 <script>
   // ⬇ Wklej tutaj URL swojego Web Appa z Google Apps Script
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG9ZvPK3-Rj09ZSal57Yt2LTxxECVqnsGhl9bRKQUr4EY43-ZWWhsAaGRi2pBQvsMoqA/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzoudFPYGza7l7WUrPR_kjZD8OlgJFcdPnrVZgz80rMBFDRPkik1q1Wl7cnHPZqkIqFg/exec";
 
   //const ADMIN_PASSWORD = ""; // ← to samo co w Kod.gs
   const CUTOFF_HOUR    = 22;           // o której rotuje się lista
@@ -350,7 +350,10 @@ function api(params) {
 async function loadDay(day) {
   state.loading[day.key] = true; render();
   const res = await api({ action:"list", dayKey:day.key, dateStr:dateKey(day.date) });
-  state.lists[day.key]   = res.ok ? res.players : [];
+  if (res.ok) {
+    state.lists[day.key]  = res.players;
+    state.locked[day.key] = res.locked; // ← pobiera stan z serwera
+  }
   state.loading[day.key] = false; render();
 }
 
@@ -378,10 +381,15 @@ async function saveEdit(dayKey) {
   if (res.ok) { state.lists[dayKey] = res.players; state.editing = null; render(); }
 }
 
-function toggleLocked(dayKey) {
-  state.locked[dayKey] = !state.locked[dayKey];
-  saveLockedState();
-  render();
+async function toggleLocked(dayKey) {
+  const day    = state.days.find(d => d.key === dayKey);
+  const action = state.locked[dayKey] ? "unlock" : "lock";
+  const res    = await api({ action, dayKey, dateStr:dateKey(day.date), password:state.adminPassword });
+  if (res.ok) {
+    state.locked[dayKey] = res.locked;
+    saveLockedState();
+    render();
+  }
 }
 
 // ── render ───────────────────────────────────────────────────────
@@ -590,7 +598,7 @@ async function tryLogin() {
 }
 
 // ── init ─────────────────────────────────────────────────────────
-loadLockedState();
+//loadLockedState();
 render();
 Promise.all(state.days.map(loadDay));
 </script>
