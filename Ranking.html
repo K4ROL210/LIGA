@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Liga Squasha — Ranking</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #696969;
+    --surface: #12151f;
+    --border:  #1f2333;
+    --muted:   #434968;
+    --text:    #dde1f0;
+    --c0: #e8ff47;
+    --c1: #47ffe8;
+    --c2: #ff8547;
+    --c3: #a847ff;
+    --green: #3ddc84;
+    --red:   #ff4757;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 0 0 60px; }
+
+  /* ── NAV (identyczny na każdej stronie) ── */
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 0 16px; }
+  .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--c0); letter-spacing: 1px; padding: 14px 12px 14px 0; margin-right: 8px; border-right: 1px solid var(--border); white-space: nowrap; flex-shrink: 0; }
+  .nav-link { display: flex; align-items: center; gap: 6px; padding: 14px 14px; font-size: 13px; font-weight: 700; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; flex-shrink: 0; }
+  .nav-link:hover { color: var(--text); }
+  .nav-link.active { color: var(--c0); border-bottom-color: var(--c0); }
+
+  /* ── page ── */
+  .page-wrap { padding: 28px 16px 0; }
+  .header { text-align: center; margin-bottom: 28px; }
+  .pill { display: inline-block; background: var(--c0); color: #000; font-size: 10px; font-weight: 900; letter-spacing: 3px; padding: 3px 12px; border-radius: 100px; margin-bottom: 12px; text-transform: uppercase; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(38px, 9vw, 72px); line-height: .95; letter-spacing: 1px; color: #fff; }
+  h1 span { color: var(--c0); }
+  .sub { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  /* ── placeholder ── */
+  .coming-soon { text-align: center; padding: 80px 20px; color: var(--muted); }
+  .coming-soon .icon { font-size: 64px; margin-bottom: 16px; }
+  .coming-soon h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--text); margin-bottom: 8px; }
+  .coming-soon p { font-size: 14px; }
+
+  footer { text-align: center; font-size: 11px; color: #2b3050; margin-top: 28px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">🎾 WPC</div>
+    <a class="nav-link"        href="index.html">📋 Zapisy</a>
+    <a class="nav-link"        href="wyniki.html">🏆 Wyniki</a>
+    <a class="nav-link active" href="ranking.html">📊 Ranking</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="header">
+    <div class="pill">📊 Ranking Sezonu</div>
+    <h1>RANKING <span>LIGI</span></h1>
+    <p class="sub">Wtorek • Czwartek • Sobota • Poniedziałek</p>
+  </div>
+
+  <!-- Tu będzie ranking — do zbudowania w kolejnym kroku -->
+  <div class="coming-soon">
+    <div class="icon">📊</div>
+    <h2>W BUDOWIE</h2>
+    <p>Ta sekcja zostanie uzupełniona o rankingi dla każdego dnia ligi</p>
+  </div>
+
+  <footer>Made by Karol Kreczmański</footer>
+</div>
+
+</body>
+</html>
