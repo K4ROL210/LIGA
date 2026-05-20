@@ -511,6 +511,82 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+ .info-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 100px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--c1);
+  border: 1.5px solid var(--c1);
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+.info-btn:hover {
+  background: rgba(0,229,255,0.08);
+  box-shadow: 0 0 14px rgba(0,229,255,0.25);
+}
+
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: fadeIn .2s ease;
+}
+.modal {
+  background: #0e1318;
+  border: 1.5px solid var(--border-hi);
+  border-radius: 18px;
+  max-width: 520px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  padding: 28px 24px 24px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: transparent; border: none;
+  color: var(--muted); font-size: 20px;
+  cursor: pointer; line-height: 1;
+  transition: color .15s;
+}
+.modal-close:hover { color: var(--text); }
+.modal h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 2px;
+  color: var(--c0); margin-bottom: 16px;
+}
+.modal-section { margin-bottom: 16px; }
+.modal-section h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px; font-weight: 900;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--c1); margin-bottom: 6px;
+}
+.modal-section p, .modal-section li {
+  font-size: 15px; font-weight: 500;
+  color: var(--text); line-height: 1.6;
+}
+.modal-section ul { list-style: none; padding: 0; }
+.modal-section ul li::before { content: "— "; color: var(--c0); }
+.modal-section a { color: var(--c0); text-decoration: none; word-break: break-all; }
+.modal-section a:hover { text-decoration: underline; }
+.modal-note {
+  font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 12px; margin-top: 4px;
+  font-style: italic;
+}
+ 
 </style>
 </head>
 <body>
@@ -539,7 +615,7 @@
   <div class="header">
     <div class="pill">🎾 Liga Squasha WPC</div>
     <h1>ZAPISY NA <span>LIGĘ</span></h1>
-    <p class="sub">Pierwszy raz na lidze?
+<p class="sub">Pierwszy raz na lidze? <button class="info-btn" onclick="openModal()">ℹ INFO</button>
       <div class="contact-btns">
         <a href="https://m.me/karol.kreczmanski" class="contact-btn contact-btn-fb" target="_blank">
           ⓕ &nbsp;Napisz do nas
@@ -865,6 +941,59 @@ async function tryLogin() {
 
 render();
 Promise.all(state.days.map(loadDay));
+</script>
+ <div class="modal-overlay" id="infoModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>ℹ Informacje ogólne</h2>
+
+    <div class="modal-section">
+      <p>Rozgrywki typu „każdy z każdym" w grupach 6–8 osobowych. Zazwyczaj gramy do 2 wygranych setów do 11 pkt. z przewagami.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Dla kogo?</h3>
+      <p>Początkujący i średnio-zaawansowani+</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Koszt</h3>
+      <p>70 zł (55 zł z Multisportem) — płatne na recepcji. 2H gry.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Kiedy?</h3>
+      <ul>
+        <li>Wtorek 20:00</li>
+        <li>Czwartek 20:00 (i 18:00 — początkujący)</li>
+        <li>Sobota 10:00</li>
+      </ul>
+      <p style="margin-top:6px">Nie ma obowiązku być co tydzień — przychodzisz kiedy chcesz!</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Gdzie?</h3>
+      <p>Warsaw Padel Club<br>ul. Annopol 3, Warszawa</p>
+      <a href="https://maps.app.goo.gl/8jomtCJRo2VoTQQY9?g_st=ac" target="_blank">📍 Otwórz w Mapach Google</a>
+    </div>
+
+    <div class="modal-section">
+      <h3>Zapisy i linki</h3>
+      <p>Zapisy na poprzedniej stronie. Dołącz do grupy na Messengerze lub napisz na priv (przycisk na stronie głównej).<br>
+      Przed każdą ligą wysyłam informacje w wiadomości prywatnej.</p>
+      <p style="margin-top:8px">Grupa FB (ogólne info):<br>
+      <a href="https://www.facebook.com/groups/1934793757286180/" target="_blank">facebook.com/groups/1934793757286180</a></p>
+      <p style="margin-top:8px">Wszystkie linki:<br>
+      <a href="https://linktr.ee/ligasquashawpc" target="_blank">linktr.ee/ligasquashawpc</a></p>
+    </div>
+
+    <p class="modal-note">* Odwołanie obecności tego samego dnia co liga wiąże się z obowiązkiem uiszczenia pełnej opłaty za udział.</p>
+  </div>
+</div>
+ <script>
+  function openModal()  { document.getElementById("infoModal").style.display = "flex"; }
+  function closeModal() { document.getElementById("infoModal").style.display = "none"; }
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
 </script>
 </body>
 </html>
