@@ -720,10 +720,19 @@ function renderMatchGrid(matchData, color) {
    th.style.whiteSpace = "normal";
 th.style.wordBreak = "break-word";
 th.style.lineHeight = "1.3";
-   th.style.whiteSpace = "pre";
-th.textContent = name.trim().includes(" ")
-  ? name.trim().split(" ")[0] + "\n" + name.trim().split(" ").slice(1).join(" ")
-  : name.trim();
+   if (name.trim().includes(" ")) {
+  const parts = name.trim().split(" ");
+  const first = document.createElement("span");
+  first.textContent = parts[0];
+  const br = document.createElement("br");
+  const last = document.createElement("span");
+  last.textContent = parts.slice(1).join(" ");
+  th.appendChild(first);
+  th.appendChild(br);
+  th.appendChild(last);
+} else {
+  th.textContent = name.trim();
+}
     hRow1.appendChild(th);
   }
   thead.appendChild(hRow1);
