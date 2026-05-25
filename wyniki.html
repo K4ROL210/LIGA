@@ -17,212 +17,177 @@
     --border-hi: rgba(255,255,255,0.18);
     --muted:     #5a6680;
     --text:      #dde4f0;
-    --accent:    #c8ff00;
-    --accent2:   #00e5ff;
-    --green:     #c8ff00;
-    --red:       #ff4d4d;
     --c0: #c8ff00;
     --c1: #00e5ff;
     --c2: #ff8c42;
     --c3: #b06aff;
+    --red: #ff4d4d;
   }
 
   html { scroll-behavior: smooth; }
-
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'Rajdhani', 'Arial', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px;
-    position: relative;
+    min-height: 100vh; padding: 0 0 80px; position: relative;
   }
-
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 90% 50% at 50% -5%, rgba(200,255,0,0.10) 0%, transparent 55%),
       radial-gradient(ellipse 50% 40% at 95% 95%,  rgba(0,229,255,0.07) 0%, transparent 55%),
       radial-gradient(ellipse 40% 30% at 5%  70%,  rgba(176,106,255,0.05) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
-
   body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background-image:
       linear-gradient(rgba(200,255,0,0.022) 1px, transparent 1px),
       linear-gradient(90deg, rgba(200,255,0,0.022) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
   }
 
   /* ── NAV ── */
-  .nav {
-    background: rgba(8,12,16,0.85);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-  .nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 0 16px;
-  }
+  .nav { background: rgba(8,12,16,0.85); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 0 16px; }
   .nav-inner::-webkit-scrollbar { display: none; }
-  .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--c0);
-    padding: 14px 16px 14px 0;
-    margin-right: 8px;
-    border-right: 1px solid var(--border);
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-shadow: 0 0 20px rgba(200,255,0,0.4);
-  }
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 14px 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    text-decoration: none;
-    border-bottom: 2px solid transparent;
-    transition: color .15s, border-color .15s;
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-transform: uppercase;
-  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--c0); padding: 14px 16px 14px 0; margin-right: 8px; border-right: 1px solid var(--border); white-space: nowrap; flex-shrink: 0; text-shadow: 0 0 20px rgba(200,255,0,0.4); }
+  .nav-link { display: flex; align-items: center; gap: 6px; padding: 14px 16px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; }
   .nav-link:hover { color: var(--text); }
-  .nav-link.active {
-    color: var(--c0);
-    border-bottom-color: var(--c0);
-    text-shadow: 0 0 12px rgba(200,255,0,0.3);
-  }
+  .nav-link.active { color: var(--c0); border-bottom-color: var(--c0); text-shadow: 0 0 12px rgba(200,255,0,0.3); }
 
   /* ── PAGE ── */
-  .page-wrap {
-    padding: 36px 16px 0;
-    position: relative;
-    z-index: 1;
-  }
+  .page-wrap { padding: 36px 16px 0; position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; }
 
   /* ── HEADER ── */
   .header { text-align: center; margin-bottom: 36px; }
+  .pill { display: inline-block; background: var(--c0); color: #0a0f08; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 3px; padding: 4px 14px; border-radius: 100px; margin-bottom: 14px; text-transform: uppercase; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 9vw, 76px); line-height: .92; letter-spacing: 2px; color: #fff; }
+  h1 span { color: var(--c0); text-shadow: 0 0 30px rgba(200,255,0,0.4), 0 0 60px rgba(200,255,0,0.15); }
+  .sub { font-size: 16px; font-weight: 600; color: var(--muted); margin-top: 10px; }
 
-  .pill {
-    display: inline-block;
-    background: var(--c0);
-    color: #0a0f08;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    padding: 4px 14px;
-    border-radius: 100px;
-    margin-bottom: 14px;
-    text-transform: uppercase;
+  /* ── SELECTOR ROWS ── */
+  .selector-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .selector-label { font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-right: 4px; white-space: nowrap; }
+
+  /* ── TABS ── */
+  .tab-btn {
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 7px 16px; border-radius: 9px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted);
+    transition: all .15s; white-space: nowrap;
   }
+  .tab-btn:hover { color: var(--text); border-color: var(--border-hi); }
+  .tab-btn.active { color: #0a0f08; border-color: transparent; }
+  .tab-btn.latest::after { content: " ●"; font-size: 9px; color: var(--c0); }
 
-  h1 {
+  /* Przyciski kolejek — trochę inne */
+  .round-btn {
+    font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.3px; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted);
+    transition: all .15s; white-space: nowrap;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+  }
+  .round-btn .r-num { font-size: 14px; }
+  .round-btn .r-date { font-size: 10px; opacity: .7; }
+  .round-btn:hover { color: var(--text); border-color: var(--border-hi); }
+  .round-btn.active { color: #0a0f08; border-color: transparent; }
+
+  /* Przyciski grup */
+  .group-btn {
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px;
+    padding: 6px 18px; border-radius: 9px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted);
+    transition: all .15s;
+  }
+  .group-btn:hover { color: var(--text); border-color: var(--border-hi); }
+  .group-btn.active { color: #0a0f08; border-color: transparent; }
+
+  /* ── SEKCJA WYNIKÓW ── */
+  .section-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 9vw, 76px);
-    line-height: .92;
-    letter-spacing: 2px;
-    color: #fff;
+    font-size: 22px; letter-spacing: 2px; color: var(--muted);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 10px;
   }
-  h1 span {
-    color: var(--c0);
-    text-shadow: 0 0 30px rgba(200,255,0,0.4), 0 0 60px rgba(200,255,0,0.15);
-  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  .sub {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: 10px;
-    letter-spacing: 0.3px;
-  }
-
-  /* ── COMING SOON ── */
-  .coming-soon {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-  }
-  .coming-soon .icon {
-    font-size: 72px;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 0 24px rgba(200,255,0,0.25));
-  }
-  .coming-soon h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 38px;
-    letter-spacing: 2px;
-    color: var(--text);
-    margin-bottom: 10px;
-  }
-  .coming-soon p {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--muted);
-    max-width: 360px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  .coming-card {
-    display: inline-block;
+  /* ── TABLE BASE ── */
+  .table-card {
     background: rgba(255,255,255,0.035);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 64px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
+    border-radius: 16px; overflow: hidden;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    position: relative; margin-bottom: 20px;
   }
-  .coming-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--c0);
-    opacity: 0.6;
+  .table-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-day); opacity: 0.7; }
+  .table-scroll { overflow-x: auto; }
+
+  /* ── RANKING TABLE ── */
+  .rank-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .rank-table th { padding: 11px 13px; text-align: left; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); white-space: nowrap; }
+  .rank-table th.c { text-align: center; }
+  .rank-table td { padding: 10px 13px; border-bottom: 1px solid rgba(255,255,255,0.04); font-weight: 600; white-space: nowrap; }
+  .rank-table tr:last-child td { border-bottom: none; }
+  .rank-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .rank-table td.c { text-align: center; }
+  .pos-1  { font-family:'Bebas Neue',sans-serif; font-size:17px; color:#ffd700; }
+  .pos-2  { font-family:'Bebas Neue',sans-serif; font-size:17px; color:#c0c0c0; }
+  .pos-3  { font-family:'Bebas Neue',sans-serif; font-size:17px; color:#cd7f32; }
+  .pos-n  { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--muted); }
+  .pname  { font-size:15px; font-weight:700; }
+  .pname.t1 { color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,.3); }
+  .pname.t2 { color:#c0c0c0; }
+  .pname.t3 { color:#cd7f32; }
+  .pts-cell { font-weight:800; text-align:center; }
+
+  /* ── MATCH TABLE ── */
+  .match-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+  .match-table td, .match-table th {
+    padding: 7px 10px;
+    border: 1px solid rgba(255,255,255,0.07);
+    white-space: nowrap;
+    font-weight: 600;
+    vertical-align: middle;
   }
+  .match-table tr:first-child td,
+  .match-table tr:first-child th { background: rgba(0,0,0,0.25); color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+  .match-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+  .match-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+  /* ── LOADING / ERROR ── */
+  .state-box { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .state-box .icon { font-size: 48px; margin-bottom: 14px; }
+  .state-box p { font-size: 14px; font-weight: 600; }
+  .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(200,255,0,0.15); border-top-color: var(--c0); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 14px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ── FOOTER ── */
-  footer {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.1);
-    margin-top: 40px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
+  footer { text-align: center; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.1); margin-top: 40px; letter-spacing: 0.5px; text-transform: uppercase; }
 </style>
 </head>
 <body>
+
+<!-- ═══ KONFIGURACJA ══════════════════════════════════════════ -->
+<script>
+  // ⬇ Wklej URL swojego nowego Web Appa (Kod_Wyniki.gs)
+  const WYNIKI_URL = "WKLEJ_URL_KOD_WYNIKI_GS";
+
+  const DAY_CONFIG = {
+    thu: { label: "Czwartek",     color: "#c8ff00" },
+    tue: { label: "Wtorek",       color: "#00e5ff" },
+    sat: { label: "Sobota",       color: "#ff8c42" },
+    mon: { label: "Poniedziałek", color: "#b06aff" },
+  };
+
+  const DAY_ORDER = ["thu", "tue", "sat", "mon"]; // kolejność zakładek
+</script>
+<!-- ══════════════════════════════════════════════════════════ -->
 
 <nav class="nav">
   <div class="nav-inner">
@@ -237,19 +202,412 @@
   <div class="header">
     <div class="pill">🏆 Wyniki Kolejek</div>
     <h1>WYNIKI <span>LIGI</span></h1>
-    <p class="sub">Wybierz dzień i kolejkę aby zobaczyć wyniki</p>
+    <p class="sub">Wybierz dzień, sezon, kolejkę i grupę</p>
   </div>
 
-  <div class="coming-soon">
-    <div class="coming-card">
+  <!-- Selektor dnia -->
+  <div class="selector-row">
+    <span class="selector-label">Dzień:</span>
+    <div id="dayTabs"></div>
+  </div>
+
+  <!-- Selektor sezonu -->
+  <div class="selector-row" id="seasonRow" style="display:none">
+    <span class="selector-label">Sezon:</span>
+    <div id="seasonTabs"></div>
+  </div>
+
+  <!-- Selektor kolejki -->
+  <div class="selector-row" id="roundRow" style="display:none">
+    <span class="selector-label">Kolejka:</span>
+    <div id="roundTabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- Selektor grupy -->
+  <div class="selector-row" id="groupRow" style="display:none">
+    <span class="selector-label">Grupa:</span>
+    <div id="groupTabs"></div>
+  </div>
+
+  <!-- Obszar wyników -->
+  <div id="contentArea">
+    <div class="state-box">
       <div class="icon">🏆</div>
-      <h2>W BUDOWIE</h2>
-      <p>Ta sekcja zostanie uzupełniona o wyniki kolejek</p>
+      <p>Wybierz dzień, sezon i kolejkę aby zobaczyć wyniki</p>
     </div>
   </div>
 
   <footer>Made by Karol Kreczmański</footer>
 </div>
 
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+let state = {
+  meta:        {},     // { thu: { seasons:[], latest:4 }, ... }
+  activeDay:   null,
+  activeSeason: null,
+  activeRound: null,
+  activeGroup: null,
+  rounds:      [],     // [ { round, date, groups[] }, ... ]
+};
+
+// ── API (JSONP) ────────────────────────────────────────────────
+function api(params) {
+  return new Promise((resolve, reject) => {
+    const cb = "jsonp_" + Math.random().toString(36).slice(2);
+    let script;
+    const t = setTimeout(() => {
+      delete window[cb];
+      if (script) script.remove();
+      reject(new Error("timeout"));
+    }, 15000);
+    window[cb] = data => {
+      clearTimeout(t);
+      delete window[cb];
+      if (script) script.remove();
+      resolve(data);
+    };
+    script = document.createElement("script");
+    script.src = WYNIKI_URL + "?" + new URLSearchParams({ ...params, callback: cb });
+    script.onerror = () => { clearTimeout(t); delete window[cb]; reject(new Error("błąd sieci")); };
+    document.head.appendChild(script);
+  });
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await api({ action: "meta" });
+    if (!res.ok) { showError(res.error); return; }
+    state.meta = res.meta;
+
+    // Domyślny dzień — pierwszy dostępny w kolejności
+    state.activeDay = DAY_ORDER.find(d => state.meta[d]) || Object.keys(state.meta)[0];
+    state.activeSeason = state.meta[state.activeDay]?.latest || 1;
+
+    renderDayTabs();
+    await loadRounds();
+  } catch(e) {
+    showError("Nie można połączyć się z serwerem: " + e.message);
+  }
+}
+
+// ── RENDER DAY TABS ───────────────────────────────────────────
+function renderDayTabs() {
+  const el = document.getElementById("dayTabs");
+  el.style.display = "flex"; el.style.gap = "6px"; el.style.flexWrap = "wrap";
+  el.innerHTML = "";
+  for (const key of DAY_ORDER) {
+    if (!state.meta[key]) continue;
+    const cfg = DAY_CONFIG[key];
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (key === state.activeDay ? " active" : "");
+    btn.textContent = cfg.label;
+    if (key === state.activeDay) btn.style.background = cfg.color;
+    btn.addEventListener("click", async () => {
+      state.activeDay    = key;
+      state.activeSeason = state.meta[key].latest;
+      state.activeRound  = null;
+      state.activeGroup  = null;
+      state.rounds       = [];
+      renderDayTabs();
+      hideGroupRow();
+      clearContent();
+      await loadRounds();
+    });
+    el.appendChild(btn);
+  }
+}
+
+// ── RENDER SEASON TABS ────────────────────────────────────────
+function renderSeasonTabs() {
+  const row = document.getElementById("seasonRow");
+  const el  = document.getElementById("seasonTabs");
+  if (!state.meta[state.activeDay]) { row.style.display = "none"; return; }
+
+  el.style.display = "flex"; el.style.gap = "6px"; el.style.flexWrap = "wrap";
+  el.innerHTML = "";
+  row.style.display = "flex";
+
+  const seasons = [...state.meta[state.activeDay].seasons].sort((a,b) => b - a);
+  const latest  = state.meta[state.activeDay].latest;
+  const color   = DAY_CONFIG[state.activeDay]?.color || "#c8ff00";
+
+  for (const s of seasons) {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn"
+      + (s === state.activeSeason ? " active" : "")
+      + (s === latest ? " latest" : "");
+    btn.textContent = "Sezon " + s;
+    if (s === state.activeSeason) btn.style.background = color;
+    btn.addEventListener("click", async () => {
+      state.activeSeason = s;
+      state.activeRound  = null;
+      state.activeGroup  = null;
+      state.rounds       = [];
+      renderSeasonTabs();
+      hideGroupRow();
+      clearContent();
+      await loadRounds();
+    });
+    el.appendChild(btn);
+  }
+}
+
+// ── LOAD ROUNDS ───────────────────────────────────────────────
+async function loadRounds() {
+  showContentLoading();
+  renderSeasonTabs();
+
+  const roundRow = document.getElementById("roundRow");
+  roundRow.style.display = "none";
+
+  try {
+    const res = await api({
+      action:  "rounds",
+      dayKey:  state.activeDay,
+      season:  state.activeSeason,
+    });
+    if (!res.ok) { showError(res.error); return; }
+
+    state.rounds = res.rounds; // posortowane malejąco
+    renderRoundTabs();
+
+    // Domyślnie wybierz pierwszą (najnowszą) kolejkę
+    if (state.rounds.length > 0) {
+      state.activeRound = state.rounds[0].round;
+      state.activeGroup = state.rounds[0].groups[0];
+      renderRoundTabs();
+      renderGroupTabs(state.rounds[0].groups);
+      await loadResults();
+    } else {
+      showError("Brak kolejek w tym sezonie");
+    }
+  } catch(e) {
+    showError("Błąd ładowania kolejek: " + e.message);
+  }
+}
+
+// ── RENDER ROUND TABS ─────────────────────────────────────────
+function renderRoundTabs() {
+  const row = document.getElementById("roundRow");
+  const el  = document.getElementById("roundTabs");
+  el.innerHTML = "";
+  row.style.display = "flex";
+
+  const color = DAY_CONFIG[state.activeDay]?.color || "#c8ff00";
+
+  for (const r of state.rounds) {
+    const btn = document.createElement("button");
+    btn.className = "round-btn" + (r.round === state.activeRound ? " active" : "");
+    btn.innerHTML = `<span class="r-num">${r.round}</span><span class="r-date">${r.date}</span>`;
+    if (r.round === state.activeRound) btn.style.background = color;
+    btn.addEventListener("click", async () => {
+      state.activeRound = r.round;
+      state.activeGroup = r.groups[0]; // reset do pierwszej grupy
+      renderRoundTabs();
+      renderGroupTabs(r.groups);
+      await loadResults();
+    });
+    el.appendChild(btn);
+  }
+}
+
+// ── RENDER GROUP TABS ─────────────────────────────────────────
+function renderGroupTabs(groups) {
+  const row = document.getElementById("groupRow");
+  const el  = document.getElementById("groupTabs");
+  el.style.display = "flex"; el.style.gap = "6px";
+  el.innerHTML = "";
+
+  const color = DAY_CONFIG[state.activeDay]?.color || "#c8ff00";
+
+  if (groups.length <= 1) {
+    // Tylko jedna grupa — ukryj selektor
+    row.style.display = "none";
+    return;
+  }
+
+  row.style.display = "flex";
+  for (const g of groups) {
+    const btn = document.createElement("button");
+    btn.className = "group-btn" + (g === state.activeGroup ? " active" : "");
+    btn.textContent = "Gr. " + g;
+    if (g === state.activeGroup) btn.style.background = color;
+    btn.addEventListener("click", async () => {
+      state.activeGroup = g;
+      renderGroupTabs(groups);
+      await loadResults();
+    });
+    el.appendChild(btn);
+  }
+}
+
+function hideGroupRow() {
+  document.getElementById("groupRow").style.display = "none";
+  document.getElementById("roundRow").style.display = "none";
+}
+
+// ── LOAD RESULTS ──────────────────────────────────────────────
+async function loadResults() {
+  showContentLoading();
+  try {
+    const res = await api({
+      action:  "results",
+      dayKey:  state.activeDay,
+      season:  state.activeSeason,
+      round:   state.activeRound,
+      group:   state.activeGroup,
+    });
+    if (!res.ok) { showError(res.error); return; }
+    renderResults(res);
+  } catch(e) {
+    showError("Błąd ładowania wyników: " + e.message);
+  }
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────
+function renderResults(data) {
+  const area  = document.getElementById("contentArea");
+  const color = DAY_CONFIG[state.activeDay]?.color || "#c8ff00";
+  area.innerHTML = "";
+
+  // ── Ranking kolejki ──────────────────────────────────────────
+  if (data.rankingRows && data.rankingRows.length > 0) {
+    const title = document.createElement("div");
+    title.className = "section-title";
+    title.style.color = color;
+    title.textContent = "Ranking kolejki";
+    area.appendChild(title);
+
+    const card = document.createElement("div");
+    card.className = "table-card";
+    card.style.setProperty("--accent-day", color);
+
+    const scroll = document.createElement("div");
+    scroll.className = "table-scroll";
+
+    const table = document.createElement("table");
+    table.className = "rank-table";
+
+    // Nagłówek
+    const thead = document.createElement("thead");
+    const hr    = document.createElement("tr");
+    data.rankingHeaders.forEach((h, i) => {
+      const th = document.createElement("th");
+      th.textContent = h;
+      if (i !== 1) th.className = "c";
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    // Wiersze
+    const tbody = document.createElement("tbody");
+    data.rankingRows.forEach(row => {
+      const pos = parseInt(row[0]) || 0;
+      const tr  = document.createElement("tr");
+
+      row.forEach((val, i) => {
+        const td = document.createElement("td");
+
+        if (i === 0) {
+          td.className = "c";
+          const posMap = { 1:"pos-1", 2:"pos-2", 3:"pos-3" };
+          const sp = document.createElement("span");
+          sp.className = posMap[pos] || "pos-n";
+          sp.textContent = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : pos;
+          td.appendChild(sp);
+        } else if (i === 1) {
+          const nameMap = { 1:"t1", 2:"t2", 3:"t3" };
+          const sp = document.createElement("span");
+          sp.className = "pname " + (nameMap[pos] || "");
+          sp.textContent = val;
+          td.appendChild(sp);
+        } else if (i === 10) {
+          // Suma — wyróżniona kolorem dnia
+          td.className = "pts-cell c";
+          td.style.color = color;
+          td.textContent = fmtNum(val);
+        } else {
+          td.className = "c";
+          td.textContent = fmtNum(val);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    scroll.appendChild(table);
+    card.appendChild(scroll);
+    area.appendChild(card);
+  }
+
+  // ── Tabela wyników mecz po meczu ─────────────────────────────
+  if (data.matchData && data.matchData.length > 0) {
+    const title2 = document.createElement("div");
+    title2.className = "section-title";
+    title2.style.color = color;
+    title2.textContent = "Wyniki meczów";
+    area.appendChild(title2);
+
+    const card2 = document.createElement("div");
+    card2.className = "table-card";
+    card2.style.setProperty("--accent-day", color);
+
+    const scroll2 = document.createElement("div");
+    scroll2.className = "table-scroll";
+
+    const table2 = document.createElement("table");
+    table2.className = "match-table";
+
+    data.matchData.forEach((row, ri) => {
+      const tr = document.createElement("tr");
+      row.forEach(val => {
+        const td = document.createElement(ri === 0 ? "th" : "td");
+        td.textContent = val === "" ? "" : val;
+        tr.appendChild(td);
+      });
+      table2.appendChild(tr);
+    });
+
+    scroll2.appendChild(table2);
+    card2.appendChild(scroll2);
+    area.appendChild(card2);
+  }
+
+  if ((!data.rankingRows || data.rankingRows.length === 0) &&
+      (!data.matchData   || data.matchData.length === 0)) {
+    showError("Brak danych w tym pliku");
+  }
+}
+
+// ── POMOCNICZE ────────────────────────────────────────────────
+function fmtNum(val) {
+  if (val === "" || val === null || val === undefined) return "";
+  if (typeof val === "number") {
+    return Number.isInteger(val) ? val : parseFloat(val.toFixed(3));
+  }
+  return val;
+}
+
+function showContentLoading() {
+  document.getElementById("contentArea").innerHTML =
+    `<div class="state-box"><div class="spinner"></div><p>Ładowanie wyników…</p></div>`;
+}
+
+function showError(msg) {
+  document.getElementById("contentArea").innerHTML =
+    `<div class="state-box"><div class="icon">❌</div><p>${msg}</p></div>`;
+}
+
+function clearContent() {
+  document.getElementById("contentArea").innerHTML =
+    `<div class="state-box"><div class="icon">🏆</div><p>Wybierz kolejkę aby zobaczyć wyniki</p></div>`;
+}
+
+// ── START ─────────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
