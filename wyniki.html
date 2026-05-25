@@ -720,14 +720,10 @@ function renderMatchGrid(matchData, color) {
    th.style.whiteSpace = "normal";
 th.style.wordBreak = "break-word";
 th.style.lineHeight = "1.3";
-    const parts = name.trim().split(" ");
-if (parts.length >= 2) {
-  th.appendChild(document.createTextNode(parts[0]));
-  th.appendChild(document.createElement("br"));
-  th.appendChild(document.createTextNode(parts.slice(1).join(" ")));
-} else {
-  th.textContent = name;
-}
+   th.style.whiteSpace = "pre";
+th.textContent = name.trim().includes(" ")
+  ? name.trim().split(" ")[0] + "\n" + name.trim().split(" ").slice(1).join(" ")
+  : name.trim();
     hRow1.appendChild(th);
   }
   thead.appendChild(hRow1);
