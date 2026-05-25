@@ -172,7 +172,7 @@
  /* PO */
 .mg-header-player {
   padding: 8px 4px;
-  font-size: 11px; font-weight: 700; font-family: 'Rajdhani', sans-serif;
+  font-size: 13px; font-weight: 900; font-family: 'Rajdhani', sans-serif;
   letter-spacing: 0.5px; text-transform: uppercase; text-align: center;
   background: rgba(0,0,0,0.28);
   border: 1px solid rgba(255,255,255,0.08);
@@ -713,25 +713,29 @@ function renderMatchGrid(matchData, color) {
     th.colSpan = 4;
     th.style.color = color;
     // imię i nazwisko jedno pod drugim, stała szerokość bloku
-    th.style.width = "88px";
-    th.style.minWidth = "88px";
-    th.style.maxWidth = "88px";
-   th.style.whiteSpace = "normal";
-th.style.wordBreak = "break-word";
-th.style.lineHeight = "1.3";
-   if (name.trim().includes(" ")) {
-  const parts = name.trim().split(" ");
-  const first = document.createElement("span");
-  first.textContent = parts[0];
-  const br = document.createElement("br");
+   /* NOWE */
+th.style.width = "88px";
+th.style.minWidth = "88px";
+th.style.maxWidth = "88px";
+th.style.display = "table-cell"; // wymuszone, bo colSpan może to resetować
+th.style.verticalAlign = "middle";
+
+const inner = document.createElement("div");
+inner.style.display = "flex";
+inner.style.flexDirection = "column";
+inner.style.alignItems = "center";
+inner.style.gap = "2px";
+
+const parts = name.trim().split(" ");
+const first = document.createElement("span");
+first.textContent = parts[0];
+inner.appendChild(first);
+if (parts.length > 1) {
   const last = document.createElement("span");
   last.textContent = parts.slice(1).join(" ");
-  th.appendChild(first);
-  th.appendChild(br);
-  th.appendChild(last);
-} else {
-  th.textContent = name.trim();
+  inner.appendChild(last);
 }
+th.appendChild(inner);
     hRow1.appendChild(th);
   }
   thead.appendChild(hRow1);
