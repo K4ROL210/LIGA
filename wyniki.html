@@ -715,16 +715,13 @@ function renderMatchGrid(matchData, color) {
 th.style.wordBreak = "break-word";
 th.style.lineHeight = "1.3";
     const parts = name.trim().split(" ");
-    if (parts.length >= 2) {
-      const firstName = document.createElement("div");
-      firstName.textContent = parts[0];
-      const lastName = document.createElement("div");
-      lastName.textContent = parts.slice(1).join(" ");
-      th.appendChild(firstName);
-      th.appendChild(lastName);
-    } else {
-      th.textContent = name;
-    }
+if (parts.length >= 2) {
+  th.appendChild(document.createTextNode(parts[0]));
+  th.appendChild(document.createElement("br"));
+  th.appendChild(document.createTextNode(parts.slice(1).join(" ")));
+} else {
+  th.textContent = name;
+}
     hRow1.appendChild(th);
   }
   thead.appendChild(hRow1);
