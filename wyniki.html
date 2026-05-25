@@ -192,14 +192,15 @@
 }
   }
   /* Komórka z nazwą gracza (wiersz) */
-  .mg-row-player {
-    padding: 8px 14px;
-    font-size: 13px; font-weight: 700;
-    white-space: nowrap; vertical-align: middle;
-    border: 1px solid rgba(255,255,255,0.08);
-    font-family: 'Rajdhani', sans-serif;
-    min-width: 130px;
-  }
+  /* PO */
+.mg-row-player {
+  padding: 8px 14px;
+  font-size: 13px; font-weight: 700;
+  white-space: nowrap; vertical-align: middle;
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Rajdhani', sans-serif;
+  width: 1%; /* kurczy się do minimalnej potrzebnej szerokości */
+}
   /* Przekątna (gracz vs siebie) */
   .mg-diagonal {
     background: rgba(255,255,255,0.07);
@@ -234,14 +235,15 @@
     vertical-align: middle;
   }
   /* Narożnik nagłówka */
-  .mg-corner {
-    padding: 8px 12px;
-    font-size: 11px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--muted); text-align: center; vertical-align: middle;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.07);
-    min-width: 130px;
-  }
+  /* PO */
+.mg-corner {
+  padding: 8px 12px;
+  font-size: 11px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); text-align: center; vertical-align: middle;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+  width: 1%;
+}
 </style>
 </head>
 <body>
@@ -669,11 +671,6 @@ function renderResults(data) {
 function renderMatchGrid(matchData, color) {
   if (!matchData || matchData.length < 3) return null;
 
-  // ── Wykryj graczy z wiersza 0 ────────────────────────────────
-  //  Nazwy graczy są w co 4. kolumnie: indeks 1, 5, 9, 13, ...
-  //  (0-indeksowane; w arkuszu: B1, F1, J1, N1, ...)
-  //  Przy scalonych komórkach getValues() zwraca wartość w [0][1]
-  //  i puste stringi w pozostałych komórkach grupy.
   const playerNames = [];
   for (let c = 1; c < matchData[0].length; c += 4) {
     const val = matchData[0][c];
@@ -684,36 +681,44 @@ function renderMatchGrid(matchData, color) {
   const n = playerNames.length;
   if (n === 0) return null;
 
-  const BORDER = "1px solid rgba(255,255,255,0.08)";
-
   const tbl = document.createElement("table");
   tbl.className = "match-grid-table";
 
-  // ── Wiersz 1 nagłówka: narożnik + nazwy graczy (po 4 kol.) ──
-  const thead  = document.createElement("thead");
-  const hRow1  = document.createElement("tr");
+  // ── Nagłówek: wiersz 1 — narożnik + nazwy graczy ──
+  const thead = document.createElement("thead");
+  const hRow1 = document.createElement("tr");
   const corner = document.createElement("th");
   corner.className = "mg-corner";
-  corner.rowSpan   = 2; // łączy obydwa wiersze nagłówka
+  corner.rowSpan = 2;
   corner.textContent = "Gracz";
   hRow1.appendChild(corner);
 
   for (const name of playerNames) {
     const th = document.createElement("th");
-    th.className   = "mg-header-player";
-    th.colSpan     = 4;
+    th.className = "mg-header-player";
+    th.colSpan = 4;
     th.style.color = color;
-    th.textContent = name;
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+      const firstName = document.createElement("div");
+      firstName.textContent = parts[0];
+      const lastName = document.createElement("div");
+      lastName.textContent = parts.slice(1).join(" ");
+      th.appendChild(firstName);
+      th.appendChild(lastName);
+    } else {
+      th.textContent = name;
+    }
     hRow1.appendChild(th);
   }
   thead.appendChild(hRow1);
 
-  // ── Wiersz 2 nagłówka: podkolumny S1 S2 S3 W ─────────────────
+  // ── Nagłówek: wiersz 2 — podkolumny S1 S2 S3 W ──
   const hRow2 = document.createElement("tr");
   for (let j = 0; j < n; j++) {
     ["S1", "S2", "S3", "W"].forEach(label => {
       const th = document.createElement("th");
-      th.className   = "mg-sub-header";
+      th.className = "mg-sub-header";
       th.textContent = label;
       hRow2.appendChild(th);
     });
@@ -721,100 +726,103 @@ function renderMatchGrid(matchData, color) {
   thead.appendChild(hRow2);
   tbl.appendChild(thead);
 
-  // ── Wiersze danych ────────────────────────────────────────────
-  //  Gracz i zajmuje wiersze matchData[2 + i*2] (górny) i [3 + i*2] (dolny).
-  //  Górny wiersz: wyniki gracza-wiersza (jego punkty w każdym secie, jego sety wyg.)
-  //  Dolny wiersz: wyniki gracza-kolumny (jego punkty w każdym secie, jego sety wyg.)
+  // ── Wiersze danych ──
   const tbody = document.createElement("tbody");
 
   for (let i = 0; i < n; i++) {
-    // Pobierz obydwa wiersze dla gracza i
-    // matchData[0] = row 1 (nagłówki), matchData[1] = row 2 (scalone = puste)
-    // matchData[2] = row 3 (gracz 0 górny), matchData[3] = row 4 (gracz 0 dolny), itd.
-    const rowA = matchData[2 + i * 2] || []; // górny wiersz
-    const rowB = matchData[3 + i * 2] || []; // dolny wiersz
+    const rowA = matchData[2 + i * 2] || [];
+    const rowB = matchData[3 + i * 2] || [];
 
-    // ── Górny wiersz gracza i ─────────────────────────────────
+    // ── Górny wiersz gracza i ──
     const tr1 = document.createElement("tr");
-   tr1.style.borderTop = "2px solid rgba(255,255,255,0.12)"; //ramki 
-   if (i % 2 === 0) tr1.style.background = "rgba(255,255,255,0.015)"; // zmienne tło
+    tr1.style.borderTop = "2px solid rgba(255,255,255,0.18)";
 
-    // Komórka z nazwą gracza, łącząca 2 wiersze
-    const nameTd    = document.createElement("td");
-    nameTd.className   = "mg-row-player";
-    nameTd.rowSpan     = 2;
+    const nameTd = document.createElement("td");
+    nameTd.className = "mg-row-player";
+    nameTd.rowSpan = 2;
     nameTd.style.color = color;
     nameTd.textContent = playerNames[i];
     tr1.appendChild(nameTd);
 
     for (let j = 0; j < n; j++) {
-      // Kolumna 4-elementowego bloku dla gracza j zaczyna się na indeksie 1+j*4
-      const colStart = 1 + j * 4; // 0-indeksowane (B=1, F=5, J=9 ... w 0-based)
+      const colStart = 1 + j * 4;
+      const isEven = (i + j) % 2 === 0;
 
       if (i === j) {
-        // Przekątna — gracz nie gra sam ze sobą
-        // colspan=4 + rowspan=2 pokrywa cały blok 4×2
-        const diag     = document.createElement("td");
+        const diag = document.createElement("td");
         diag.className = "mg-diagonal";
-        diag.colSpan   = 4;
-        diag.rowSpan   = 2;
+        diag.colSpan = 4;
+        diag.rowSpan = 2;
         tr1.appendChild(diag);
-
       } else {
-        // Sprawdź czy mecz był rozegrany
-        // (pierwsze pole S1 jest liczbą; tekst = nierozegrany lub placeholder)
-        const s1       = rowA[colStart];
+        const s1 = rowA[colStart];
         const notPlayed = isNotPlayed(s1);
 
         if (notPlayed) {
-          // Mecz nierozegrany — jeden duży symbol "—" na 4 kol. i 2 wiersze
-          const ph     = document.createElement("td");
+          const ph = document.createElement("td");
           ph.className = "mg-empty";
-          ph.colSpan   = 4;
-          ph.rowSpan   = 2;
+          ph.colSpan = 4;
+          ph.rowSpan = 2;
           ph.textContent = "—";
+          // szachownica dla nierozegranych
+          ph.style.background = isEven
+            ? "rgba(255,255,255,0.03)"
+            : "rgba(0,0,0,0.30)";
           tr1.appendChild(ph);
         } else {
-          // 3 komórki z wynikami setów (S1, S2, S3)
+          // S1, S2, S3
           for (let c = 0; c < 3; c++) {
-            const td     = document.createElement("td");
+            const td = document.createElement("td");
             td.className = "mg-score";
             td.textContent = fmtVal(rowA[colStart + c]);
+            td.style.background = isEven
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(0,0,0,0.35)";
             tr1.appendChild(td);
           }
-          // 1 komórka z liczbą wygranych setów (W)
-          const wTd     = document.createElement("td");
+          // W — wynik setów
+          const wTd = document.createElement("td");
           wTd.className = "mg-result";
           wTd.style.color = color;
           wTd.textContent = fmtVal(rowA[colStart + 3]);
+          wTd.style.background = isEven
+            ? "rgba(255,255,255,0.13)"
+            : "rgba(0,0,0,0.22)";
           tr1.appendChild(wTd);
         }
       }
     }
     tbody.appendChild(tr1);
 
-    // ── Dolny wiersz gracza i ─────────────────────────────────
-    //  Przekątna i "nierozegrany" mają już rowspan=2, więc je pomijamy.
+    // ── Dolny wiersz gracza i ──
     const tr2 = document.createElement("tr");
-   if (i % 2 === 0) tr2.style.background = "rgba(255,255,255,0.015)"; // tak samo jak w tr1
+
     for (let j = 0; j < n; j++) {
-      if (i === j) continue; // przekątna zajmuje rowspan=2
+      if (i === j) continue;
 
       const colStart = 1 + j * 4;
-      const s1       = rowA[colStart];
-      if (isNotPlayed(s1)) continue; // placeholder zajął rowspan=2
+      const isEven = (i + j) % 2 === 0;
+      const s1 = rowA[colStart];
+      if (isNotPlayed(s1)) continue;
 
-      // Dolny wiersz: wyniki seta z perspektywy gracza-kolumny
+      // S1, S2, S3
       for (let c = 0; c < 3; c++) {
-        const td     = document.createElement("td");
+        const td = document.createElement("td");
         td.className = "mg-score";
         td.textContent = fmtVal(rowB[colStart + c]);
+        td.style.background = isEven
+          ? "rgba(255,255,255,0.06)"
+          : "rgba(0,0,0,0.35)";
         tr2.appendChild(td);
       }
-      const wTd     = document.createElement("td");
+      // W
+      const wTd = document.createElement("td");
       wTd.className = "mg-result";
       wTd.style.color = color;
       wTd.textContent = fmtVal(rowB[colStart + 3]);
+      wTd.style.background = isEven
+        ? "rgba(255,255,255,0.13)"
+        : "rgba(0,0,0,0.22)";
       tr2.appendChild(wTd);
     }
     tbody.appendChild(tr2);
