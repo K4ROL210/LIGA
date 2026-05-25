@@ -586,7 +586,22 @@
   padding-top: 12px; margin-top: 4px;
   font-style: italic;
 }
- 
+ .input-error {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red);
+  padding: 8px 14px 10px;
+  border-top: 1px solid rgba(255,77,77,0.15);
+  background: rgba(255,77,77,0.06);
+  line-height: 1.4;
+  animation: fadeIn .2s ease;
+}
+.input-error a {
+  color: var(--c0);
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -603,7 +618,7 @@
 
 <!-- ═══ KONFIGURACJA ════════════════════════════════════════════ -->
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvICdMrS8X83wq-H1s-AE6KNHZffZIKwfYWJdkP3hwViln1lS1CjKi1DE2v8V0pnYr/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGbiyNzfPJIUINDedgllhRVHOgm2eLS5MyYe34t6oj7-yCT0I8VzKqmzX2-DE6-8dC/exec";
   const CUTOFF_HOUR = 19;
   const today = new Date();
   const day   = String(today.getDate()).padStart(2, '0');
@@ -682,6 +697,7 @@ let state = {
   passErr:   false,
   locked:    {},
   adminPassword: "",
+  errors: {}, 
 };
 
 function saveLockedState() {
@@ -730,12 +746,21 @@ async function addPlayer(dayKey) {
   const day  = state.days.find(d => d.key === dayKey);
   const name = (state.inputs[dayKey]||"").trim();
   if (!name) return;
-  state.saving[dayKey] = true; render();
+  state.saving[dayKey] = true;
+  state.errors[dayKey] = null; // czyść poprzedni błąd
+  render();
   const res = await api({ action:"add", dayKey, dateStr:dateKey(day.date), name });
-  if (res.ok) { state.lists[dayKey] = res.players; state.inputs[dayKey] = ""; }
-  state.saving[dayKey] = false; render();
+  if (res.ok) {
+    state.lists[dayKey]  = res.players;
+    state.inputs[dayKey] = "";
+    state.errors[dayKey] = null;
+  } else {
+    state.errors[dayKey] = res.error;
+  }
+  state.saving[dayKey] = false;
+  render();
 }
-
+ 
 async function removePlayer(dayKey, idx) {
   const day = state.days.find(d => d.key === dayKey);
   const res = await api({ action:"remove", dayKey, dateStr:dateKey(day.date), idx, password:state.adminPassword });
@@ -906,9 +931,33 @@ function mkCard(day) {
   addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
   addB.addEventListener("click", () => addPlayer(day.key));
   inputRow.appendChild(inp); inputRow.appendChild(addB);
-  card.appendChild(inputRow);
+ card.appendChild(inputRow);
 
-  return card;
+// Komunikat błędu pod polem wpisywania
+const err = state.errors[day.key];
+if (err) {
+  const errDiv = document.createElement("div");
+  errDiv.className = "input-error";
+  if (err === "NOT_ON_LIST") {
+    errDiv.innerHTML = `⚠️ Nie znaleziono Cię na liście graczy!<br>
+      Pierwszy raz na lidze? 
+      <a href="https://m.me/karol.kreczmanski" target="_blank">Napisz do nas ⓕ</a> 
+      lub zadzwoń <a href="tel:+48511915628">511 915 628</a>`;
+  } else {
+    errDiv.textContent = "⚠️ " + err;
+  }
+  card.appendChild(errDiv);
+}
+
+// Czyść błąd gdy użytkownik zaczyna pisać
+inp.addEventListener("input", () => {
+  if (state.errors[day.key]) {
+    state.errors[day.key] = null;
+    render();
+  }
+});
+
+return card;
 }
 
 function mkBtn(label, cls, onClick) {
