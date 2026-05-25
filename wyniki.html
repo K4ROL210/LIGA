@@ -166,21 +166,30 @@
     min-width: 100%;
   }
   /* Nagłówek z nazwą gracza (kolumna) */
-  .mg-header-player {
-    padding: 8px 10px;
-    font-size: 13px; font-weight: 700; font-family: 'Rajdhani', sans-serif;
-    letter-spacing: 0.5px; text-transform: uppercase; text-align: center;
-    background: rgba(0,0,0,0.28);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
+ /* PO */
+.mg-header-player {
+  padding: 8px 4px;
+  font-size: 11px; font-weight: 700; font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.5px; text-transform: uppercase; text-align: center;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.08);
+  white-space: normal;
+  word-break: break-word;
+  max-width: 80px;
+  width: 80px;
+}
   /* Podkolumny: S1 S2 S3 W */
-  .mg-sub-header {
-    padding: 4px 6px;
-    font-size: 10px; font-weight: 900; letter-spacing: 1px;
-    text-align: center; color: var(--muted);
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.07);
-    text-transform: uppercase;
+  /* PO */
+.mg-sub-header {
+  padding: 4px 2px;
+  font-size: 10px; font-weight: 900; letter-spacing: 1px;
+  text-align: center; color: var(--muted);
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.07);
+  text-transform: uppercase;
+  width: 20px;
+  min-width: 20px;
+}
   }
   /* Komórka z nazwą gracza (wiersz) */
   .mg-row-player {
@@ -198,19 +207,23 @@
   }
   /* Wynik pojedynczego seta (liczby punktów) */
   .mg-score {
-    padding: 6px 9px;
-    text-align: center; font-weight: 600;
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: var(--text);
-  }
-  /* Wynik setów (ile setów wygrał gracz) */
-  .mg-result {
-    padding: 6px 9px;
-    text-align: center; font-weight: 800;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.10);
-  }
+  padding: 6px 4px;
+  text-align: center; font-weight: 600;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text);
+  width: 20px;
+  min-width: 20px;
+}
+
+.mg-result {
+  padding: 6px 4px;
+  text-align: center; font-weight: 800;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.10);
+  width: 20px;
+  min-width: 20px;
+}
   /* Mecz nierozegrany */
   .mg-empty {
     padding: 8px;
@@ -236,7 +249,7 @@
 <!-- ═══ KONFIGURACJA ══════════════════════════════════════════ -->
 <script>
   // ⬇ Wklej URL swojego Web Appa (Kod_Wyniki.gs)
-  const WYNIKI_URL = "https://script.google.com/macros/s/AKfycbymd3AIL4JMBmNxxVivVSz3StXKlDP_E54F6uz5lD8bY31fW0BGC1JecG-cGycMNoo3HA/exec";
+  const WYNIKI_URL = "https://script.google.com/macros/s/AKfycbw3N6sNxh4YZi0yapOlh_G288wln4kF-IGVyGHtpEFQDcJD9-gRgZV0ZZbb9pDV8tFhMw/exec";
 
   const DAY_CONFIG = {
     thu: { label: "Czwartek",     color: "#c8ff00" },
@@ -723,6 +736,8 @@ function renderMatchGrid(matchData, color) {
 
     // ── Górny wiersz gracza i ─────────────────────────────────
     const tr1 = document.createElement("tr");
+   tr1.style.borderTop = "2px solid rgba(255,255,255,0.12)"; //ramki 
+   if (i % 2 === 0) tr1.style.background = "rgba(255,255,255,0.015)"; // zmienne tło
 
     // Komórka z nazwą gracza, łącząca 2 wiersze
     const nameTd    = document.createElement("td");
@@ -781,6 +796,7 @@ function renderMatchGrid(matchData, color) {
     // ── Dolny wiersz gracza i ─────────────────────────────────
     //  Przekątna i "nierozegrany" mają już rowspan=2, więc je pomijamy.
     const tr2 = document.createElement("tr");
+   if (i % 2 === 0) tr2.style.background = "rgba(255,255,255,0.015)"; // tak samo jak w tr1
     for (let j = 0; j < n; j++) {
       if (i === j) continue; // przekątna zajmuje rowspan=2
 
