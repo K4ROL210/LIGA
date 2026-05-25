@@ -166,6 +166,9 @@
     min-width: 100%;
   }
   /* Nagłówek z nazwą gracza (kolumna) */
+ .mg-header-player div {
+  display: block;
+}
  /* PO */
 .mg-header-player {
   padding: 8px 4px;
@@ -708,6 +711,9 @@ function renderMatchGrid(matchData, color) {
     th.style.width = "88px";
     th.style.minWidth = "88px";
     th.style.maxWidth = "88px";
+   th.style.whiteSpace = "normal";
+th.style.wordBreak = "break-word";
+th.style.lineHeight = "1.3";
     const parts = name.trim().split(" ");
     if (parts.length >= 2) {
       const firstName = document.createElement("div");
