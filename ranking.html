@@ -17,212 +17,165 @@
     --border-hi: rgba(255,255,255,0.18);
     --muted:     #5a6680;
     --text:      #dde4f0;
-    --accent:    #c8ff00;
-    --accent2:   #00e5ff;
-    --green:     #c8ff00;
-    --red:       #ff4d4d;
     --c0: #c8ff00;
     --c1: #00e5ff;
     --c2: #ff8c42;
     --c3: #b06aff;
+    --red: #ff4d4d;
   }
 
   html { scroll-behavior: smooth; }
-
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'Rajdhani', 'Arial', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px;
-    position: relative;
+    min-height: 100vh; padding: 0 0 80px; position: relative;
   }
-
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 90% 50% at 50% -5%, rgba(200,255,0,0.10) 0%, transparent 55%),
       radial-gradient(ellipse 50% 40% at 95% 95%,  rgba(0,229,255,0.07) 0%, transparent 55%),
       radial-gradient(ellipse 40% 30% at 5%  70%,  rgba(176,106,255,0.05) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
-
   body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background-image:
       linear-gradient(rgba(200,255,0,0.022) 1px, transparent 1px),
       linear-gradient(90deg, rgba(200,255,0,0.022) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
   }
 
   /* ── NAV ── */
-  .nav {
-    background: rgba(8,12,16,0.85);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-  .nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 0 16px;
-  }
+  .nav { background: rgba(8,12,16,0.85); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 0 16px; }
   .nav-inner::-webkit-scrollbar { display: none; }
-  .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--c0);
-    padding: 14px 16px 14px 0;
-    margin-right: 8px;
-    border-right: 1px solid var(--border);
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-shadow: 0 0 20px rgba(200,255,0,0.4);
-  }
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 14px 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    text-decoration: none;
-    border-bottom: 2px solid transparent;
-    transition: color .15s, border-color .15s;
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-transform: uppercase;
-  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--c0); padding: 14px 16px 14px 0; margin-right: 8px; border-right: 1px solid var(--border); white-space: nowrap; flex-shrink: 0; text-shadow: 0 0 20px rgba(200,255,0,0.4); }
+  .nav-link { display: flex; align-items: center; gap: 6px; padding: 14px 16px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; }
   .nav-link:hover { color: var(--text); }
-  .nav-link.active {
-    color: var(--c0);
-    border-bottom-color: var(--c0);
-    text-shadow: 0 0 12px rgba(200,255,0,0.3);
-  }
+  .nav-link.active { color: var(--c0); border-bottom-color: var(--c0); text-shadow: 0 0 12px rgba(200,255,0,0.3); }
 
   /* ── PAGE ── */
-  .page-wrap {
-    padding: 36px 16px 0;
-    position: relative;
-    z-index: 1;
-  }
+  .page-wrap { padding: 36px 16px 0; position: relative; z-index: 1; }
 
   /* ── HEADER ── */
   .header { text-align: center; margin-bottom: 36px; }
+  .pill { display: inline-block; background: var(--c0); color: #0a0f08; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 3px; padding: 4px 14px; border-radius: 100px; margin-bottom: 14px; text-transform: uppercase; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 9vw, 76px); line-height: .92; letter-spacing: 2px; color: #fff; }
+  h1 span { color: var(--c0); text-shadow: 0 0 30px rgba(200,255,0,0.4), 0 0 60px rgba(200,255,0,0.15); }
+  .sub { font-size: 16px; font-weight: 600; color: var(--muted); margin-top: 10px; letter-spacing: 0.3px; }
 
-  .pill {
-    display: inline-block;
-    background: var(--c0);
-    color: #0a0f08;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    padding: 4px 14px;
-    border-radius: 100px;
-    margin-bottom: 14px;
-    text-transform: uppercase;
+  /* ── DAY TABS ── */
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .day-tab {
+    font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 9px 20px; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    transition: all .15s;
   }
+  .day-tab:hover { color: var(--text); border-color: var(--border-hi); }
+  .day-tab.active { color: #0a0f08; border-color: transparent; }
 
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 9vw, 76px);
-    line-height: .92;
-    letter-spacing: 2px;
-    color: #fff;
+  /* ── SEASON TABS ── */
+  .season-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .season-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-right: 4px; }
+  .season-tab {
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted);
+    transition: all .15s;
   }
-  h1 span {
-    color: var(--c0);
-    text-shadow: 0 0 30px rgba(200,255,0,0.4), 0 0 60px rgba(200,255,0,0.15);
-  }
+  .season-tab:hover { color: var(--text); }
+  .season-tab.active { background: var(--surface); color: var(--text); border-color: var(--border-hi); }
+  .season-tab.latest::after { content: " ●"; color: var(--c0); font-size: 10px; }
 
-  .sub {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-top: 10px;
-    letter-spacing: 0.3px;
-  }
+  /* ── REFRESH BAR ── */
+  .refresh-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.3px; }
+  .live-dot { width: 7px; height: 7px; background: var(--c0); border-radius: 50%; animation: pulse 1.8s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(200,255,0,.5)} 70%{box-shadow:0 0 0 7px rgba(200,255,0,0)} 100%{box-shadow:0 0 0 0 rgba(200,255,0,0)} }
+  .refresh-timer { color: var(--c0); font-variant-numeric: tabular-nums; }
 
-  /* ── COMING SOON ── */
-  .coming-soon {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-  }
-  .coming-soon .icon {
-    font-size: 72px;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 0 24px rgba(200,255,0,0.25));
-  }
-  .coming-soon h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 38px;
-    letter-spacing: 2px;
-    color: var(--text);
-    margin-bottom: 10px;
-  }
-  .coming-soon p {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--muted);
-    max-width: 360px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  .coming-card {
-    display: inline-block;
+  /* ── TABLE ── */
+  .table-wrap {
     background: rgba(255,255,255,0.035);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 64px;
+    border-radius: 16px;
+    overflow: hidden;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     position: relative;
-    overflow: hidden;
   }
-  .coming-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--c0);
-    opacity: 0.6;
+  .table-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-day); opacity: 0.7; }
+
+  .rank-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .rank-table th {
+    padding: 12px 14px; text-align: left;
+    font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 900;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+    white-space: nowrap;
   }
+  .rank-table th.num-col { text-align: center; }
+  .rank-table td {
+    padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-weight: 600; white-space: nowrap;
+    transition: background .1s;
+  }
+  .rank-table tr:last-child td { border-bottom: none; }
+  .rank-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .rank-table td.num-col { text-align: center; }
+
+  /* pozycje */
+  .pos-1 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #ffd700; }
+  .pos-2 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #c0c0c0; }
+  .pos-3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #cd7f32; }
+  .pos-other { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--muted); }
+
+  .player-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .player-name.top1 { color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,0.3); }
+  .player-name.top2 { color: #c0c0c0; }
+  .player-name.top3 { color: #cd7f32; }
+
+  .num-val { text-align: center; color: var(--text); }
+  .pts-val { text-align: center; font-weight: 700; }
+  .ratio-val { text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* ── LOADING / EMPTY / ERROR ── */
+  .state-box { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .state-box .icon { font-size: 48px; margin-bottom: 14px; }
+  .state-box p { font-size: 14px; font-weight: 600; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid rgba(200,255,0,0.15); border-top-color: var(--c0); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 14px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── OVERFLOW TABLE ── */
+  .table-scroll { overflow-x: auto; }
 
   /* ── FOOTER ── */
-  footer {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.1);
-    margin-top: 40px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
+  footer { text-align: center; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.1); margin-top: 40px; letter-spacing: 0.5px; text-transform: uppercase; }
 </style>
 </head>
 <body>
+
+<!-- ═══ KONFIGURACJA ══════════════════════════════════════════ -->
+<script>
+  // ⬇ Wklej URL swojego nowego Web Appa (Kod_Ranking.gs)
+  const RANKING_URL = "https://script.google.com/macros/s/AKfycbyzctjYVLwrTzDF7ogmHFp5COv8ZF4FmAJo_4-se2c-xZmCRWikXbygELKXWEoFs7Jj/exec";
+
+  const REFRESH_SEC = 300; // 5 minut (tylko dla aktualnego sezonu)
+
+  const DAY_CONFIG = {
+    thu: { label: "Czwartek", color: "#c8ff00" },
+    tue: { label: "Wtorek",   color: "#00e5ff" },
+    sat: { label: "Sobota",   color: "#ff8c42" },
+    mon: { label: "Poniedziałek", color: "#b06aff" },
+  };
+</script>
+<!-- ══════════════════════════════════════════════════════════ -->
 
 <nav class="nav">
   <div class="nav-inner">
@@ -237,19 +190,262 @@
   <div class="header">
     <div class="pill">📊 Ranking Sezonu</div>
     <h1>RANKING <span>LIGI</span></h1>
-    <p class="sub">Wtorek &bull; Czwartek &bull; Sobota &bull; Poniedziałek</p>
+    <p class="sub">Wybierz dzień i sezon</p>
   </div>
 
-  <div class="coming-soon">
-    <div class="coming-card">
-      <div class="icon">📊</div>
-      <h2>W BUDOWIE</h2>
-      <p>Ta sekcja zostanie uzupełniona o rankingi dla każdego dnia ligi</p>
-    </div>
+  <div class="day-tabs"   id="dayTabs"></div>
+  <div class="season-bar" id="seasonBar"></div>
+  <div class="refresh-bar" id="refreshBar" style="display:none">
+    <div class="live-dot"></div>
+    <span>Na żywo — odświeżenie za <span class="refresh-timer" id="timerVal">5:00</span></span>
   </div>
+  <div id="tableArea"></div>
 
   <footer>Made by Karol Kreczmański</footer>
 </div>
 
+<script>
+// ── state ──────────────────────────────────────────────────
+let meta       = {};       // { thu: { seasons:[1,2,3,4], latest:4 }, ... }
+let activeDay  = null;
+let activeSeason = null;
+let remaining  = REFRESH_SEC;
+let refreshInterval = null;
+let timerInterval   = null;
+
+// ── api ────────────────────────────────────────────────────
+function api(params) {
+  return new Promise((resolve, reject) => {
+    const cb = "jsonp_" + Math.random().toString(36).slice(2);
+    let script;
+    const t = setTimeout(() => { delete window[cb]; if(script) script.remove(); reject(new Error("timeout")); }, 12000);
+    window[cb] = data => { clearTimeout(t); delete window[cb]; if(script) script.remove(); resolve(data); };
+    script = document.createElement("script");
+    script.src = RANKING_URL + "?" + new URLSearchParams({ ...params, callback: cb });
+    script.onerror = () => { clearTimeout(t); delete window[cb]; reject(new Error("error")); };
+    document.head.appendChild(script);
+  });
+}
+
+// ── init ───────────────────────────────────────────────────
+async function init() {
+  showLoading();
+  try {
+    const res = await api({ action: "meta" });
+    if (!res.ok) { showError(res.error); return; }
+    meta = res.meta;
+
+    // domyślny dzień — pierwszy dostępny w kolejności: thu, tue, sat, mon
+    const order = ["thu","tue","sat","mon"];
+    activeDay = order.find(d => meta[d]) || Object.keys(meta)[0];
+    activeSeason = meta[activeDay]?.latest || 1;
+
+    renderDayTabs();
+    await loadRanking();
+  } catch(e) {
+    showError("Nie można połączyć się z serwerem");
+  }
+}
+
+// ── day tabs ───────────────────────────────────────────────
+function renderDayTabs() {
+  const el = document.getElementById("dayTabs");
+  el.innerHTML = "";
+  const order = ["thu","tue","sat","mon"];
+  for (const key of order) {
+    if (!meta[key]) continue;
+    const cfg = DAY_CONFIG[key];
+    const btn = document.createElement("button");
+    btn.className = "day-tab" + (key === activeDay ? " active" : "");
+    btn.textContent = cfg.label;
+    if (key === activeDay) btn.style.background = cfg.color;
+    btn.addEventListener("click", () => {
+      activeDay   = key;
+      activeSeason = meta[key].latest;
+      renderDayTabs();
+      loadRanking();
+    });
+    el.appendChild(btn);
+  }
+}
+
+// ── season tabs ────────────────────────────────────────────
+function renderSeasonTabs() {
+  const el = document.getElementById("seasonBar");
+  el.innerHTML = "";
+  if (!meta[activeDay]) return;
+
+  const label = document.createElement("span");
+  label.className = "season-label";
+  label.textContent = "Sezon:";
+  el.appendChild(label);
+
+  const seasons = [...meta[activeDay].seasons].sort((a,b) => b - a); // malejąco
+  const latest  = meta[activeDay].latest;
+
+  for (const s of seasons) {
+    const btn = document.createElement("button");
+    btn.className = "season-tab" + (s === activeSeason ? " active" : "") + (s === latest ? " latest" : "");
+    btn.textContent = "S" + s;
+    btn.addEventListener("click", () => {
+      activeSeason = s;
+      renderSeasonTabs();
+      loadRanking();
+    });
+    el.appendChild(btn);
+  }
+}
+
+// ── load ranking ───────────────────────────────────────────
+async function loadRanking() {
+  stopTimer();
+  showLoading();
+  renderSeasonTabs();
+
+  try {
+    const res = await api({ action: "ranking", dayKey: activeDay, season: activeSeason });
+    if (!res.ok) { showError(res.error); return; }
+    renderTable(res.rows, res.headers);
+
+    // odświeżanie tylko dla aktualnego sezonu
+    if (activeSeason === meta[activeDay]?.latest) {
+      startTimer();
+    } else {
+      document.getElementById("refreshBar").style.display = "none";
+    }
+  } catch(e) {
+    showError("Błąd pobierania danych");
+  }
+}
+
+// ── render table ───────────────────────────────────────────
+function renderTable(rows, headers) {
+  const area  = document.getElementById("tableArea");
+  const color = DAY_CONFIG[activeDay]?.color || "#c8ff00";
+
+  if (rows.length === 0) {
+    area.innerHTML = `<div class="state-box"><div class="icon">📭</div><p>Brak danych dla tego sezonu</p></div>`;
+    return;
+  }
+
+  const wrap  = document.createElement("div");
+  wrap.className = "table-wrap";
+  wrap.style.setProperty("--accent-day", color);
+
+  const scroll = document.createElement("div");
+  scroll.className = "table-scroll";
+
+  const table = document.createElement("table");
+  table.className = "rank-table";
+
+  // nagłówek
+  const thead = document.createElement("thead");
+  const hr    = document.createElement("tr");
+  headers.forEach((h, i) => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    if (i !== 1) th.className = "num-col";
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  // wiersze
+  const tbody = document.createElement("tbody");
+  rows.forEach(row => {
+    const pos = parseInt(row[0]) || 0;
+    const tr  = document.createElement("tr");
+
+    row.forEach((val, i) => {
+      const td = document.createElement("td");
+
+      if (i === 0) {
+        // Pozycja
+        td.className = "num-col";
+        const posMap = { 1: "pos-1", 2: "pos-2", 3: "pos-3" };
+        const span = document.createElement("span");
+        span.className = posMap[pos] || "pos-other";
+        span.textContent = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : pos;
+        td.appendChild(span);
+
+      } else if (i === 1) {
+        // Gracz
+        const nameMap = { 1: "top1", 2: "top2", 3: "top3" };
+        const span = document.createElement("span");
+        span.className = "player-name " + (nameMap[pos] || "");
+        span.textContent = val;
+        td.appendChild(span);
+
+      } else if (i === 9) {
+        // Suma punktów — wyróżniona
+        td.className = "pts-val num-col";
+        td.style.color = color;
+        td.textContent = typeof val === "number" ? val.toFixed(2) : val;
+
+      } else if (i >= 11) {
+        // Ratio
+        td.className = "ratio-val num-col";
+        td.textContent = typeof val === "number" ? val.toFixed(3) : val;
+
+      } else {
+        td.className = "num-val num-col";
+        td.textContent = typeof val === "number" ? (Number.isInteger(val) ? val : val.toFixed(2)) : val;
+      }
+
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  scroll.appendChild(table);
+  wrap.appendChild(scroll);
+  area.innerHTML = "";
+  area.appendChild(wrap);
+}
+
+// ── timer (tylko aktualny sezon) ───────────────────────────
+function startTimer() {
+  remaining = REFRESH_SEC;
+  document.getElementById("refreshBar").style.display = "flex";
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    remaining--;
+    if (remaining < 0) {
+      remaining = REFRESH_SEC;
+      loadRanking();
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  clearInterval(refreshInterval);
+  document.getElementById("refreshBar").style.display = "none";
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(remaining / 60);
+  const s = String(remaining % 60).padStart(2, "0");
+  const el = document.getElementById("timerVal");
+  if (el) el.textContent = m + ":" + s;
+}
+
+// ── loading / error ────────────────────────────────────────
+function showLoading() {
+  document.getElementById("tableArea").innerHTML =
+    `<div class="state-box"><div class="spinner"></div><p>Ładowanie rankingu…</p></div>`;
+}
+
+function showError(msg) {
+  document.getElementById("tableArea").innerHTML =
+    `<div class="state-box"><div class="icon">❌</div><p>${msg}</p></div>`;
+}
+
+// ── start ──────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
