@@ -683,14 +683,20 @@ function renderMatchGrid(matchData, color) {
 
   const tbl = document.createElement("table");
   tbl.className = "match-grid-table";
+  tbl.style.tableLayout = "fixed";
 
   // ── Nagłówek: wiersz 1 — narożnik + nazwy graczy ──
   const thead = document.createElement("thead");
   const hRow1 = document.createElement("tr");
+
+  // Narożnik — stała szerokość na imię + nazwisko w jednej linii
   const corner = document.createElement("th");
   corner.className = "mg-corner";
   corner.rowSpan = 2;
   corner.textContent = "Gracz";
+  corner.style.width = "220px";
+  corner.style.minWidth = "220px";
+  corner.style.maxWidth = "220px";
   hRow1.appendChild(corner);
 
   for (const name of playerNames) {
@@ -698,6 +704,10 @@ function renderMatchGrid(matchData, color) {
     th.className = "mg-header-player";
     th.colSpan = 4;
     th.style.color = color;
+    // imię i nazwisko jedno pod drugim, stała szerokość bloku
+    th.style.width = "88px";
+    th.style.minWidth = "88px";
+    th.style.maxWidth = "88px";
     const parts = name.trim().split(" ");
     if (parts.length >= 2) {
       const firstName = document.createElement("div");
@@ -720,6 +730,9 @@ function renderMatchGrid(matchData, color) {
       const th = document.createElement("th");
       th.className = "mg-sub-header";
       th.textContent = label;
+      th.style.width = "22px";
+      th.style.minWidth = "22px";
+      th.style.maxWidth = "22px";
       hRow2.appendChild(th);
     });
   }
@@ -737,10 +750,17 @@ function renderMatchGrid(matchData, color) {
     const tr1 = document.createElement("tr");
     tr1.style.borderTop = "2px solid rgba(255,255,255,0.18)";
 
+    // Pierwsza kolumna — imię i nazwisko w jednej linii, stała szerokość
     const nameTd = document.createElement("td");
     nameTd.className = "mg-row-player";
     nameTd.rowSpan = 2;
     nameTd.style.color = color;
+    nameTd.style.width = "220px";
+    nameTd.style.minWidth = "220px";
+    nameTd.style.maxWidth = "220px";
+    nameTd.style.whiteSpace = "nowrap";
+    nameTd.style.overflow = "hidden";
+    nameTd.style.textOverflow = "ellipsis";
     nameTd.textContent = playerNames[i];
     tr1.appendChild(nameTd);
 
@@ -764,26 +784,25 @@ function renderMatchGrid(matchData, color) {
           ph.colSpan = 4;
           ph.rowSpan = 2;
           ph.textContent = "—";
-          // szachownica dla nierozegranych
           ph.style.background = isEven
             ? "rgba(255,255,255,0.03)"
             : "rgba(0,0,0,0.30)";
           tr1.appendChild(ph);
         } else {
-          // S1, S2, S3
           for (let c = 0; c < 3; c++) {
             const td = document.createElement("td");
             td.className = "mg-score";
             td.textContent = fmtVal(rowA[colStart + c]);
+            td.style.width = "22px";
             td.style.background = isEven
               ? "rgba(255,255,255,0.06)"
               : "rgba(0,0,0,0.35)";
             tr1.appendChild(td);
           }
-          // W — wynik setów
           const wTd = document.createElement("td");
           wTd.className = "mg-result";
           wTd.style.color = color;
+          wTd.style.width = "22px";
           wTd.textContent = fmtVal(rowA[colStart + 3]);
           wTd.style.background = isEven
             ? "rgba(255,255,255,0.13)"
@@ -805,20 +824,20 @@ function renderMatchGrid(matchData, color) {
       const s1 = rowA[colStart];
       if (isNotPlayed(s1)) continue;
 
-      // S1, S2, S3
       for (let c = 0; c < 3; c++) {
         const td = document.createElement("td");
         td.className = "mg-score";
         td.textContent = fmtVal(rowB[colStart + c]);
+        td.style.width = "22px";
         td.style.background = isEven
           ? "rgba(255,255,255,0.06)"
           : "rgba(0,0,0,0.35)";
         tr2.appendChild(td);
       }
-      // W
       const wTd = document.createElement("td");
       wTd.className = "mg-result";
       wTd.style.color = color;
+      wTd.style.width = "22px";
       wTd.textContent = fmtVal(rowB[colStart + 3]);
       wTd.style.background = isEven
         ? "rgba(255,255,255,0.13)"
