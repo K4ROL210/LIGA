@@ -371,7 +371,27 @@ async function init() {
     if (!res.ok) { showError(res.error); return; }
     state.meta = res.meta;
 
-    state.activeDay    = DAY_ORDER.find(d => state.meta[d]) || Object.keys(state.meta)[0];
+   // Kolejność dni ligi (bez poniedziałku — to trening)
+const LEAGUE_DAYS = [
+  { key: "tue", dow: 2 },
+  { key: "thu", dow: 4 },
+  { key: "sat", dow: 6 },
+];
+
+const todayDow = new Date().getDay(); // 0=nd, 1=pn, 2=wt, 3=śr, 4=czw, 5=pt, 6=sob
+
+// Znajdź ostatni miniony dzień ligowy (lub dzisiejszy)
+let bestDay = null;
+let bestDiff = 999;
+for (const d of LEAGUE_DAYS) {
+  if (!state.meta[d.key]) continue;
+  const diff = (todayDow - d.dow + 7) % 7; // ile dni temu był ten dzień
+  if (diff < bestDiff) {
+    bestDiff = diff;
+    bestDay  = d.key;
+  }
+}
+state.activeDay = bestDay || DAY_ORDER.find(d => state.meta[d]);
     state.activeSeason = state.meta[state.activeDay]?.latest || 1;
 
     renderDayTabs();
