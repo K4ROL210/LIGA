@@ -166,7 +166,7 @@
   // ⬇ Wklej URL swojego nowego Web Appa (Kod_Ranking.gs)
   const RANKING_URL = "https://script.google.com/macros/s/AKfycbyzctjYVLwrTzDF7ogmHFp5COv8ZF4FmAJo_4-se2c-xZmCRWikXbygELKXWEoFs7Jj/exec";
 
-  const REFRESH_SEC = 300; // 5 minut (tylko dla aktualnego sezonu)
+  // const REFRESH_SEC = 300; // 5 minut (tylko dla aktualnego sezonu)
 
   const DAY_CONFIG = {
     thu: { label: "Czwartek", color: "#c8ff00" },
@@ -195,10 +195,7 @@
 
   <div class="day-tabs"   id="dayTabs"></div>
   <div class="season-bar" id="seasonBar"></div>
-  <div class="refresh-bar" id="refreshBar" style="display:none">
-    <div class="live-dot"></div>
-    <span>Na żywo — odświeżenie za <span class="refresh-timer" id="timerVal">5:00</span></span>
-  </div>
+  
   <div id="tableArea"></div>
 
   <footer>Made by Karol Kreczmański</footer>
@@ -307,12 +304,7 @@ async function loadRanking() {
     if (!res.ok) { showError(res.error); return; }
     renderTable(res.rows, res.headers);
 
-    // odświeżanie tylko dla aktualnego sezonu
-    if (activeSeason === meta[activeDay]?.latest) {
-      startTimer();
-    } else {
-      document.getElementById("refreshBar").style.display = "none";
-    }
+    
   } catch(e) {
     showError("Błąd pobierania danych");
   }
@@ -404,34 +396,7 @@ function renderTable(rows, headers) {
   area.appendChild(wrap);
 }
 
-// ── timer (tylko aktualny sezon) ───────────────────────────
-function startTimer() {
-  remaining = REFRESH_SEC;
-  document.getElementById("refreshBar").style.display = "flex";
-  updateTimerDisplay();
 
-  timerInterval = setInterval(() => {
-    remaining--;
-    if (remaining < 0) {
-      remaining = REFRESH_SEC;
-      loadRanking();
-    }
-    updateTimerDisplay();
-  }, 1000);
-}
-
-function stopTimer() {
-  clearInterval(timerInterval);
-  clearInterval(refreshInterval);
-  document.getElementById("refreshBar").style.display = "none";
-}
-
-function updateTimerDisplay() {
-  const m = Math.floor(remaining / 60);
-  const s = String(remaining % 60).padStart(2, "0");
-  const el = document.getElementById("timerVal");
-  if (el) el.textContent = m + ":" + s;
-}
 
 // ── loading / error ────────────────────────────────────────
 function showLoading() {
