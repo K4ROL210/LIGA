@@ -315,8 +315,8 @@
 
 <div class="page-wrap">
   <div class="header">
-    <button class="pill pill-btn" onclick="toggleWprowadzanie()">✏️ Wprowadzanie wyników</button>
-<div id="wprowadzaniePanel" style="display:none; margin-bottom:14px;">
+ <div class="pill">✏️ Wprowadzanie wyników</div>
+<div id="wprowadzaniePanel" style="margin-bottom:14px;">
   <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
     <a href="https://script.google.com/macros/s/AKfycbxLKh0eSjjVcyDXhfEr_8rjg2z2Gl0T90uctq1-Haq67TJE77DDp9CAYxLjrrBDRaNCrg/exec?group=A"
        target="_blank" class="group-entry-btn">Grupa A</a>
@@ -1001,11 +1001,6 @@ function clearContent() {
 // ── START ──────────────────────────────────────────────────────
 init();
 </script>
- <script>
-  function toggleWprowadzanie() {
-    const p = document.getElementById("wprowadzaniePanel");
-    p.style.display = p.style.display === "none" ? "block" : "none";
-  }
-</script>
+
 </body>
 </html>
