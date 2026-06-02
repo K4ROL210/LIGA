@@ -3,7 +3,7 @@
    Wstaw przed </body>: <script src="chat-widget.js"></script>
    ============================================================ */
 
-const GEMINI_API_KEY = "AQ.Ab8RN6JE41-zWFW25238jNMAHm1CpiFGL8NrFH6kM2Bt6f84DQ";
+const GROQ_API_KEY = "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";
 const QA_FILE = "qa.json";
 
 (function () {
@@ -178,15 +178,22 @@ async function send() {
 
   try {
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + GEMINI_API_KEY,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      }
-    );
-    const json = await res.json();
-    const answer = json?.candidates?.[0]?.content?.parts?.[0]?.text || "Przepraszam, coś poszło nie tak.";
+  "https://api.groq.com/openai/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + GROQ_API_KEY
+    },
+    body: JSON.stringify({
+      model: "llama-3.1-8b-instant",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 500
+    })
+  }
+);
+const json = await res.json();
+const answer = json?.choices?.[0]?.message?.content || "Przepraszam, coś poszło nie tak.";
     t.className = "cwm bot";
     t.textContent = answer;
   } catch {
