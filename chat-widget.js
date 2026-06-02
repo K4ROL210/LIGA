@@ -5,7 +5,7 @@ cat > /home/claude/chatbot/chat-widget.js << 'ENDOFFILE'
    <script src="chat-widget.js"></script>
    ============================================================ */
 
-const GEMINI_API_KEY = "WKLEJ_TUTAJ_KLUCZ_AIzaSy...";
+const GEMINI_API_KEY = "AQ.Ab8RN6JE41-zWFW25238jNMAHm1CpiFGL8NrFH6kM2Bt6f84DQ";
 const QA_FILE = "qa.json";
 
 (function () {
