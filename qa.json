@@ -2,9 +2,9 @@
   { "q": "koszt wpisowe", "a": "70 zł, 55 zł z Multisportem — płatne na recepcji." },
   { "q": "gdzie kiedy godziny", "a": "Warsaw Padel Club, ul. Annopol 3. Wtorek i czwartek 20:00, sobota 10:00." },
   { "q": "jak się zapisać rejestracja", "a": "Na stronie głównej wpisujesz imię i nazwisko w odpowiednim dniu." },
-  { "q": "nie mogę się zarejestrować, czemu?", "a": "W celu rejestracji musisz poprosić administratora o dopisanie do listy graczy" }
-  { "q": "Jaki jest poziom w konkretne dni", "a": "Zazwyczaj w czwartki jest najwyższy poziom, ale często powstają dwie grupy, więc Grupa B jest dla graczy początkujących i średnio zaawansowanych. Co do wtorków to różnie bywa, ale ostatnio poziom to średnio-zaawansowany i bywają 3-4 osoby początkujące. W poniedziałek różnie na chwilę obecną, co do soboty to ciężko powiedzieć, poniewać sobota nie jest póki co chodliwym terminem" }
-  { "q": "ile musi być minimum osób zapisanych żeby liga ruszyła?", "a": "Najmniejsza liczba osób na ligę to 5 minimum aby ruszyć. Zazwyczaj gramy w 6-8 osób" },
-  { "q": "mogę płacić kartą lub gotówką?", "a": "Tak, płatność w dowolnej formie na recepcji" }
-  { "q": "jak się wypisać z ligi?", "a": "Trzeba napisać do Karola Kreczmańskiego na messengerze lub pod numerem telefonu 511915628. Tylko administrator może edytować listę osób zapisanych" }
+  { "q": "nie mogę się zarejestrować", "a": "Aby dołączyć do ligi musisz poprosić administratora o dopisanie do listy graczy — napisz do Karola na m.me/karol.kreczmanski lub zadzwoń 511 915 628." },
+  { "q": "poziom trudności dni tygodnia", "a": "Czwartki mają najwyższy poziom, często są dwie grupy — Grupa B dla początkujących i średnio-zaawansowanych. Wtorki to poziom średnio-zaawansowany z kilkoma osobami początkującymi. Poniedziałki i soboty są mniej przewidywalne, sobota nie jest jeszcze popularnym terminem." },
+  { "q": "ile osób minimum żeby liga ruszyła", "a": "Minimalna liczba to 5 osób. Zazwyczaj gramy w grupach 6-8 osób." },
+  { "q": "płatność karta gotówka", "a": "Tak, płatność w dowolnej formie na recepcji." },
+  { "q": "jak się wypisać odwołać", "a": "Napisz do Karola Kreczmańskiego na m.me/karol.kreczmanski lub zadzwoń 511 915 628. Tylko administrator może edytować listę zapisanych." }
 ]
