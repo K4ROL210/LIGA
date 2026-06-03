@@ -26,7 +26,7 @@ styleEl.textContent = `
 }
 #cw-panel {
   position:fixed; bottom:90px; right:24px; z-index:9999;
-  width:340px; max-height:520px;
+  width:340px; max-height: min(520px, 60dvh);
   background:#0e1318; border:1.5px solid rgba(255,255,255,0.12);
   border-radius:18px;
   box-shadow:0 8px 40px rgba(0,0,0,0.5);
@@ -195,5 +195,10 @@ async function send() {
 document.getElementById("cw-snd").addEventListener("click", send);
 inp.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 loadQA();
-
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => {
+    const offset = window.innerHeight - window.visualViewport.height;
+    panel.style.bottom = (90 + offset) + "px";
+  });
+}
 })();
