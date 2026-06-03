@@ -1150,15 +1150,17 @@ Promise.all(state.days.map(loadDay));
 window.addEventListener("load", () => {
   const ua = navigator.userAgent.toLowerCase();
 
-  console.log(ua); // sprawdź w konsoli jaki jest User-Agent
+  console.log("UA:", ua);
 
-  const isFacebookBrowser =
+  const isMessenger =
+    ua.includes("messenger") ||
     ua.includes("fban") ||
     ua.includes("fbav") ||
     ua.includes("fb_iab") ||
-    ua.includes("fb4a");
+    ua.includes("fb4a") ||
+    ua.includes("facebook");
 
-  if (isFacebookBrowser) {
+  if (isMessenger) {
     document.getElementById("messengerBanner").style.display = "block";
   }
 });
