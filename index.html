@@ -627,48 +627,7 @@
 </head>
 <body>
 
-<div id="messengerBanner" style="
-display:none;
-position:fixed;
-inset:0;
-z-index:99999;
-background:#080c10;
-padding:30px;
-text-align:center;
-color:white;
-font-family:Rajdhani,sans-serif;
-">
-  <h2 style="color:#c8ff00;margin-bottom:20px;">
-    Otwórz stronę w przeglądarce
-  </h2>
 
-  <p style="font-size:18px;line-height:1.6;margin-bottom:25px;">
-    Messenger często blokuje niektóre funkcje strony.
-    <br><br>
-    Kliknij <b>⋮</b> w prawym górnym rogu
-    i wybierz <b>„Otwórz w przeglądarce”</b>.
-  </p>
-
-  <img
-    src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png"
-    width="80"
-    alt=""
-    style="opacity:.8;margin-bottom:20px;"
-  >
-
-  <br>
-
-  <button onclick="hideMessengerBanner()" style="
-    background:#c8ff00;
-    border:none;
-    padding:12px 24px;
-    border-radius:10px;
-    font-weight:bold;
-    cursor:pointer;
-  ">
-    Kontynuuj mimo wszystko
-  </button>
-</div>
 <!-- ═══ NAV ════════════════════════════════════════════════════ -->
 <nav class="nav">
   <div class="nav-inner">
@@ -1145,25 +1104,5 @@ Promise.all(state.days.map(loadDay));
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
 </script>
  <script src="chat-widget.js"></script>
-
- <script>
-window.addEventListener("load", () => {
-  const ua = navigator.userAgent.toLowerCase();
-
-  console.log("UA:", ua);
-
-  const isMessenger =
-    ua.includes("messenger") ||
-    ua.includes("fban") ||
-    ua.includes("fbav") ||
-    ua.includes("fb_iab") ||
-    ua.includes("fb4a") ||
-    ua.includes("facebook");
-
-  if (isMessenger) {
-    document.getElementById("messengerBanner").style.display = "block";
-  }
-});
-</script>
 </body>
 </html>
