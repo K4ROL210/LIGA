@@ -641,10 +641,12 @@
 <script>
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGbiyNzfPJIUINDedgllhRVHOgm2eLS5MyYe34t6oj7-yCT0I8VzKqmzX2-DE6-8dC/exec";
   const CUTOFF_HOUR = 19;
-  const today = new Date();
-  const day   = String(today.getDate()).padStart(2, '0');
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const todayDateStr = `${day}.${month}`;
+const today = new Date();
+const todayDateStr = today.toLocaleDateString("pl-PL", {
+  day: "2-digit",
+  month: "2-digit",
+  timeZone: "Europe/Warsaw"
+});
 </script>
 
 <div class="page-wrap">
@@ -685,7 +687,7 @@ const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff"];
 function getNextDate(dow) {
   const now   = new Date();
   const today = now.getDay();
-  const hour  = now.getHours();
+  const hour = parseInt(new Date().toLocaleString("pl-PL", { hour: "2-digit", hour12: false, timeZone: "Europe/Warsaw" }));
   let diff = (dow - today + 7) % 7;
   if (diff === 0 && hour >= CUTOFF_HOUR) diff = 7;
   const d = new Date(now);
