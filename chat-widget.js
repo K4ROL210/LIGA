@@ -33,7 +33,7 @@ styleEl.textContent = `
   display:flex; flex-direction:column; overflow:hidden;
   font-family:'Rajdhani','Arial',sans-serif;
   transform:scale(0.88) translateY(16px); opacity:0; pointer-events:none;
-  transition:transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s, bottom .15s;
 }
 #cw-panel.open { transform:scale(1) translateY(0); opacity:1; pointer-events:all; }
 #cw-head {
@@ -195,10 +195,21 @@ async function send() {
 document.getElementById("cw-snd").addEventListener("click", send);
 inp.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 loadQA();
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", () => {
-    const offset = window.innerHeight - window.visualViewport.height;
-    panel.style.bottom = (90 + offset) + "px";
-  });
+function fixIOSKeyboard() {
+  if (!window.visualViewport) return;
+  function update() {
+    const vv = window.visualViewport;
+    const keyboardHeight = window.innerHeight - vv.height - vv.offsetTop;
+    if (keyboardHeight > 100) {
+      panel.style.bottom = (keyboardHeight + 10) + "px";
+      panel.style.maxHeight = (vv.height - 110) + "px";
+    } else {
+      panel.style.bottom = "90px";
+      panel.style.maxHeight = "520px";
+    }
+  }
+  window.visualViewport.addEventListener("resize", update);
+  window.visualViewport.addEventListener("scroll", update);
 }
+fixIOSKeyboard();
 })();
