@@ -144,7 +144,7 @@ function toggle() {
   panel.classList.toggle("open", isOpen);
   document.getElementById("cw-badge").style.display = isOpen ? "none" : "";
   if (isOpen && msgs.children.length === 0) {
-    msg("Cześć! 👋 Zapytaj o zapisy, koszty, terminy lub zasady Ligi Squasha WPC.", "bot");
+    msg("Cześć! 👋 Jeśli masz jakies pytanie na temat Ligi Squasha to śmiało zadawaj, postaram sie pomóc :)", "bot");
   }
   if (isOpen) setTimeout(() => inp.focus(), 250);
 }
