@@ -1147,22 +1147,21 @@ Promise.all(state.days.map(loadDay));
  <script src="chat-widget.js"></script>
 
  <script>
-function isMessenger() {
-  const ua = navigator.userAgent || "";
-  return (
-    ua.includes("FBAN") ||
-    ua.includes("FBAV") ||
-    ua.includes("Messenger")
-  );
-}
+window.addEventListener("load", () => {
+  const ua = navigator.userAgent.toLowerCase();
 
-function hideMessengerBanner() {
-  document.getElementById("messengerBanner").style.display = "none";
-}
+  console.log(ua); // sprawdź w konsoli jaki jest User-Agent
 
-if (isMessenger()) {
-  document.getElementById("messengerBanner").style.display = "block";
-}
+  const isFacebookBrowser =
+    ua.includes("fban") ||
+    ua.includes("fbav") ||
+    ua.includes("fb_iab") ||
+    ua.includes("fb4a");
+
+  if (isFacebookBrowser) {
+    document.getElementById("messengerBanner").style.display = "block";
+  }
+});
 </script>
 </body>
 </html>
