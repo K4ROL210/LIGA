@@ -16,7 +16,7 @@ styleEl.textContent = `
   cursor:pointer; display:flex; align-items:center; justify-content:center;
   box-shadow:0 0 18px rgba(200,255,0,0.35);
   transition:transform .2s, box-shadow .2s;
-  font-size:24px; line-height:1;
+  font-size:24px; line-height:1; color: white;
 }
 #cw-btn:hover { transform:scale(1.1); box-shadow:0 0 28px rgba(200,255,0,0.6); }
 #cw-badge {
