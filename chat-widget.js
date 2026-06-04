@@ -109,7 +109,7 @@ if (!document.querySelector('link[href*="Bebas+Neue"]')) {
 }
 
 document.body.insertAdjacentHTML("beforeend", `
-  <button id="cw-btn" aria-label="Czat"><span>HELP</span><span id="cw-badge"></span></button>
+  <button id="cw-btn" aria-label="Czat"><span>ASK</span><span id="cw-badge"></span></button>
   <div id="cw-panel">
     <div id="cw-head">
       <div class="av">🏆</div>
