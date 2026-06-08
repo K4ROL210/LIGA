@@ -708,11 +708,12 @@ function formatPL(d) {
   return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit",year:"numeric"});
 }
 
+const _savedName = localStorage.getItem("lastPlayerName") || "";
 let state = {
   days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow), color: COLORS[i] })),
   lists:     {},
   loading:   {},
-  inputs:    {},
+  inputs: Object.fromEntries(DAYS.map(d => [d.key, _savedName])),
   saving:    {},
   editing:   null,
   editVal:   "",
@@ -776,9 +777,10 @@ async function addPlayer(dayKey) {
   render();
   const res = await api({ action:"add", dayKey, dateStr:dateKey(day.date), name });
   if (res.ok) {
-    state.lists[dayKey]  = res.players;
-    state.inputs[dayKey] = "";
-    state.errors[dayKey] = null;
+state.lists[dayKey] = res.players;
+state.errors[dayKey] = null;
+localStorage.setItem("lastPlayerName", name);
+state.days.forEach(d => { state.inputs[d.key] = name; });
   } else {
     state.errors[dayKey] = res.error;
   }
