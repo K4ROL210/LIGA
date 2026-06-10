@@ -999,9 +999,14 @@ const err = state.errors[day.key];
 if (err) {
   const errDiv = document.createElement("div");
   errDiv.className = "input-error";
-  if (err === "NOT_ON_LIST") {
+if (err === "NOT_ON_LIST") {
+    const nameVal = (state.inputs[day.key] || '').trim();
     errDiv.innerHTML = `⚠️ Nie znaleziono Cię na liście graczy!<br>
-      Pierwszy raz na lidze? 
+      <a href="#" onclick="window.startRejestracja(${JSON.stringify(nameVal)});return false;" 
+         style="color:var(--c0);font-weight:700;text-decoration:underline;">
+        ➕ DOPISZ MNIE DO LISTY
+      </a>
+      &nbsp;lub&nbsp;
       <a href="https://m.me/karol.kreczmanski" target="_blank">Napisz do nas ⓕ</a> 
       lub zadzwoń <a href="tel:+48511915628">511 915 628</a>`;
   } else {
