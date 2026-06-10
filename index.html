@@ -631,7 +631,7 @@
 <!-- ═══ NAV ════════════════════════════════════════════════════ -->
 <nav class="nav">
   <div class="nav-inner">
-    <div class="nav-logo">🎾 WPC</div>
+    <div class="nav-logo" id="navLogo" style="cursor:default;touch-action:manipulation;">🎾 WPC</div>
     <a class="nav-link active" href="index.html">📋 Zapisy</a>
     <a class="nav-link"        href="wyniki.html">🏆 Wyniki</a>
     <a class="nav-link"        href="ranking.html">📊 Ranking</a>
@@ -1051,6 +1051,22 @@ async function tryLogin() {
 
 render();
 Promise.all(state.days.map(loadDay));
+// potrojny klik
+(function() {
+  var clicks = 0, timer;
+  document.getElementById("navLogo").addEventListener("click", function() {
+    clicks++;
+    if (clicks === 1) {
+      timer = setTimeout(function() { clicks = 0; }, 800);
+    }
+    if (clicks >= 3) {
+      clearTimeout(timer);
+      clicks = 0;
+      window.open("https://script.google.com/macros/s/AKfycbwnEVQ93dlxCCsnB7K1jikrXQGz50gzfnxd6zFntqpMNxhPYue2oPF4yxNfkFF0PL4IDg/exec?liga=wpc", "_blank");
+    }
+  });
+})();
+ 
 </script>
  <div class="modal-overlay" id="infoModal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
