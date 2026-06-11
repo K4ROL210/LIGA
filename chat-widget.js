@@ -262,6 +262,7 @@ inp.addEventListener("keydown", function(e) {
 regSend.addEventListener('click', function() {
   const phone = inp.value.trim();
   if (phone) msg(phone, 'usr');
+  inp.value = '';
   setRegMode(false);
   krokFB(phone);
 });
