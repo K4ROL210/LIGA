@@ -74,9 +74,12 @@ styleEl.textContent = `
 }
 .cwm.typ { color:#5a6680; font-style:italic; }
 #cw-irow {
-  display:flex; gap:8px; padding:10px 12px;
+  display:flex; flex-direction:column; gap:8px; padding:10px 12px;
   border-top:1px solid rgba(255,255,255,0.07);
   background:#080c10;
+}
+#cw-irow-fields {
+  display:flex; gap:8px;
 }
 #cw-inp {
   flex:1; background:rgba(255,255,255,0.05);
