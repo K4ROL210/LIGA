@@ -1002,13 +1002,21 @@ if (err) {
 if (err === "NOT_ON_LIST") {
     const nameVal = (state.inputs[day.key] || '').trim();
     errDiv.innerHTML = `⚠️ Nie znaleziono Cię na liście graczy!<br>
-      <a href="#" onclick="window.startRejestracja(${JSON.stringify(nameVal)});return false;" 
+      <a href="#" id="dopisz-btn-${day.key}"
          style="color:var(--c0);font-weight:700;text-decoration:underline;">
         ➕ DOPISZ MNIE DO LISTY
       </a>
       &nbsp;lub&nbsp;
       <a href="https://m.me/karol.kreczmanski" target="_blank">Napisz do nas ⓕ</a> 
       lub zadzwoń <a href="tel:+48511915628">511 915 628</a>`;
+    // Listener zamiast onclick w HTML — bezpieczne dla każdej nazwy
+    setTimeout(function() {
+      const btn = document.getElementById('dopisz-btn-' + day.key);
+      if (btn) btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.startRejestracja(nameVal);
+      });
+    }, 0);
   } else {
     errDiv.textContent = "⚠️ " + err;
   }
