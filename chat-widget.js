@@ -140,11 +140,13 @@ document.body.insertAdjacentHTML("beforeend", `
     <div id="cw-msgs"></div>
     <div id="cw-irow">
       <input id="cw-inp" type="text" placeholder="Napisz pytanie o ligę…" autocomplete="off"/>
-      <button id="cw-snd">➤</button>
-    </div>
-    <div id="cw-reg-bar">
-      <button id="cw-reg-send">Wyślij</button>
-      <button id="cw-reg-skip">Pomiń</button>
+      <div id="cw-irow-fields">
+        <button id="cw-snd">➤</button>
+      </div>
+      <div id="cw-reg-bar" style="display:none;">
+        <button id="cw-reg-send">Wyślij</button>
+        <button id="cw-reg-skip">Pomiń</button>
+      </div>
     </div>
   </div>
 `);
@@ -189,16 +191,6 @@ function addButtons(opcje) {
 }
 
 function setRegMode(active) {
-  irow.style.display    = active ? 'none' : 'flex';
-  regBar.style.display  = active ? 'flex' : 'none';
-  if (active) {
-    inp.value = '';
-    inp.placeholder = 'Numer telefonu…';
-    setTimeout(function() { inp.focus(); }, 100);
-  } else {
-    inp.placeholder = 'Napisz pytanie o ligę…';
-  }
-}
 
 function toggle() {
   isOpen = !isOpen;
