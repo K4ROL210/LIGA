@@ -191,6 +191,16 @@ function addButtons(opcje) {
 }
 
 function setRegMode(active) {
+  document.getElementById('cw-irow-fields').style.display = active ? 'none' : 'flex';
+  regBar.style.display = active ? 'flex' : 'none';
+  if (active) {
+    inp.value = '';
+    inp.placeholder = 'Numer telefonu…';
+    setTimeout(function() { inp.focus(); }, 100);
+  } else {
+    inp.placeholder = 'Napisz pytanie o ligę…';
+  }
+}
 
 function toggle() {
   isOpen = !isOpen;
