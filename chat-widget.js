@@ -1,11 +1,12 @@
 /* ============================================================
    chat-widget.js — Liga Squasha WPC
-   Wstaw przed </body>: <script src="chat-widget.js"></script>
    ============================================================ */
 
 const QA_FILE = "qa.json";
 
 (function () {
+
+const SCRIPT_URL = typeof APPS_SCRIPT_URL !== 'undefined' ? APPS_SCRIPT_URL : '';
 
 const styleEl = document.createElement("style");
 styleEl.textContent = `
@@ -94,6 +95,23 @@ styleEl.textContent = `
   font-size:16px; transition:box-shadow .15s;
 }
 #cw-snd:hover { box-shadow:0 0 14px rgba(200,255,0,0.5); }
+#cw-reg-bar {
+  display:none; gap:8px; padding:8px 12px;
+  border-top:1px solid rgba(255,255,255,0.07);
+  background:#080c10;
+}
+#cw-reg-send {
+  flex:1; padding:8px 14px; border-radius:20px;
+  border:none; background:#c8ff00; color:#0a0f08;
+  font-family:'Rajdhani',sans-serif; font-weight:700;
+  font-size:14px; cursor:pointer;
+}
+#cw-reg-skip {
+  padding:8px 14px; border-radius:20px;
+  border:1.5px solid rgba(255,255,255,0.15); background:transparent;
+  color:#5a6680; font-family:'Rajdhani',sans-serif; font-weight:700;
+  font-size:14px; cursor:pointer;
+}
 @media(max-width:400px){
   #cw-panel{width:calc(100vw - 24px);right:12px;bottom:78px;}
   #cw-btn{right:12px;bottom:16px;}
@@ -121,14 +139,24 @@ document.body.insertAdjacentHTML("beforeend", `
       <input id="cw-inp" type="text" placeholder="Napisz pytanie o ligę…" autocomplete="off"/>
       <button id="cw-snd">➤</button>
     </div>
+    <div id="cw-reg-bar">
+      <button id="cw-reg-send">Wyślij</button>
+      <button id="cw-reg-skip">Pomiń</button>
+    </div>
   </div>
 `);
 
 let qa = null;
 let isOpen = false;
-const panel = document.getElementById("cw-panel");
-const msgs  = document.getElementById("cw-msgs");
-const inp   = document.getElementById("cw-inp");
+let regState = null;
+
+const panel   = document.getElementById("cw-panel");
+const msgs    = document.getElementById("cw-msgs");
+const inp     = document.getElementById("cw-inp");
+const irow    = document.getElementById("cw-irow");
+const regBar  = document.getElementById("cw-reg-bar");
+const regSend = document.getElementById("cw-reg-send");
+const regSkip = document.getElementById("cw-reg-skip");
 
 function msg(text, cls) {
   const d = document.createElement("div");
@@ -137,6 +165,36 @@ function msg(text, cls) {
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   return d;
+}
+
+function addButtons(opcje) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;';
+  opcje.forEach(function(o) {
+    const b = document.createElement('button');
+    b.textContent = o.label;
+    b.style.cssText = 'padding:6px 14px;border-radius:20px;border:1.5px solid #c8ff00;background:transparent;color:#c8ff00;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;cursor:pointer;';
+    b.addEventListener('click', function() {
+      wrap.remove();
+      msg(o.label, 'usr');
+      o.action();
+    });
+    wrap.appendChild(b);
+  });
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function setRegMode(active) {
+  irow.style.display    = active ? 'none' : 'flex';
+  regBar.style.display  = active ? 'flex' : 'none';
+  if (active) {
+    inp.value = '';
+    inp.placeholder = 'Numer telefonu…';
+    setTimeout(function() { inp.focus(); }, 100);
+  } else {
+    inp.placeholder = 'Napisz pytanie o ligę…';
+  }
 }
 
 function toggle() {
@@ -168,71 +226,54 @@ async function send() {
   const data = await loadQA();
   const ctx = data.length ? data.map(x => "P: " + x.q + "\nO: " + x.a).join("\n\n") : "";
 
-  const prompt = "Jesteś pomocnym asystentem Ligi Squasha WPC w Warszawie (Warsaw Padel Club, ul. Annopol 3).\n"
-    + "Odpowiadaj po polsku, zwięźle i przyjaźnie.\n\n"
-    + (ctx ? "Baza wiedzy:\n" + ctx + "\n\n" : "")
-    + "Jeśli pytanie wykracza poza bazę, zasugeruj kontakt: m.me/karol.kreczmanski lub tel. 511 915 628.\n"
-    + "Nie wymyślaj dat ani danych których nie ma w bazie.\n\n"
-    + "Pytanie: " + q;
-
   try {
-  const res = await fetch("https://squash-chat.karol-kreczmanski.workers.dev/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question: q, context: ctx })
-  });
-  const json = await res.json();
-  const answer = json?.answer || "Przepraszam, coś poszło nie tak.";
-  t.className = "cwm bot";
-  t.textContent = answer;
-} catch {
-  t.className = "cwm bot";
-  t.textContent = "Błąd połączenia. Spróbuj ponownie.";
-}
+    const res = await fetch("https://squash-chat.karol-kreczmanski.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q, context: ctx })
+    });
+    const json = await res.json();
+    t.className = "cwm bot";
+    t.textContent = json?.answer || "Przepraszam, coś poszło nie tak.";
+  } catch {
+    t.className = "cwm bot";
+    t.textContent = "Błąd połączenia. Spróbuj ponownie.";
+  }
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 document.getElementById("cw-snd").addEventListener("click", send);
-inp.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
-loadQA();
+inp.addEventListener("keydown", function(e) {
+  if (e.key !== "Enter") return;
+  if (regBar.style.display === 'flex') {
+    // W trybie rejestracji Enter = Wyślij
+    regSend.click();
+  } else {
+    send();
+  }
+});
 
-// ── TRYB REJESTRACJI ─────────────────────────────────────────
-var regState = null; // null = normalny tryb czatu
+// ── Przyciski trybu rejestracji ───────────────────────────────
+regSend.addEventListener('click', function() {
+  const phone = inp.value.trim();
+  if (phone) msg(phone, 'usr');
+  setRegMode(false);
+  krokFB(phone);
+});
 
-function addBotMsg(text) {
-  const d = msg(text, 'bot');
-  return d;
-}
+regSkip.addEventListener('click', function() {
+  msg('Pominięto', 'usr');
+  setRegMode(false);
+  krokFB('');
+});
 
-function addButtons(opcje) {
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;';
-  opcje.forEach(function(o) {
-    const b = document.createElement('button');
-    b.textContent = o.label;
-    b.style.cssText = 'padding:6px 14px;border-radius:20px;border:1.5px solid #c8ff00;background:transparent;color:#c8ff00;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .15s;';
-    b.onmouseover = function() { b.style.background = 'rgba(200,255,0,0.1)'; };
-    b.onmouseout  = function() { b.style.background = 'transparent'; };
-    b.addEventListener('click', function() {
-      wrap.remove();
-      msg(o.label, 'usr');
-      o.action();
-    });
-    wrap.appendChild(b);
-  });
-  msgs.appendChild(wrap);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
+// ── Flow rejestracji ──────────────────────────────────────────
 window.startRejestracja = function(imie) {
-  // Otwórz czat jeśli zamknięty
   if (!isOpen) toggle();
-
-  // Wyczyść poprzednie wiadomości rejestracji jeśli były
   regState = { imie: imie, phone: '' };
 
   setTimeout(function() {
-    addBotMsg('Chcesz dołączyć do listy graczy jako "' + imie + '"?');
+    msg('Chcesz dołączyć do listy graczy jako "' + imie + '"?', 'bot');
     setTimeout(function() {
       addButtons([
         {
@@ -241,7 +282,10 @@ window.startRejestracja = function(imie) {
         },
         {
           label: '✗ Anuluj',
-          action: function() { regState = null; addBotMsg('Rejestracja anulowana.'); }
+          action: function() {
+            regState = null;
+            msg('Rejestracja anulowana.', 'bot');
+          }
         }
       ]);
     }, 300);
@@ -249,21 +293,13 @@ window.startRejestracja = function(imie) {
 };
 
 function krokTelefon() {
-  addBotMsg('Podaj numer telefonu (opcjonalnie) — przyda się do kontaktu. Możesz też zostawić pole puste i kliknąć Pomiń.');
-  inp.placeholder = 'Numer telefonu…';
-  inp.value = '';
-  inp.focus();
-
-  // Tymczasowo przechwytuje wysyłanie
-  inp.dataset.regMode = 'phone';
+  msg('Podaj numer telefonu (opcjonalnie) — przyda się do kontaktu. Możesz kliknąć Pomiń.', 'bot');
+  setRegMode(true);
 }
 
 function krokFB(phone) {
-  regState.phone = phone || '';
-  inp.dataset.regMode = '';
-  inp.placeholder = 'Napisz pytanie o ligę…';
-
-  addBotMsg('Czy wysłałeś wiadomość do organizatora na Facebooku? (m.me/karol.kreczmanski)');
+  regState.phone = phone;
+  msg('Czy wysłałeś wiadomość do organizatora na Facebooku? (m.me/karol.kreczmanski)', 'bot');
   setTimeout(function() {
     addButtons([
       {
@@ -273,7 +309,7 @@ function krokFB(phone) {
       {
         label: '✗ Jeszcze nie',
         action: function() {
-          addBotMsg('Wyślij wiadomość tutaj: m.me/karol.kreczmanski — a potem wróć i kliknij "DOPISZ MNIE" ponownie.');
+          msg('Wyślij wiadomość tutaj: m.me/karol.kreczmanski — a potem wróć i kliknij "DOPISZ MNIE" ponownie.', 'bot');
           regState = null;
         }
       }
@@ -282,7 +318,7 @@ function krokFB(phone) {
 }
 
 function krokZapis() {
-  addBotMsg('Zapisuję…');
+  msg('Zapisuję…', 'bot');
 
   const cbName = 'jsonp_reg_' + Math.random().toString(36).slice(2);
   const script = document.createElement('script');
@@ -291,13 +327,11 @@ function krokZapis() {
     delete window[cbName];
     script.remove();
     if (data.ok) {
-      addBotMsg('✅ Gotowe! "' + regState.imie + '" został dodany do listy graczy. Możesz się teraz zapisać na ligę!');
+      msg('✅ Gotowe! "' + regState.imie + '" dodany do listy graczy. Możesz się teraz zapisać na ligę!', 'bot');
     } else {
-      addBotMsg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'));
+      msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
     }
     regState = null;
-    inp.placeholder = 'Napisz pytanie o ligę…';
-    inp.dataset.regMode = '';
   };
 
   const params = new URLSearchParams({
@@ -307,28 +341,17 @@ function krokZapis() {
     callback: cbName
   });
 
-  script.src = APPS_SCRIPT_URL + '?' + params.toString();
+  script.src = SCRIPT_URL + '?' + params.toString();
   script.onerror = function() {
     delete window[cbName];
-    addBotMsg('❌ Błąd połączenia. Spróbuj ponownie.');
+    msg('❌ Błąd połączenia. Spróbuj ponownie.', 'bot');
     regState = null;
   };
   document.head.appendChild(script);
 }
 
-// Przechwytuj send() gdy jesteśmy w trybie rejestracji
-const _origSend = send;
-send = function() {
-  if (inp.dataset.regMode === 'phone') {
-    const phone = inp.value.trim();
-    inp.value = '';
-    if (phone) msg(phone, 'usr');
-    else msg('Pominięto', 'usr');
-    krokFB(phone);
-    return;
-  }
-  _origSend();
-};
+loadQA();
+
 function fixIOSKeyboard() {
   if (!window.visualViewport) return;
   function update() {
@@ -346,4 +369,5 @@ function fixIOSKeyboard() {
   window.visualViewport.addEventListener("scroll", update);
 }
 fixIOSKeyboard();
+
 })();
