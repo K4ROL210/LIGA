@@ -273,32 +273,46 @@ function krokZapis() {
   const cbName = 'jsonp_reg_' + Math.random().toString(36).slice(2);
   const script = document.createElement('script');
 
-window[cbName] = function(data) {
-   console.log('JSONP callback otrzymany:', data);
-  delete window[cbName];
-  script.remove();
-  if (data.ok) {
-    const imie   = regState.imie;
-    const dayKey = regState.dayKey;
-    msg('✅ Gotowe! "' + imie + '" dodany do listy graczy. Zapisuję Cię teraz na ligę...', 'bot');
-    regState = null;
-    if (dayKey && typeof state !== 'undefined' && typeof addPlayer === 'function') {
-      state.inputs[dayKey] = imie;
-      setTimeout(function() {
-        addPlayer(dayKey).then(function(res) {
-          if (state.errors[dayKey]) {
-            msg('Coś poszło nie tak przy zapisie na ligę — wpisz się ręcznie w formularzu, dane już masz dodane do listy graczy.', 'bot');
-          } else {
-            msg('🎾 Zapisano na ligę! Do zobaczenia.', 'bot');
-          }
-        });
-      }, 1500);
+  window[cbName] = function(data) {
+    console.log('JSONP callback otrzymany:', data);
+    delete window[cbName];
+    script.remove();
+    if (data.ok) {
+      const imie   = regState.imie;
+      const dayKey = regState.dayKey;
+      msg('✅ Gotowe! "' + imie + '" dodany do listy graczy. Zapisuję Cię teraz na ligę...', 'bot');
+      regState = null;
+      if (dayKey && typeof state !== 'undefined' && typeof addPlayer === 'function') {
+        state.inputs[dayKey] = imie;
+        setTimeout(function() {
+          addPlayer(dayKey).then(function(res) {
+            if (state.errors[dayKey]) {
+              msg('Coś poszło nie tak przy zapisie na ligę — wpisz się ręcznie w formularzu, dane już masz dodane do listy graczy.', 'bot');
+            } else {
+              msg('🎾 Zapisano na ligę! Do zobaczenia.', 'bot');
+            }
+          });
+        }, 1500);
+      }
+    } else {
+      msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
+      regState = null;
     }
-  } else {
-    msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
+  };
+
+  const params = new URLSearchParams({
+    action:   'registerPlayer',
+    name:     regState.imie,
+    callback: cbName
+  });
+
+  script.src = SCRIPT_URL + '?' + params.toString();
+  script.onerror = function() {
+    delete window[cbName];
+    msg('❌ Błąd połączenia. Spróbuj ponownie.', 'bot');
     regState = null;
-  }
-};
+  };
+
   document.head.appendChild(script);
 }
 loadQA();
