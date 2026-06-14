@@ -270,6 +270,7 @@ function krokZapis() {
   const script = document.createElement('script');
 
 window[cbName] = function(data) {
+   console.log('JSONP callback otrzymany:', data);
   delete window[cbName];
   script.remove();
   if (data.ok) {
