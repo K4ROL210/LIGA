@@ -603,8 +603,8 @@ function hideGroupRow() {
 // ══════════════════════════════════════════════════════════════
 //  LOAD: wyniki kolejki
 // ══════════════════════════════════════════════════════════════
-async function loadResults() {
-  showContentLoading();
+async function loadResults(silent = false) {
+  if (!silent) showContentLoading();
   try {
     const res = await api({
       action:  "results",
@@ -613,10 +613,10 @@ async function loadResults() {
       round:   state.activeRound,
       group:   state.activeGroup,
     });
-    if (!res.ok) { showError(res.error); return; }
+    if (!res.ok) { if (!silent) showError(res.error); return; }
     renderResults(res);
   } catch(e) {
-    showError("Błąd ładowania wyników: " + e.message);
+    if (!silent) showError("Błąd ładowania wyników: " + e.message);
   }
 }
 
@@ -1001,6 +1001,14 @@ function clearContent() {
 
 // ── START ──────────────────────────────────────────────────────
 init();
+
+ // ── AUTO-ODŚWIEŻANIE WYNIKÓW co 8 sekund ────────────────────────
+setInterval(() => {
+  if (state.activeDay && state.activeSeason && state.activeRound && state.activeGroup) {
+    loadResults(true);
+  }
+}, 8000);
+ 
 </script>
 <script src="chat-widget.js"></script>
 </body>
