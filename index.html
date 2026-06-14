@@ -623,6 +623,41 @@
   text-decoration: underline;
   cursor: pointer;
 }
+.input-info {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 10px 14px;
+  border-top: 1px solid rgba(0,229,255,0.15);
+  background: rgba(0,229,255,0.06);
+  line-height: 1.4;
+  animation: fadeIn .2s ease;
+}
+.dopisz-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 9px 18px;
+  background: var(--c0);
+  color: #0a0f08;
+  font-weight: 900;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 12px rgba(200,255,0,0.3);
+  transition: box-shadow .15s, transform .15s;
+}
+.dopisz-btn:hover { box-shadow: 0 4px 18px rgba(200,255,0,0.5); transform: translateY(-1px); }
+.input-info .alt-links {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.input-info .alt-links a { color: var(--c0); }
+ 
 </style>
 </head>
 <body>
@@ -998,18 +1033,14 @@ function mkCard(day) {
 const err = state.errors[day.key];
 if (err) {
   const errDiv = document.createElement("div");
-  errDiv.className = "input-error";
-if (err === "NOT_ON_LIST") {
+  if (err === "NOT_ON_LIST") {
+    errDiv.className = "input-info";
     const nameVal = (state.inputs[day.key] || '').trim();
-    errDiv.innerHTML = `⚠️ Nie znaleziono Cię na liście graczy!<br>
-      <a href="#" id="dopisz-btn-${day.key}"
-         style="color:var(--c0);font-weight:700;text-decoration:underline;">
-        ➕ DOPISZ MNIE DO LISTY
+    errDiv.innerHTML = `Nie mamy jeszcze "${esc(nameVal)}" na liście graczy.<br>
+      <a href="#" id="dopisz-btn-${day.key}" class="dopisz-btn">
+        ➕ Dopisz mnie do listy
       </a>
-      &nbsp;lub&nbsp;
-      <a href="https://m.me/karol.kreczmanski" target="_blank">Napisz do nas ⓕ</a> 
-      lub zadzwoń <a href="tel:+48511915628">511 915 628</a>`;
-    // Listener zamiast onclick w HTML — bezpieczne dla każdej nazwy
+      <span class="alt-links">albo napisz do nas: <a href="https://m.me/karol.kreczmanski" target="_blank">FB</a> / <a href="tel:+48511915628">SMS 511 915 628</a></span>`;
     setTimeout(function() {
       const btn = document.getElementById('dopisz-btn-' + day.key);
       if (btn) btn.addEventListener('click', function(e) {
@@ -1018,6 +1049,7 @@ if (err === "NOT_ON_LIST") {
       });
     }, 0);
   } else {
+    errDiv.className = "input-error";
     errDiv.textContent = "⚠️ " + err;
   }
   card.appendChild(errDiv);
