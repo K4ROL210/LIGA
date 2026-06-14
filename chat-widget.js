@@ -269,7 +269,7 @@ function krokZapis() {
   const cbName = 'jsonp_reg_' + Math.random().toString(36).slice(2);
   const script = document.createElement('script');
 
-  window[cbName] = function(data) {
+window[cbName] = function(data) {
   delete window[cbName];
   script.remove();
   if (data.ok) {
@@ -277,7 +277,6 @@ function krokZapis() {
     const dayKey = regState.dayKey;
     msg('✅ Gotowe! "' + imie + '" dodany do listy graczy. Zapisuję Cię teraz na ligę...', 'bot');
     regState = null;
-
     if (dayKey && typeof state !== 'undefined' && typeof addPlayer === 'function') {
       state.inputs[dayKey] = imie;
       setTimeout(function() {
@@ -289,6 +288,7 @@ function krokZapis() {
           }
         });
       }, 1500);
+    }
   } else {
     msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
     regState = null;
