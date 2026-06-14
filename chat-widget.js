@@ -3,7 +3,7 @@
    ============================================================ */
 
 const QA_FILE = "qa.json";
-console.log('CHAT WIDGET ZAŁADOWANY - wersja test 123');
+console.log('CHAT WIDGET ZAŁADOWANY - wersja 1');
 (function () {
 
 const SCRIPT_URL = typeof APPS_SCRIPT_URL !== 'undefined' ? APPS_SCRIPT_URL : '';
