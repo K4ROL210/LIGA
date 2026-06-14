@@ -220,9 +220,9 @@ inp.addEventListener("keydown", function(e) {
 
 
 // ── Flow rejestracji ──────────────────────────────────────────
-window.startRejestracja = function(imie) {
+window.startRejestracja = function(imie, dayKey) {
   if (!isOpen) toggle();
-  regState = { imie: imie };
+  regState = { imie: imie, dayKey: dayKey };
 
   setTimeout(function() {
     msg('Chcesz dołączyć do listy graczy jako "' + imie + '"?', 'bot');
@@ -270,28 +270,29 @@ function krokZapis() {
   const script = document.createElement('script');
 
   window[cbName] = function(data) {
-    delete window[cbName];
-    script.remove();
-    if (data.ok) {
-      msg('✅ Gotowe! "' + regState.imie + '" dodany do listy graczy. Możesz się teraz zapisać na ligę!', 'bot');
-    } else {
-      msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
+  delete window[cbName];
+  script.remove();
+  if (data.ok) {
+    const imie   = regState.imie;
+    const dayKey = regState.dayKey;
+    msg('✅ Gotowe! "' + imie + '" dodany do listy graczy. Zapisuję Cię teraz na ligę...', 'bot');
+    regState = null;
+
+    if (dayKey && typeof state !== 'undefined' && typeof addPlayer === 'function') {
+      state.inputs[dayKey] = imie;
+      addPlayer(dayKey).then(function(res) {
+        if (state.errors[dayKey]) {
+          msg('Coś poszło nie tak przy zapisie na ligę — wpisz się ręcznie w formularzu, dane już masz dodane do listy graczy.', 'bot');
+        } else {
+          msg('🎾 Zapisano na ligę! Do zobaczenia.', 'bot');
+        }
+      });
     }
+  } else {
+    msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
     regState = null;
-  };
-
-  const params = new URLSearchParams({
-    action:   'registerPlayer',
-    name:     regState.imie,
-    callback: cbName
-  });
-
-  script.src = SCRIPT_URL + '?' + params.toString();
-  script.onerror = function() {
-    delete window[cbName];
-    msg('❌ Błąd połączenia. Spróbuj ponownie.', 'bot');
-    regState = null;
-  };
+  }
+};
   document.head.appendChild(script);
 }
 loadQA();
