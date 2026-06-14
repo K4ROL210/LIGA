@@ -264,6 +264,7 @@ function krokFB() {
 }
 
 function krokZapis() {
+   console.log('krokZapis start, regState:', regState);
   msg('Zapisuję…', 'bot');
 
   const cbName = 'jsonp_reg_' + Math.random().toString(36).slice(2);
