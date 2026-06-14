@@ -98,23 +98,7 @@ styleEl.textContent = `
   font-size:16px; transition:box-shadow .15s;
 }
 #cw-snd:hover { box-shadow:0 0 14px rgba(200,255,0,0.5); }
-#cw-reg-bar {
-  display:none; gap:8px; padding:8px 12px;
-  border-top:1px solid rgba(255,255,255,0.07);
-  background:#080c10;
-}
-#cw-reg-send {
-  flex:1; padding:8px 14px; border-radius:20px;
-  border:none; background:#c8ff00; color:#0a0f08;
-  font-family:'Rajdhani',sans-serif; font-weight:700;
-  font-size:14px; cursor:pointer;
-}
-#cw-reg-skip {
-  padding:8px 14px; border-radius:20px;
-  border:1.5px solid rgba(255,255,255,0.15); background:transparent;
-  color:#5a6680; font-family:'Rajdhani',sans-serif; font-weight:700;
-  font-size:14px; cursor:pointer;
-}
+
 @media(max-width:400px){
   #cw-panel{width:calc(100vw - 24px);right:12px;bottom:78px;}
   #cw-btn{right:12px;bottom:16px;}
@@ -143,10 +127,6 @@ document.body.insertAdjacentHTML("beforeend", `
       <div id="cw-irow-fields">
         <button id="cw-snd">➤</button>
       </div>
-      <div id="cw-reg-bar" style="display:none;">
-        <button id="cw-reg-send">Wyślij</button>
-        <button id="cw-reg-skip">Pomiń</button>
-      </div>
     </div>
   </div>
 `);
@@ -159,9 +139,6 @@ const panel   = document.getElementById("cw-panel");
 const msgs    = document.getElementById("cw-msgs");
 const inp     = document.getElementById("cw-inp");
 const irow    = document.getElementById("cw-irow");
-const regBar  = document.getElementById("cw-reg-bar");
-const regSend = document.getElementById("cw-reg-send");
-const regSkip = document.getElementById("cw-reg-skip");
 
 function msg(text, cls) {
   const d = document.createElement("div");
@@ -188,18 +165,6 @@ function addButtons(opcje) {
   });
   msgs.appendChild(wrap);
   msgs.scrollTop = msgs.scrollHeight;
-}
-
-function setRegMode(active) {
-  document.getElementById('cw-irow-fields').style.display = active ? 'none' : 'flex';
-  regBar.style.display = active ? 'flex' : 'none';
-  if (active) {
-    inp.value = '';
-    inp.placeholder = 'Numer telefonu…';
-    setTimeout(function() { inp.focus(); }, 100);
-  } else {
-    inp.placeholder = 'Napisz pytanie o ligę…';
-  }
 }
 
 function toggle() {
@@ -250,33 +215,14 @@ async function send() {
 document.getElementById("cw-snd").addEventListener("click", send);
 inp.addEventListener("keydown", function(e) {
   if (e.key !== "Enter") return;
-  if (regBar.style.display === 'flex') {
-    // W trybie rejestracji Enter = Wyślij
-    regSend.click();
-  } else {
-    send();
-  }
+  send();
 });
 
-// ── Przyciski trybu rejestracji ───────────────────────────────
-regSend.addEventListener('click', function() {
-  const phone = inp.value.trim();
-  if (phone) msg(phone, 'usr');
-  inp.value = '';
-  setRegMode(false);
-  krokFB(phone);
-});
-
-regSkip.addEventListener('click', function() {
-  msg('Pominięto', 'usr');
-  setRegMode(false);
-  krokFB('');
-});
 
 // ── Flow rejestracji ──────────────────────────────────────────
 window.startRejestracja = function(imie) {
   if (!isOpen) toggle();
-  regState = { imie: imie, phone: '' };
+  regState = { imie: imie };
 
   setTimeout(function() {
     msg('Chcesz dołączyć do listy graczy jako "' + imie + '"?', 'bot');
@@ -284,7 +230,7 @@ window.startRejestracja = function(imie) {
       addButtons([
         {
           label: '✓ Tak, to ja',
-          action: function() { krokTelefon(); }
+          action: function() { krokFB(); }
         },
         {
           label: '✗ Anuluj',
@@ -298,24 +244,18 @@ window.startRejestracja = function(imie) {
   }, 400);
 };
 
-function krokTelefon() {
-  msg('Podaj numer telefonu (opcjonalnie) — przyda się do kontaktu. Możesz kliknąć Pomiń.', 'bot');
-  setRegMode(true);
-}
-
-function krokFB(phone) {
-  regState.phone = phone;
-  msg('Czy wysłałeś wiadomość do organizatora na Facebooku? (m.me/karol.kreczmanski)', 'bot');
+function krokFB() {
+  msg('Czy napisałeś wiadomość do organizatora na FB lub na numer telefonu?', 'bot');
   setTimeout(function() {
     addButtons([
       {
-        label: '✓ Tak, wysłałem',
+        label: '✓ Tak',
         action: function() { krokZapis(); }
       },
       {
-        label: '✗ Jeszcze nie',
+        label: '✗ Nie',
         action: function() {
-          msg('Wyślij wiadomość tutaj: m.me/karol.kreczmanski — a potem wróć i kliknij "DOPISZ MNIE" ponownie.', 'bot');
+          msg('Najpierw napisz wiadomość do organizatora: m.me/karol.kreczmanski lub SMS 511 915 628 — a potem wróć i kliknij "DOPISZ MNIE" ponownie.', 'bot');
           regState = null;
         }
       }
@@ -343,7 +283,6 @@ function krokZapis() {
   const params = new URLSearchParams({
     action:   'registerPlayer',
     name:     regState.imie,
-    phone:    regState.phone,
     callback: cbName
   });
 
