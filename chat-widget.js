@@ -280,14 +280,15 @@ function krokZapis() {
 
     if (dayKey && typeof state !== 'undefined' && typeof addPlayer === 'function') {
       state.inputs[dayKey] = imie;
-      addPlayer(dayKey).then(function(res) {
-        if (state.errors[dayKey]) {
-          msg('Coś poszło nie tak przy zapisie na ligę — wpisz się ręcznie w formularzu, dane już masz dodane do listy graczy.', 'bot');
-        } else {
-          msg('🎾 Zapisano na ligę! Do zobaczenia.', 'bot');
-        }
-      });
-    }
+      setTimeout(function() {
+        addPlayer(dayKey).then(function(res) {
+          if (state.errors[dayKey]) {
+            msg('Coś poszło nie tak przy zapisie na ligę — wpisz się ręcznie w formularzu, dane już masz dodane do listy graczy.', 'bot');
+          } else {
+            msg('🎾 Zapisano na ligę! Do zobaczenia.', 'bot');
+          }
+        });
+      }, 1500);
   } else {
     msg('❌ Błąd: ' + (data.error || 'Spróbuj ponownie.'), 'bot');
     regState = null;
