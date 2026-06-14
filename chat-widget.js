@@ -150,6 +150,7 @@ function msg(text, cls) {
 }
 
 function addButtons(opcje) {
+   console.log('addButtons:', opcje.map(o => o.label));
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;';
   opcje.forEach(function(o) {
@@ -221,6 +222,7 @@ inp.addEventListener("keydown", function(e) {
 
 // ── Flow rejestracji ──────────────────────────────────────────
 window.startRejestracja = function(imie, dayKey) {
+   console.log('startRejestracja:', imie, dayKey);
   if (!isOpen) toggle();
   regState = { imie: imie, dayKey: dayKey };
 
@@ -245,6 +247,7 @@ window.startRejestracja = function(imie, dayKey) {
 };
 
 function krokFB() {
+   console.log('krokFB start, regState:', regState);
   msg('Czy napisałeś wiadomość do organizatora na FB lub na numer telefonu?', 'bot');
   setTimeout(function() {
     addButtons([
