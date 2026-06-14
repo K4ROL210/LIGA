@@ -1045,7 +1045,7 @@ if (err) {
       const btn = document.getElementById('dopisz-btn-' + day.key);
       if (btn) btn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.startRejestracja(nameVal);
+        window.startRejestracja(nameVal, day.key);
       });
     }, 0);
   } else {
