@@ -322,7 +322,7 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
   }
-  @media (max-width: 900px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 500px)  { .grid { grid-template-columns: 1fr; } }
 
   /* ── CARD ── */
@@ -711,23 +711,27 @@ const todayDateStr = today.toLocaleDateString("pl-PL", {
 </div>
 
 <script>
-const DAYS = [
+const DAYS_BASE = [
   { key:"mon", label:"Poniedziałek 20:00 <br> Początkująca Liga Squasha", short:"Pn",  dow:1 },
   { key:"tue", label:"Wtorek 20:00",                 short:"Wt",  dow:2 },
   { key:"thu", label:"Czwartek 20:00",               short:"Czw", dow:4 },
   { key:"sat", label:"Sobota 10:00",                 short:"Sob", dow:6 },
 ];
+ const DAYS = [
+  ...DAYS_BASE,
+  ...DAYS_BASE.map(d => ({ ...d, key: d.key + "_w2", weekOffset: 7 })),
+];
  const REZERWA_MARKER = "REZERWA"; // dokładnie tak wpisz w arkuszu
-const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff"];
+const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff","#c8ff00","#00e5ff","#ff8c42","#b06aff"];
 
-function getNextDate(dow) {
+function getNextDate(dow, weekOffset) {
   const now   = new Date();
   const today = now.getDay();
   const hour = parseInt(new Date().toLocaleString("pl-PL", { hour: "2-digit", hour12: false, timeZone: "Europe/Warsaw" }));
   let diff = (dow - today + 7) % 7;
   if (diff === 0 && hour >= CUTOFF_HOUR) diff = 7;
   const d = new Date(now);
-  d.setDate(d.getDate() + diff);
+  d.setDate(d.getDate() + diff + (weekOffset || 0));
   d.setHours(0,0,0,0);
   return d;
 }
@@ -745,7 +749,7 @@ function formatPL(d) {
 
 const _savedName = localStorage.getItem("lastPlayerName") || "";
 let state = {
-  days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow), color: COLORS[i] })),
+  days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow, d.weekOffset), color: COLORS[i % COLORS.length] })),
   lists:     {},
   loading:   {},
   inputs: Object.fromEntries(DAYS.map(d => [d.key, _savedName])),
@@ -794,7 +798,7 @@ function api(params) {
 
 async function loadDay(day) {
   state.loading[day.key] = true; render();
-  const res = await api({ action:"list", dayKey:day.key, dateStr:dateKey(day.date) });
+  const res = await api({ action:"list", dayKey:day.key.replace(/_w2$/, ""), dateStr:dateKey(day.date) });
   if (res.ok) {
     state.lists[day.key]  = res.players;
     state.locked[day.key] = res.locked;
@@ -810,7 +814,7 @@ async function addPlayer(dayKey) {
   state.saving[dayKey] = true;
   state.errors[dayKey] = null; // czyść poprzedni błąd
   render();
-  const res = await api({ action:"add", dayKey, dateStr:dateKey(day.date), name });
+  const res = await api({ action:"add", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), name });
   if (res.ok) {
 state.lists[dayKey] = res.players;
 state.errors[dayKey] = null;
@@ -825,21 +829,21 @@ state.days.forEach(d => { state.inputs[d.key] = name; });
  
 async function removePlayer(dayKey, idx) {
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"remove", dayKey, dateStr:dateKey(day.date), idx, password:state.adminPassword });
+  const res = await api({ action:"remove", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = res.players; render(); }
 }
 
 async function saveEdit(dayKey) {
   if (!state.editing) return;
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"edit", dayKey, dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
+  const res = await api({ action:"edit", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = res.players; state.editing = null; render(); }
 }
 
 async function toggleLocked(dayKey) {
   const day    = state.days.find(d => d.key === dayKey);
   const action = state.locked[dayKey] ? "unlock" : "lock";
-  const res    = await api({ action, dayKey, dateStr:dateKey(day.date), password:state.adminPassword });
+  const res    = await api({ action, dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), password:state.adminPassword });
   if (res.ok) {
     state.locked[dayKey] = res.locked;
     saveLockedState();
