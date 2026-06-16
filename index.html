@@ -801,7 +801,8 @@ let state = {
   locked:    {},
   adminPassword: "",
   errors: {},
-  thu18: Object.fromEntries(DAYS.map(d => [d.key, false])),
+  thu18:  Object.fromEntries(DAYS.map(d => [d.key, false])),
+  labels: {},
 };
 
 function saveLockedState() {
@@ -841,6 +842,7 @@ async function loadDay(day) {
   if (res.ok) {
     state.lists[day.key]  = normalizePlayers(res.players);
     state.locked[day.key] = res.locked;
+    if (res.label) state.labels[day.key] = res.label;
   }
   state.loading[day.key] = false; render();
 }
@@ -976,6 +978,7 @@ function mkCard(day) {
   const saving   = state.saving[day.key];
   const isClosed = state.locked[day.key];
   const isThu    = day.key.replace(/_w2$/, "") === "thu";
+  const cardLabel = state.labels[day.key] || day.label;
 
   const card = document.createElement("div");
   card.className = "card";
@@ -985,7 +988,7 @@ function mkCard(day) {
   headDiv.className = "card-head";
   const textDiv = document.createElement("div");
   textDiv.className = "card-head-text";
-  textDiv.innerHTML = `<div class="day-label">${day.label}</div><div class="date-label">${formatPL(day.date)}</div>`;
+  textDiv.innerHTML = `<div class="day-label">${cardLabel}</div><div class="date-label">${formatPL(day.date)}</div>`;
   headDiv.appendChild(textDiv);
 
   if (state.adminMode) {
