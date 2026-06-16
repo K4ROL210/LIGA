@@ -657,7 +657,7 @@
   color: var(--muted);
 }
 .input-info .alt-links a { color: var(--c0); }
- 
+
 .badge-18 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 11px;
@@ -669,28 +669,32 @@
   letter-spacing: 0.5px;
   flex-shrink: 0;
 }
-.icon-18on  { color: var(--c1);  border: 1px solid rgba(0,229,255,0.4); font-size: 10px; }
+.icon-18on  { color: var(--c1);   border: 1px solid rgba(0,229,255,0.4);    font-size: 10px; }
 .icon-18off { color: var(--muted); border: 1px solid rgba(90,102,128,0.4); font-size: 10px; }
 
-.checkbox-row {
-  padding: 6px 14px 0;
-  display: flex;
-  align-items: center;
-  gap: 7px;
+.thu18-pill {
+  display: inline-block;
   font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
+  border-radius: 100px;
+  padding: 5px 16px;
   cursor: pointer;
   user-select: none;
+  transition: color .15s, border-color .15s, background .15s;
+  border: 1px solid rgba(90,102,128,0.3);
+  color: var(--muted);
+  background: transparent;
 }
-.checkbox-row input[type="checkbox"] {
-  accent-color: var(--c1);
-  width: 15px; height: 15px;
-  cursor: pointer;
-  flex-shrink: 0;
+.thu18-pill.active {
+  color: var(--c1);
+  border-color: rgba(0,229,255,0.4);
+  background: rgba(0,229,255,0.08);
 }
-.checkbox-row label { cursor: pointer; }
+.thu18-pill-wrap {
+  background: rgba(0,0,0,0.15);
+  padding: 0 14px 10px;
+}
 
 </style>
 </head>
@@ -796,7 +800,7 @@ let state = {
   passErr:   false,
   locked:    {},
   adminPassword: "",
-    errors: {},
+  errors: {},
   thu18: Object.fromEntries(DAYS.map(d => [d.key, false])),
 };
 
@@ -847,24 +851,24 @@ async function addPlayer(dayKey) {
   const name = (state.inputs[dayKey]||"").trim();
   if (!name) return;
   state.saving[dayKey] = true;
-  state.errors[dayKey] = null; // czyść poprzedni błąd
+  state.errors[dayKey] = null;
   render();
   const isThu = dayKey.replace(/_w2$/, "") === "thu";
   const addParams = { action:"add", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), name };
   if (isThu) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
   const res = await api(addParams);
   if (res.ok) {
-state.lists[dayKey] = normalizePlayers(res.players);
-state.errors[dayKey] = null;
-localStorage.setItem("lastPlayerName", name);
-state.days.forEach(d => { state.inputs[d.key] = name; });
+    state.lists[dayKey] = normalizePlayers(res.players);
+    state.errors[dayKey] = null;
+    localStorage.setItem("lastPlayerName", name);
+    state.days.forEach(d => { state.inputs[d.key] = name; });
   } else {
     state.errors[dayKey] = res.error;
   }
   state.saving[dayKey] = false;
   render();
 }
- 
+
 async function removePlayer(dayKey, idx) {
   const day = state.days.find(d => d.key === dayKey);
   const res = await api({ action:"remove", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, password:state.adminPassword });
@@ -888,9 +892,13 @@ async function toggleLocked(dayKey) {
     render();
   }
 }
- 
+
 function normalizePlayers(arr) {
-  return (arr || []).map(p => typeof p === "string" ? { name: p, early18: false } : p);
+  return (arr || []).map(p => {
+    if (typeof p === "string") return { name: p, early18: false };
+    const e18 = p.early18;
+    return { ...p, early18: e18 === true || e18 === 1 || e18 === "1" || e18 === "true" };
+  });
 }
 
 async function toggleEarly18(dayKey, idx) {
@@ -967,6 +975,7 @@ function mkCard(day) {
   const loading  = state.loading[day.key];
   const saving   = state.saving[day.key];
   const isClosed = state.locked[day.key];
+  const isThu    = day.key.replace(/_w2$/, "") === "thu";
 
   const card = document.createElement("div");
   card.className = "card";
@@ -998,103 +1007,86 @@ function mkCard(day) {
   } else if (players.length === 0) {
     list.innerHTML = `<div class="empty">Brak zapisanych graczy</div>`;
   } else {
-      const isThuCard = day.key.replace(/_w2$/, "") === "thu";
     players.forEach((player, i) => {
-  const name = player.name;
-  const early18 = player.early18 || false;
+      const name    = player.name;
+      const early18 = player.early18 || false;
 
-  // ── Separator REZERWA ──────────────────────────────────
-  if (name === REZERWA_MARKER) {
-    const sep = document.createElement("div");
-    sep.className = "rezerwa-separator";
-    sep.textContent = "▼  REZERWA  ▼";
-    if (state.adminMode) {
-      const btnDel = mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i));
-      btnDel.style.marginLeft = "4px";
-      sep.appendChild(btnDel);
-    }
-    list.appendChild(sep);
-    return;
-  }
-
-  // ── Normalny gracz ─────────────────────────────────────
-  const isRezerwa = players.slice(0, i).some(p => p.name === REZERWA_MARKER);
-  const isEdit = state.editing && state.editing.dayKey === day.key && state.editing.idx === i;
-  const row = document.createElement("div");
-  row.className = "player-row";
-
-  if (!isRezerwa) {
-     const numBefore = players.slice(0, i).filter(p => p.name !== REZERWA_MARKER).length;
-    row.innerHTML = `<span class="num">${numBefore + 1}</span>`;
-  } else {
-    row.innerHTML = `<span class="num" style="color:var(--c2);opacity:0.5">—</span>`;
-  }
-
-  if (state.adminMode && isEdit) {
-    const inp = document.createElement("input");
-    inp.className = "field"; inp.value = state.editVal; inp.style.flex = "1";
-    inp.addEventListener("input", e => state.editVal = e.target.value);
-    inp.addEventListener("keydown", e => {
-      if (e.key === "Enter")  saveEdit(day.key);
-      if (e.key === "Escape") { state.editing = null; render(); }
-    });
-    row.appendChild(inp);
-    setTimeout(() => inp.focus(), 0);
-    row.appendChild(mkIconBtn("✓", "icon-btn icon-ok", () => saveEdit(day.key)));
-  } else {
-    const span = document.createElement("span");
-    span.className = "pname";
-    span.textContent = name;
-    // Rezerwowi — przyciemnione imię
-    if (isRezerwa) span.style.opacity = "0.55";
-    row.appendChild(span);
-   
-    // Badge 18:00 dla czwartku
-    if (isThuCard && early18) {
-      const badge = document.createElement("span");
-      badge.className = "badge-18";
-      badge.textContent = "18:00";
-      row.appendChild(badge);
-    }
-
-    if (state.adminMode) {
-      const wrap = document.createElement("div");
-      wrap.style.display = "flex"; wrap.style.gap = "4px";
-     // Toggle 18:00 dla czwartku
-      if (isThuCard) {
-        const btn18 = mkIconBtn(early18 ? "18✓" : "18+", early18 ? "icon-btn icon-18on" : "icon-btn icon-18off", () => toggleEarly18(day.key, i));
-        btn18.style.width = "32px";
-        btn18.title = early18 ? "Usuń 18:00" : "Dodaj 18:00";
-        wrap.appendChild(btn18);
+      // ── Separator REZERWA ──────────────────────────────────
+      if (name === REZERWA_MARKER) {
+        const sep = document.createElement("div");
+        sep.className = "rezerwa-separator";
+        sep.textContent = "▼  REZERWA  ▼";
+        if (state.adminMode) {
+          const btnDel = mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i));
+          btnDel.style.marginLeft = "4px";
+          sep.appendChild(btnDel);
+        }
+        list.appendChild(sep);
+        return;
       }
-      wrap.appendChild(mkIconBtn("✎", "icon-btn icon-edit", () => {
-        state.editing = { dayKey: day.key, idx: i };
-        state.editVal = name;
-        render();
-      }));
-      wrap.appendChild(mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i)));
-      row.appendChild(wrap);
-    }
-  }
-  list.appendChild(row);
-});
+
+      // ── Normalny gracz ─────────────────────────────────────
+      const isRezerwa = players.slice(0, i).some(p => p.name === REZERWA_MARKER);
+      const isEdit    = state.editing && state.editing.dayKey === day.key && state.editing.idx === i;
+      const row       = document.createElement("div");
+      row.className   = "player-row";
+
+      if (!isRezerwa) {
+        const numBefore = players.slice(0, i).filter(p => p.name !== REZERWA_MARKER).length;
+        row.innerHTML = `<span class="num">${numBefore + 1}</span>`;
+      } else {
+        row.innerHTML = `<span class="num" style="color:var(--c2);opacity:0.5">—</span>`;
+      }
+
+      if (state.adminMode && isEdit) {
+        const inp = document.createElement("input");
+        inp.className = "field"; inp.value = state.editVal; inp.style.flex = "1";
+        inp.addEventListener("input", e => state.editVal = e.target.value);
+        inp.addEventListener("keydown", e => {
+          if (e.key === "Enter")  saveEdit(day.key);
+          if (e.key === "Escape") { state.editing = null; render(); }
+        });
+        row.appendChild(inp);
+        setTimeout(() => inp.focus(), 0);
+        row.appendChild(mkIconBtn("✓", "icon-btn icon-ok", () => saveEdit(day.key)));
+      } else {
+        const span = document.createElement("span");
+        span.className = "pname";
+        span.textContent = name;
+        if (isRezerwa) span.style.opacity = "0.55";
+        row.appendChild(span);
+
+        // Badge 18:00 dla czwartku
+        if (isThu && early18) {
+          const badge = document.createElement("span");
+          badge.className = "badge-18";
+          badge.textContent = "18:00";
+          row.appendChild(badge);
+        }
+
+        if (state.adminMode) {
+          const wrap = document.createElement("div");
+          wrap.style.display = "flex"; wrap.style.gap = "4px";
+          // Toggle 18:00 dla czwartku
+          if (isThu) {
+            const btn18 = mkIconBtn(early18 ? "18✓" : "18+", early18 ? "icon-btn icon-18on" : "icon-btn icon-18off", () => toggleEarly18(day.key, i));
+            btn18.style.width = "32px";
+            btn18.title = early18 ? "Usuń 18:00" : "Dodaj 18:00";
+            wrap.appendChild(btn18);
+          }
+          wrap.appendChild(mkIconBtn("✎", "icon-btn icon-edit", () => {
+            state.editing = { dayKey: day.key, idx: i };
+            state.editVal = name;
+            render();
+          }));
+          wrap.appendChild(mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i)));
+          row.appendChild(wrap);
+        }
+      }
+      list.appendChild(row);
+    });
   }
   card.appendChild(list);
- const isThuInput = day.key.replace(/_w2$/, "") === "thu";
-  // Checkbox 18:00 dla czwartku (tylko gdy lista otwarta)
-  if (isThuInput && !isClosed) {
-    const cbRow = document.createElement("div");
-    cbRow.className = "checkbox-row";
-    const cbId = "cb18-" + day.key;
-    const cb = document.createElement("input");
-    cb.type = "checkbox"; cb.id = cbId;
-    cb.checked = state.thu18[day.key] || false;
-    cb.addEventListener("change", e => { state.thu18[day.key] = e.target.checked; });
-    const lbl = document.createElement("label");
-    lbl.htmlFor = cbId; lbl.textContent = "Mogę też na 18:00";
-    cbRow.appendChild(cb); cbRow.appendChild(lbl);
-    card.appendChild(cbRow);
-  }
 
   const inputRow = document.createElement("div");
   inputRow.className = "input-row" + (isClosed ? " closed" : "");
@@ -1111,43 +1103,55 @@ function mkCard(day) {
   addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
   addB.addEventListener("click", () => addPlayer(day.key));
   inputRow.appendChild(inp); inputRow.appendChild(addB);
-   card.appendChild(inputRow);
+  card.appendChild(inputRow);
 
-// Komunikat błędu pod polem wpisywania
-const err = state.errors[day.key];
-if (err) {
-  const errDiv = document.createElement("div");
-  if (err === "NOT_ON_LIST") {
-    errDiv.className = "input-info";
-    const nameVal = (state.inputs[day.key] || '').trim();
-    errDiv.innerHTML = `Nie mamy jeszcze "${esc(nameVal)}" na liście graczy.<br>
-      <a href="#" id="dopisz-btn-${day.key}" class="dopisz-btn">
-        ➕ Dopisz mnie do listy
-      </a>
-      <span class="alt-links">albo napisz do nas: <a href="https://m.me/karol.kreczmanski" target="_blank">FB</a> / <a href="tel:+48511915628">SMS 511 915 628</a></span>`;
-    setTimeout(function() {
-      const btn = document.getElementById('dopisz-btn-' + day.key);
-      if (btn) btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.startRejestracja(nameVal, day.key);
-      });
-    }, 0);
-  } else {
-    errDiv.className = "input-error";
-    errDiv.textContent = "⚠️ " + err;
+  // Pill "Mogę też na 18:00" dla czwartku (tylko gdy lista otwarta)
+  if (isThu && !isClosed) {
+    const pillWrap = document.createElement("div");
+    pillWrap.className = "thu18-pill-wrap";
+    const pill = document.createElement("div");
+    pill.className = "thu18-pill" + (state.thu18[day.key] ? " active" : "");
+    pill.textContent = "Mogę też na 18:00";
+    pill.addEventListener("click", () => { state.thu18[day.key] = !state.thu18[day.key]; render(); });
+    pillWrap.appendChild(pill);
+    card.appendChild(pillWrap);
   }
-  card.appendChild(errDiv);
-}
 
-// Czyść błąd gdy użytkownik zaczyna pisać
-inp.addEventListener("input", () => {
-  if (state.errors[day.key]) {
-    state.errors[day.key] = null;
-    render();
+  // Komunikat błędu pod polem wpisywania
+  const err = state.errors[day.key];
+  if (err) {
+    const errDiv = document.createElement("div");
+    if (err === "NOT_ON_LIST") {
+      errDiv.className = "input-info";
+      const nameVal = (state.inputs[day.key] || '').trim();
+      errDiv.innerHTML = `Nie mamy jeszcze "${esc(nameVal)}" na liście graczy.<br>
+        <a href="#" id="dopisz-btn-${day.key}" class="dopisz-btn">
+          ➕ Dopisz mnie do listy
+        </a>
+        <span class="alt-links">albo napisz do nas: <a href="https://m.me/karol.kreczmanski" target="_blank">FB</a> / <a href="tel:+48511915628">SMS 511 915 628</a></span>`;
+      setTimeout(function() {
+        const btn = document.getElementById('dopisz-btn-' + day.key);
+        if (btn) btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.startRejestracja(nameVal, day.key);
+        });
+      }, 0);
+    } else {
+      errDiv.className = "input-error";
+      errDiv.textContent = "⚠️ " + err;
+    }
+    card.appendChild(errDiv);
   }
-});
 
-return card;
+  // Czyść błąd gdy użytkownik zaczyna pisać
+  inp.addEventListener("input", () => {
+    if (state.errors[day.key]) {
+      state.errors[day.key] = null;
+      render();
+    }
+  });
+
+  return card;
 }
 
 function mkBtn(label, cls, onClick) {
