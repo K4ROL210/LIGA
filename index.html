@@ -753,7 +753,9 @@ const DAYS_BASE = [
   { key:"mon", label:"Poniedziałek 20:00", short:"Pn",  dow:1 },
   { key:"tue", label:"Wtorek 20:00",                 short:"Wt",  dow:2 },
   { key:"thu", label:"Czwartek 20:00",               short:"Czw", dow:4 },
-  { key:"sat", label:"Sobota 10:00",                 short:"Sob", dow:6 },
+  { key:"fri", label:"Piątek 19:00",                 short:"Pt",  dow:5 },
+  // Sobota wyłączona (zastąpiona piątkiem) — odkomentuj, żeby przywrócić:
+  // { key:"sat", label:"Sobota 10:00",              short:"Sob", dow:6 },
 ];
  const DAYS = [
   ...DAYS_BASE,
@@ -1229,7 +1231,10 @@ Promise.all(state.days.map(loadDay));
         <li>Poniedziałek 20:00</li>
         <li>Wtorek 20:00</li>
         <li>Czwartek 20:00 (i 18:00 — jeśli na 20:00 jest więcej niż 14 osób)</li>
+        <li>Piątek 19:00</li>
+        <!-- Sobota wyłączona (zastąpiona piątkiem) — odkomentuj, żeby przywrócić:
         <li>Sobota 10:00</li>
+        -->
       </ul>
       <p style="margin-top:6px">Nie ma obowiązku być co tydzień — przychodzisz kiedy chcesz!</p>
     </div>
