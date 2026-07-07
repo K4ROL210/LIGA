@@ -800,6 +800,7 @@ let state = {
   showLogin: false,
   passInput: "",
   passErr:   false,
+  passErrMsg: "",
   locked:    {},
   adminPassword: "",
   errors: {},
@@ -811,31 +812,47 @@ function saveLockedState() {
   localStorage.setItem('lockedDays', JSON.stringify(state.locked));
 }
 
-function api(params) {
+function apiOnce(params) {
   return new Promise((resolve, reject) => {
     const cbName = "jsonp_" + Math.random().toString(36).slice(2);
     let script;
-    const timeout = setTimeout(() => {
-      delete window[cbName];
+    const cleanup = () => {
+      clearTimeout(timeout);
+      // Zastępujemy no-opem zamiast usuwać: gdy Apps Script odpowie
+      // spóźniony (po timeoucie/błędzie), wywołanie nie wywali ReferenceError.
+      window[cbName] = () => {};
       if (script) script.remove();
+    };
+    const timeout = setTimeout(() => {
+      cleanup();
       reject(new Error("timeout"));
     }, 25000);
     window[cbName] = (data) => {
-      clearTimeout(timeout);
-      delete window[cbName];
-      if (script) script.remove();
+      cleanup();
       resolve(data);
     };
     script = document.createElement("script");
     const p = { ...params, callback: cbName };
     script.src = APPS_SCRIPT_URL + "?" + new URLSearchParams(p).toString();
     script.onerror = () => {
-      clearTimeout(timeout);
-      delete window[cbName];
+      cleanup();
       reject(new Error("script error"));
     };
     document.head.appendChild(script);
   });
+}
+
+// Endpoint Apps Script bywa przejściowo zawodny (404 / brak odpowiedzi),
+// dlatego ponawiamy próbę zamiast od razu zgłaszać błąd użytkownikowi.
+async function api(params, retries = 2) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await apiOnce(params);
+    } catch (e) {
+      if (attempt >= retries) throw e;
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+    }
+  }
 }
 
 async function loadDay(day) {
@@ -889,12 +906,19 @@ async function saveEdit(dayKey) {
 async function toggleLocked(dayKey) {
   const day    = state.days.find(d => d.key === dayKey);
   const action = state.locked[dayKey] ? "unlock" : "lock";
-  const res    = await api({ action, dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), password:state.adminPassword });
-  if (res.ok) {
-    state.locked[dayKey] = res.locked;
-    saveLockedState();
-    render();
+  state.errors[dayKey] = null;
+  try {
+    const res = await api({ action, dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), password:state.adminPassword });
+    if (res.ok) {
+      state.locked[dayKey] = res.locked;
+      saveLockedState();
+    } else {
+      state.errors[dayKey] = res.error;
+    }
+  } catch (e) {
+    state.errors[dayKey] = "Błąd połączenia z serwerem, spróbuj ponownie";
   }
+  render();
 }
 
 function normalizePlayers(arr) {
@@ -949,7 +973,7 @@ function renderLoginBox() {
         <button class="btn btn-yellow" id="passOk">OK</button>
         <button class="btn btn-dark"   id="passX">✕</button>
       </div>
-      ${state.passErr ? '<p class="err-msg">Błędne hasło</p>' : ""}
+      ${state.passErr ? `<p class="err-msg">${esc(state.passErrMsg || "Błędne hasło")}</p>` : ""}
     </div>`;
   const inp = el.querySelector("#passInp");
   inp.addEventListener("input",  e => { state.passInput=e.target.value; state.passErr=false; });
@@ -1174,15 +1198,21 @@ function mkIconBtn(label, cls, onClick) {
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
 
 async function tryLogin() {
-  const res = await api({ action:"checkPassword", password: state.passInput });
-  if (res.ok) {
-    state.adminMode     = true;
-    state.adminPassword = state.passInput;
-    state.showLogin     = false;
-    state.passInput     = "";
-    state.passErr       = false;
-  } else {
-    state.passErr = true;
+  try {
+    const res = await api({ action:"checkPassword", password: state.passInput });
+    if (res.ok) {
+      state.adminMode     = true;
+      state.adminPassword = state.passInput;
+      state.showLogin     = false;
+      state.passInput     = "";
+      state.passErr       = false;
+    } else {
+      state.passErr    = true;
+      state.passErrMsg = "Błędne hasło";
+    }
+  } catch (e) {
+    state.passErr    = true;
+    state.passErrMsg = "Błąd połączenia z serwerem, spróbuj ponownie";
   }
   render();
 }
