@@ -866,6 +866,35 @@ async function loadDay(day) {
   state.loading[day.key] = false; render();
 }
 
+// Ładuje wszystkie dni jednym zapytaniem (backend otwiera arkusz raz zamiast
+// osobno dla każdego dnia) — dużo szybsze niż 8 osobnych żądań "list".
+async function loadAllDays(days) {
+  days.forEach(d => state.loading[d.key] = true);
+  render();
+  try {
+    const payload = days.map(d => ({
+      fullKey: d.key,
+      dayKey:  d.key.replace(/_w2$/, ""),
+      dateStr: dateKey(d.date),
+    }));
+    const res = await api({ action:"listAll", days: JSON.stringify(payload) });
+    if (!res.ok) throw new Error(res.error || "listAll failed");
+    for (const fullKey in res.data) {
+      const entry = res.data[fullKey];
+      state.lists[fullKey]  = normalizePlayers(entry.players);
+      state.locked[fullKey] = entry.locked;
+      if (entry.label) state.labels[fullKey] = entry.label;
+    }
+    days.forEach(d => state.loading[d.key] = false);
+    render();
+  } catch (e) {
+    // Backend bez akcji "listAll" (np. przed redeployem) albo inny błąd —
+    // wracamy do ładowania dzień po dniu, żeby strona nie została pusta.
+    days.forEach(d => state.loading[d.key] = false);
+    await loadDaysStaggered(days, 2);
+  }
+}
+
 async function addPlayer(dayKey) {
   if (state.locked[dayKey]) return;
   const day  = state.days.find(d => d.key === dayKey);
@@ -1223,7 +1252,7 @@ async function loadDaysStaggered(days, batchSize) {
     await Promise.all(days.slice(i, i + batchSize).map(loadDay));
   }
 }
-loadDaysStaggered(state.days, 2);
+loadAllDays(state.days);
 // potrojny klik
 (function() {
   var clicks = 0, timer;
