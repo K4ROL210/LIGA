@@ -433,7 +433,7 @@
   }
 
   .empty       { text-align: center; padding: 20px 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
-  .loading-txt { text-align: center; padding: 20px 8px; color: var(--muted); font-size: 12px; }
+  .loading-txt { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 8px; color: #fff; font-size: 12px; }
   .closed-txt  { text-align: center; padding: 20px 8px; color: var(--red); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
   /* ── ICON BUTTONS ── */
@@ -531,6 +531,7 @@
     animation: spin .6s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt .spinner { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
 
  .info-btn {
   display: inline-flex;
@@ -1061,7 +1062,7 @@ function mkCard(day) {
   if (isClosed) {
     list.innerHTML = `<div class="closed-txt">🔒 Zapisy zamknięte</div>`;
   } else if (loading) {
-    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span></div>`;
+    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span>Ładowanie</div>`;
   } else if (players.length === 0) {
     list.innerHTML = `<div class="empty">Brak zapisanych graczy</div>`;
   } else {
