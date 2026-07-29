@@ -99,6 +99,22 @@ styleEl.textContent = `
 }
 #cw-snd:hover { box-shadow:0 0 14px rgba(200,255,0,0.5); }
 
+.cwm-info-row { display:flex; flex-direction:column; gap:8px; margin-top:4px; max-width:88%; }
+.cwm-info-inp {
+  background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.10);
+  border-radius:20px; padding:8px 14px; font-size:14px; color:#dde4f0; outline:none;
+  font-family:'Rajdhani',sans-serif; font-weight:600; transition:border-color .15s;
+}
+.cwm-info-inp::placeholder { color:#5a6680; }
+.cwm-info-inp:focus { border-color:rgba(200,255,0,0.5); }
+.cwm-info-inp.err { border-color:#ff4d4d; }
+.cwm-info-btn {
+  align-self:flex-start; padding:8px 16px; border-radius:20px; border:none;
+  background:#c8ff00; color:#0a0f08; font-family:'Rajdhani',sans-serif;
+  font-weight:700; font-size:14px; cursor:pointer; transition:box-shadow .15s;
+}
+.cwm-info-btn:hover { box-shadow:0 0 14px rgba(200,255,0,0.5); }
+
 @media(max-width:400px){
   #cw-panel{width:calc(100vw - 24px);right:12px;bottom:78px;}
   #cw-btn{right:12px;bottom:16px;}
@@ -134,6 +150,16 @@ document.body.insertAdjacentHTML("beforeend", `
 let qa = null;
 let isOpen = false;
 let regState = null;
+let infoGateActive = false;
+
+const USER_INFO_KEY = 'cw_userInfo';
+function getUserInfo() {
+  try { return JSON.parse(localStorage.getItem(USER_INFO_KEY) || 'null'); } catch { return null; }
+}
+function saveUserInfo(info) {
+  try { localStorage.setItem(USER_INFO_KEY, JSON.stringify(info)); } catch {}
+}
+let userInfo = getUserInfo();
 
 const panel   = document.getElementById("cw-panel");
 const msgs    = document.getElementById("cw-msgs");
@@ -178,7 +204,82 @@ function toggle() {
   if (isOpen) setTimeout(() => inp.focus(), 250);
 }
 
-document.getElementById("cw-btn").addEventListener("click", toggle);
+function addInfoForm(onSubmit) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cwm-info-row';
+
+  const nameInp = document.createElement('input');
+  nameInp.className = 'cwm-info-inp';
+  nameInp.type = 'text';
+  nameInp.placeholder = 'Imię i nazwisko';
+
+  const mailInp = document.createElement('input');
+  mailInp.className = 'cwm-info-inp';
+  mailInp.type = 'email';
+  mailInp.placeholder = 'E-mail (opcjonalnie)';
+
+  const btn = document.createElement('button');
+  btn.className = 'cwm-info-btn';
+  btn.textContent = 'Dalej';
+
+  function submit() {
+    const name = nameInp.value.trim();
+    if (!name) { nameInp.classList.add('err'); nameInp.focus(); return; }
+    const email = mailInp.value.trim();
+    wrap.remove();
+    msg(email ? (name + ' · ' + email) : name, 'usr');
+    onSubmit({ name: name, email: email });
+  }
+
+  nameInp.addEventListener('input', () => nameInp.classList.remove('err'));
+  nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') mailInp.focus(); });
+  mailInp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  btn.addEventListener('click', submit);
+
+  wrap.appendChild(nameInp);
+  wrap.appendChild(mailInp);
+  wrap.appendChild(btn);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => nameInp.focus(), 50);
+}
+
+// Pyta o dane tylko przy zwykłym otwarciu czatu (nie przy flow "Dopisz mnie do listy"),
+// i tylko raz na przeglądarkę — zapamiętane w localStorage. Jeśli dane już są zapamiętane,
+// wypisuje je ponownie jako wiadomość, żeby było widać kto pisze też przy kolejnych wizytach.
+let infoRevealedThisSession = false;
+function maybeAskUserInfo() {
+  if (infoGateActive) return;
+
+  if (userInfo && userInfo.name) {
+    if (!infoRevealedThisSession) {
+      infoRevealedThisSession = true;
+      setTimeout(function() {
+        msg(userInfo.email ? (userInfo.name + ' · ' + userInfo.email) : userInfo.name, 'usr');
+      }, 350);
+    }
+    return;
+  }
+
+  infoGateActive = true;
+  irow.style.display = 'none';
+  setTimeout(function() {
+    msg('Zanim przejdziemy do rozmowy — podaj Imię i Nazwisko (opcjonalnie e-mail):', 'bot');
+    addInfoForm(function(info) {
+      userInfo = info;
+      saveUserInfo(info);
+      infoGateActive = false;
+      infoRevealedThisSession = true;
+      irow.style.display = '';
+      inp.focus();
+    });
+  }, 350);
+}
+
+document.getElementById("cw-btn").addEventListener("click", function() {
+  toggle();
+  if (isOpen) maybeAskUserInfo();
+});
 document.getElementById("cw-cl").addEventListener("click", toggle);
 
 async function loadQA() {
@@ -188,6 +289,7 @@ async function loadQA() {
 }
 
 async function send() {
+  if (infoGateActive) return;
   const q = inp.value.trim();
   if (!q) return;
   inp.value = "";
