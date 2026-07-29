@@ -151,15 +151,7 @@ let qa = null;
 let isOpen = false;
 let regState = null;
 let infoGateActive = false;
-
-const USER_INFO_KEY = 'cw_userInfo';
-function getUserInfo() {
-  try { return JSON.parse(localStorage.getItem(USER_INFO_KEY) || 'null'); } catch { return null; }
-}
-function saveUserInfo(info) {
-  try { localStorage.setItem(USER_INFO_KEY, JSON.stringify(info)); } catch {}
-}
-let userInfo = getUserInfo();
+let userInfo = null;
 
 const panel   = document.getElementById("cw-panel");
 const msgs    = document.getElementById("cw-msgs");
@@ -244,34 +236,32 @@ function addInfoForm(onSubmit) {
   setTimeout(() => nameInp.focus(), 50);
 }
 
-// Pyta o dane tylko przy zwykłym otwarciu czatu (nie przy flow "Dopisz mnie do listy"),
-// i tylko raz na przeglądarkę — zapamiętane w localStorage. Jeśli dane już są zapamiętane,
-// wypisuje je ponownie jako wiadomość, żeby było widać kto pisze też przy kolejnych wizytach.
-let infoRevealedThisSession = false;
+// Wysyła "pytanie" do bota tylko po to, żeby wywołać istniejące powiadomienie
+// (np. na Telegramie) po stronie Workera — odpowiedź jest ignorowana, nic się nie wyświetla.
+function notifyBot(text) {
+  fetch("https://squash-chat.karol-kreczmanski.workers.dev/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: text, context: "" })
+  }).catch(() => {});
+}
+
+// Pyta o dane przy KAŻDYM zwykłym otwarciu czatu (nie przy flow "Dopisz mnie do listy") —
+// nic nie jest zapamiętywane między otwarciami, więc pytanie pojawia się za każdym razem.
 function maybeAskUserInfo() {
   if (infoGateActive) return;
 
-  if (userInfo && userInfo.name) {
-    if (!infoRevealedThisSession) {
-      infoRevealedThisSession = true;
-      setTimeout(function() {
-        msg(userInfo.email ? (userInfo.name + ' · ' + userInfo.email) : userInfo.name, 'usr');
-      }, 350);
-    }
-    return;
-  }
-
+  userInfo = null;
   infoGateActive = true;
   irow.style.display = 'none';
   setTimeout(function() {
     msg('Zanim przejdziemy do rozmowy — podaj Imię i Nazwisko (opcjonalnie e-mail):', 'bot');
     addInfoForm(function(info) {
       userInfo = info;
-      saveUserInfo(info);
       infoGateActive = false;
-      infoRevealedThisSession = true;
       irow.style.display = '';
       inp.focus();
+      notifyBot('Nowa osoba rozpoczęła rozmowę: ' + info.name + (info.email ? ' (' + info.email + ')' : ''));
     });
   }, 350);
 }
@@ -298,12 +288,13 @@ async function send() {
 
   const data = await loadQA();
   const ctx = data.length ? data.map(x => "P: " + x.q + "\nO: " + x.a).join("\n\n") : "";
+  const who = userInfo && userInfo.name ? "[" + userInfo.name + (userInfo.email ? " - " + userInfo.email : "") + "] " : "";
 
   try {
     const res = await fetch("https://squash-chat.karol-kreczmanski.workers.dev/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q, context: ctx })
+      body: JSON.stringify({ question: who + q, context: ctx })
     });
     const json = await res.json();
     t.className = "cwm bot";
