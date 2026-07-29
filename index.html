@@ -762,6 +762,12 @@ const DAYS_BASE = [
   ...DAYS_BASE,
   ...DAYS_BASE.map(d => ({ ...d, key: d.key + "_w2", weekOffset: 7 })),
 ];
+
+// Dodatkowa opcja zapisu (pigułka + odznaka przy nazwisku), per dzień tygodnia
+const EXTRA_OPTIONS = {
+  thu: { pill: "Mogę też na 18:00",              badge: "18:00", short: "18" },
+  mon: { pill: "Poziom Pocz./Śr-zaaw. 21:00",    badge: "21:00", short: "21" },
+};
  const REZERWA_MARKER = "REZERWA"; // dokładnie tak wpisz w arkuszu
 const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff","#c8ff00","#00e5ff","#ff8c42","#b06aff"];
 
@@ -904,9 +910,9 @@ async function addPlayer(dayKey) {
   state.saving[dayKey] = true;
   state.errors[dayKey] = null;
   render();
-  const isThu = dayKey.replace(/_w2$/, "") === "thu";
+  const extraOpt = EXTRA_OPTIONS[dayKey.replace(/_w2$/, "")];
   const addParams = { action:"add", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), name };
-  if (isThu) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
+  if (extraOpt) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
   const res = await api(addParams);
   if (res.ok) {
     state.lists[dayKey] = normalizePlayers(res.players);
@@ -1033,7 +1039,7 @@ function mkCard(day) {
   const loading  = state.loading[day.key];
   const saving   = state.saving[day.key];
   const isClosed = state.locked[day.key];
-  const isThu    = day.key.replace(/_w2$/, "") === "thu";
+  const extraOpt = EXTRA_OPTIONS[day.key.replace(/_w2$/, "")];
   const cardLabel = state.labels[day.key] || day.label;
 
   const card = document.createElement("div");
@@ -1115,22 +1121,22 @@ function mkCard(day) {
         if (isRezerwa) span.style.opacity = "0.55";
         row.appendChild(span);
 
-        // Badge 18:00 dla czwartku
-        if (isThu && early18) {
+        // Odznaka dodatkowej opcji (np. 18:00 dla czwartku, 21:00 dla poniedziałku)
+        if (extraOpt && early18) {
           const badge = document.createElement("span");
           badge.className = "badge-18";
-          badge.textContent = "18:00";
+          badge.textContent = extraOpt.badge;
           row.appendChild(badge);
         }
 
         if (state.adminMode) {
           const wrap = document.createElement("div");
           wrap.style.display = "flex"; wrap.style.gap = "4px";
-          // Toggle 18:00 dla czwartku
-          if (isThu) {
-            const btn18 = mkIconBtn(early18 ? "18✓" : "18+", early18 ? "icon-btn icon-18on" : "icon-btn icon-18off", () => toggleEarly18(day.key, i));
+          // Toggle dodatkowej opcji
+          if (extraOpt) {
+            const btn18 = mkIconBtn(early18 ? extraOpt.short + "✓" : extraOpt.short + "+", early18 ? "icon-btn icon-18on" : "icon-btn icon-18off", () => toggleEarly18(day.key, i));
             btn18.style.width = "32px";
-            btn18.title = early18 ? "Usuń 18:00" : "Dodaj 18:00";
+            btn18.title = early18 ? `Usuń ${extraOpt.badge}` : `Dodaj ${extraOpt.badge}`;
             wrap.appendChild(btn18);
           }
           wrap.appendChild(mkIconBtn("✎", "icon-btn icon-edit", () => {
@@ -1164,13 +1170,13 @@ function mkCard(day) {
   inputRow.appendChild(inp); inputRow.appendChild(addB);
   card.appendChild(inputRow);
 
-  // Pill "Mogę też na 18:00" dla czwartku (tylko gdy lista otwarta)
-  if (isThu && !isClosed) {
+  // Pigułka dodatkowej opcji (tylko gdy lista otwarta)
+  if (extraOpt && !isClosed) {
     const pillWrap = document.createElement("div");
     pillWrap.className = "thu18-pill-wrap";
     const pill = document.createElement("div");
     pill.className = "thu18-pill" + (state.thu18[day.key] ? " active" : "");
-    pill.textContent = "Mogę też na 18:00";
+    pill.textContent = extraOpt.pill;
     pill.addEventListener("click", () => { state.thu18[day.key] = !state.thu18[day.key]; render(); });
     pillWrap.appendChild(pill);
     card.appendChild(pillWrap);
