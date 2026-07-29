@@ -695,6 +695,16 @@
 .thu18-pill-wrap {
   background: rgba(0,0,0,0.15);
   padding: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.thu18-pill-hint {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--muted);
 }
 
 </style>
@@ -1179,6 +1189,10 @@ function mkCard(day) {
     pill.textContent = extraOpt.pill;
     pill.addEventListener("click", () => { state.thu18[day.key] = !state.thu18[day.key]; render(); });
     pillWrap.appendChild(pill);
+    const hint = document.createElement("span");
+    hint.className = "thu18-pill-hint";
+    hint.textContent = "<- ZAZNACZ PRZY ZAPISIE";
+    pillWrap.appendChild(hint);
     card.appendChild(pillWrap);
   }
 
