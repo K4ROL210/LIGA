@@ -284,6 +284,100 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(200,255,0,0.5);
 }
+
+/* ── DRABINKA TURNIEJU (zakładka Turniej) ───────────────────── */
+.bracket-group { margin-bottom: 40px; }
+
+.bracket-round1 {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  margin-bottom: 26px;
+}
+
+.branch-wrap { margin-bottom: 22px; }
+.branch-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.bracket-branches { display: flex; flex-direction: column; }
+
+.bracket-branch {
+  display: flex; align-items: stretch;
+  overflow-x: auto;
+}
+
+.bracket-col {
+  display: flex; flex-direction: column; justify-content: space-around;
+  gap: 14px; flex-shrink: 0;
+}
+.bracket-col.single { justify-content: center; }
+
+.bracket-connector { width: 32px; position: relative; flex-shrink: 0; }
+.bracket-connector::before {
+  content: '';
+  position: absolute;
+  left: 0; width: 16px;
+  top: 25%; bottom: 25%;
+  border-top: 2px solid var(--border-hi);
+  border-right: 2px solid var(--border-hi);
+  border-bottom: 2px solid var(--border-hi);
+  border-radius: 0 8px 8px 0;
+}
+.bracket-connector::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 0; top: 50%;
+  border-top: 2px solid var(--border-hi);
+}
+
+.match-card {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-width: 230px;
+  padding: 8px 12px;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+.match-card-label {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.mcl-title {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 900;
+  letter-spacing: 1.2px; color: var(--muted);
+}
+.mcl-sub {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 600;
+  color: var(--muted); opacity: 0.7;
+}
+
+.match-card-player {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 4px 0; font-weight: 700; font-size: 14px;
+}
+.match-card-player.winner { font-weight: 900; }
+
+.mcp-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.mcp-name > span:last-child {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mcp-seed {
+  font-family: 'Bebas Neue', sans-serif; font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 0 4px; flex-shrink: 0;
+}
+
+.mcp-sets { display: flex; gap: 3px; flex-shrink: 0; }
+.mcp-set {
+  min-width: 16px; text-align: center;
+  font-size: 12px; font-weight: 800;
+  background: rgba(0,0,0,0.25); border-radius: 4px; padding: 1px 3px;
+  color: var(--text);
+}
 </style>
 </head>
 <body>
@@ -293,6 +387,9 @@
   // ⬇ Wklej URL swojego Web Appa (Kod_Wyniki.gs)
   const WYNIKI_URL = "https://script.google.com/macros/s/AKfycbw3N6sNxh4YZi0yapOlh_G288wln4kF-IGVyGHtpEFQDcJD9-gRgZV0ZZbb9pDV8tFhMw/exec";
 
+  // ⬇ Wklej URL Web Appa wdrożonego z TurniejWyniki.gs
+  const TURNIEJ_URL = "WKLEJ_TU_URL_WEB_APPA_TurniejWyniki";
+
   const DAY_CONFIG = {
     thu: { label: "Czwartek",     color: "#c8ff00" },
     tue: { label: "Wtorek",       color: "#00e5ff" },
@@ -301,6 +398,8 @@
   };
 
   const DAY_ORDER = ["thu", "tue", "sat", "mon"]; // kolejność zakładek
+
+  const TOURNAMENT_COLOR = "#ffd700"; // kolor zakładki Turniej
 </script>
 <!-- ══════════════════════════════════════════════════════════ -->
 
@@ -376,6 +475,7 @@
 //  STATE
 // ══════════════════════════════════════════════════════════════
 let state = {
+  mode:         "days", // "days" | "tournament"
   meta:         {},    // { thu: { seasons:[], latest:4 }, ... }
   activeDay:    null,
   activeSeason: null,
@@ -387,7 +487,7 @@ let state = {
 // ══════════════════════════════════════════════════════════════
 //  API (JSONP — omija CORS przy wywołaniu z pliku lokalnego)
 // ══════════════════════════════════════════════════════════════
-function api(params) {
+function jsonp(url, params) {
   return new Promise((resolve, reject) => {
     const cb = "jsonp_" + Math.random().toString(36).slice(2);
     let script;
@@ -403,11 +503,14 @@ function api(params) {
       resolve(data);
     };
     script = document.createElement("script");
-    script.src = WYNIKI_URL + "?" + new URLSearchParams({ ...params, callback: cb });
+    script.src = url + "?" + new URLSearchParams({ ...params, callback: cb });
     script.onerror = () => { clearTimeout(t); delete window[cb]; reject(new Error("błąd sieci")); };
     document.head.appendChild(script);
   });
 }
+
+function api(params) { return jsonp(WYNIKI_URL, params); }
+function apiTurniej(params) { return jsonp(TURNIEJ_URL, params); }
 
 // ══════════════════════════════════════════════════════════════
 //  INIT
@@ -460,10 +563,11 @@ function renderDayTabs() {
     if (!state.meta[key]) continue;
     const cfg = DAY_CONFIG[key];
     const btn = document.createElement("button");
-    btn.className = "tab-btn" + (key === state.activeDay ? " active" : "");
+    btn.className = "tab-btn" + (state.mode === "days" && key === state.activeDay ? " active" : "");
     btn.textContent = cfg.label;
-    if (key === state.activeDay) btn.style.background = cfg.color;
+    if (state.mode === "days" && key === state.activeDay) btn.style.background = cfg.color;
     btn.addEventListener("click", async () => {
+      state.mode         = "days";
       state.activeDay    = key;
       state.activeSeason = state.meta[key].latest;
       state.activeRound  = null;
@@ -476,6 +580,25 @@ function renderDayTabs() {
     });
     el.appendChild(btn);
   }
+
+  // Zakładka Turniej — osobny tryb widoku (drabinka), bez sezonu/kolejki/grupy
+  const tourBtn = document.createElement("button");
+  tourBtn.className = "tab-btn" + (state.mode === "tournament" ? " active" : "");
+  tourBtn.textContent = "🏆 Turniej";
+  if (state.mode === "tournament") tourBtn.style.background = TOURNAMENT_COLOR;
+  tourBtn.addEventListener("click", async () => {
+    state.mode = "tournament";
+    renderDayTabs();
+    hideSelectorRows();
+    await loadTournament();
+  });
+  el.appendChild(tourBtn);
+}
+
+function hideSelectorRows() {
+  document.getElementById("seasonRow").style.display = "none";
+  document.getElementById("roundRow").style.display  = "none";
+  document.getElementById("groupRow").style.display  = "none";
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -941,6 +1064,199 @@ nameTd.style.fontWeight = "900";
 }
 
 // ══════════════════════════════════════════════════════════════
+//  TURNIEJ — drabinka (zakładka "Turniej")
+// ══════════════════════════════════════════════════════════════
+async function loadTournament(silent = false) {
+  if (!silent) showContentLoading();
+  try {
+    const res = await apiTurniej({ action: "bracket" });
+    if (!res.ok) { if (!silent) showError(res.error); return; }
+    renderTournament(res);
+  } catch (e) {
+    if (!silent) showError("Błąd ładowania turnieju: " + e.message);
+  }
+}
+
+// Etykiety meczów rundy 2 i fazy finałowej — miejsca liczone względem
+// bazy grupy (0 dla "1-8", 8 dla "9-16").
+const TOUR_LABELS = {
+  final:            n => ({ title: "FINAŁ",              sub: `miejsca ${n+1}-${n+2}` }),
+  trzecie:          n => ({ title: `MECZ O ${n+3}. MIEJSCE`, sub: `miejsca ${n+3}-${n+4}` }),
+  piate:            n => ({ title: `MECZ O ${n+5}. MIEJSCE`, sub: `miejsca ${n+5}-${n+6}` }),
+  siodme:           n => ({ title: `MECZ O ${n+7}. MIEJSCE`, sub: `miejsca ${n+7}-${n+8}` }),
+  "polfinalA_1-4":  n => ({ title: "PÓŁFINAŁ A", sub: `walka o miejsca ${n+1}-${n+4}` }),
+  "polfinalB_1-4":  n => ({ title: "PÓŁFINAŁ B", sub: `walka o miejsca ${n+1}-${n+4}` }),
+  "polfinalA_5-8":  n => ({ title: "PÓŁFINAŁ A", sub: `walka o miejsca ${n+5}-${n+8}` }),
+  "polfinalB_5-8":  n => ({ title: "PÓŁFINAŁ B", sub: `walka o miejsca ${n+5}-${n+8}` }),
+};
+
+// Czy mecz ma już wpisany choć jeden set?
+function tourMatchPlayed(m) {
+  return m.player1.sets.some(v => v !== "") || m.player2.sets.some(v => v !== "");
+}
+
+// Liczba wygranych setów jednego gracza (na podstawie surowych wyników, nie formuł arkusza).
+function tourSetsWon(sets, opp) {
+  let w = 0;
+  for (let i = 0; i < sets.length; i++) {
+    if (sets[i] === "" || opp[i] === "") continue;
+    if (Number(sets[i]) > Number(opp[i])) w++;
+  }
+  return w;
+}
+
+// Zwraca 1, 2 lub null (mecz nierozstrzygnięty / nierozegrany).
+function tourWinnerSide(m) {
+  if (!tourMatchPlayed(m)) return null;
+  const w1 = tourSetsWon(m.player1.sets, m.player2.sets);
+  const w2 = tourSetsWon(m.player2.sets, m.player1.sets);
+  if (w1 === w2) return null;
+  return w1 > w2 ? 1 : 2;
+}
+
+// Buduje kartę pojedynczego meczu drabinki.
+function mkMatchCard(m, color, labelInfo) {
+  const card = document.createElement("div");
+  card.className = "match-card";
+
+  if (labelInfo) {
+    const lbl = document.createElement("div");
+    lbl.className = "match-card-label";
+    lbl.innerHTML = `<span class="mcl-title">${labelInfo.title}</span>` +
+      (labelInfo.sub ? `<span class="mcl-sub">${labelInfo.sub}</span>` : "");
+    card.appendChild(lbl);
+  }
+
+  const winner = tourWinnerSide(m);
+  const played = tourMatchPlayed(m);
+
+  [m.player1, m.player2].forEach((p, idx) => {
+    const isWinner = winner === idx + 1;
+    const row = document.createElement("div");
+    row.className = "match-card-player" + (isWinner ? " winner" : "");
+    if (isWinner) row.style.color = color;
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "mcp-name";
+    if (p.seed !== null && p.seed !== undefined) {
+      const seedSpan = document.createElement("span");
+      seedSpan.className = "mcp-seed";
+      seedSpan.textContent = p.seed;
+      nameSpan.appendChild(seedSpan);
+    }
+    const txt = document.createElement("span");
+    txt.textContent = p.name || "—";
+    if (!p.name) txt.style.opacity = "0.4";
+    nameSpan.appendChild(txt);
+    row.appendChild(nameSpan);
+
+    if (played) {
+      const setsSpan = document.createElement("span");
+      setsSpan.className = "mcp-sets";
+      p.sets.forEach(v => {
+        const s = document.createElement("span");
+        s.className = "mcp-set";
+        s.textContent = v === "" ? "" : v;
+        setsSpan.appendChild(s);
+      });
+      row.appendChild(setsSpan);
+    }
+
+    card.appendChild(row);
+  });
+
+  return card;
+}
+
+// Owija gałąź drzewa w nagłówek opisujący, o jakie miejsca toczy się walka.
+function mkBranchWrap(title, branchEl) {
+  const wrap = document.createElement("div");
+  wrap.className = "branch-wrap";
+  const h = document.createElement("div");
+  h.className = "branch-title";
+  h.textContent = title;
+  wrap.appendChild(h);
+  wrap.appendChild(branchEl);
+  return wrap;
+}
+
+// Buduje jedną gałąź drzewa: kolumna Rundy 2 → łącznik → kolumna fazy finałowej.
+function mkBracketBranch(round2Matches, finalMatches, baseRank, color) {
+  const branch = document.createElement("div");
+  branch.className = "bracket-branch";
+
+  const col1 = document.createElement("div");
+  col1.className = "bracket-col";
+  round2Matches.forEach(m => {
+    const info = TOUR_LABELS[m.tag] ? TOUR_LABELS[m.tag](baseRank) : null;
+    col1.appendChild(mkMatchCard(m, color, info));
+  });
+
+  const connector = document.createElement("div");
+  connector.className = "bracket-connector";
+
+  const col2 = document.createElement("div");
+  col2.className = "bracket-col single";
+  finalMatches.forEach(m => {
+    const info = TOUR_LABELS[m.tag] ? TOUR_LABELS[m.tag](baseRank) : null;
+    col2.appendChild(mkMatchCard(m, color, info));
+  });
+
+  branch.appendChild(col1);
+  branch.appendChild(connector);
+  branch.appendChild(col2);
+  return branch;
+}
+
+// Buduje całą sekcję drabinki dla jednej grupy ("1-8" lub "9-16").
+function renderBracketGroup(group, color) {
+  const baseRank = group.key === "9-16" ? 8 : 0;
+
+  const wrap = document.createElement("div");
+  wrap.className = "bracket-group";
+
+  wrap.appendChild(mkSectionTitle("Drabinka — " + group.label, color));
+
+  // Runda 1 — wspólny start obu gałęzi (walka o 1-4 / walka o 5-8)
+  const r1Wrap = document.createElement("div");
+  r1Wrap.className = "bracket-round1";
+  (group.round1 || []).forEach(m => {
+    r1Wrap.appendChild(mkMatchCard(m, color, { title: "RUNDA 1", sub: "" }));
+  });
+  wrap.appendChild(r1Wrap);
+
+  // Gałęzie: walka o miejsca (baseRank+1)-(baseRank+4) oraz (baseRank+5)-(baseRank+8)
+  const branches = document.createElement("div");
+  branches.className = "bracket-branches";
+
+  const r2Top    = (group.round2 || []).filter(m => m.tag.indexOf("_1-4") >= 0);
+  const r2Bottom = (group.round2 || []).filter(m => m.tag.indexOf("_5-8") >= 0);
+  const finTop    = (group.final || []).filter(m => m.tag === "final" || m.tag === "trzecie");
+  const finBottom = (group.final || []).filter(m => m.tag === "piate" || m.tag === "siodme");
+
+  branches.appendChild(mkBranchWrap(`Walka o miejsca ${baseRank+1}-${baseRank+4}`, mkBracketBranch(r2Top, finTop, baseRank, color)));
+  branches.appendChild(mkBranchWrap(`Walka o miejsca ${baseRank+5}-${baseRank+8}`, mkBracketBranch(r2Bottom, finBottom, baseRank, color)));
+  wrap.appendChild(branches);
+
+  return wrap;
+}
+
+// Renderuje całą zakładkę Turniej: najpierw grupa "1-8", pod nią "9-16".
+function renderTournament(data) {
+  const area = document.getElementById("contentArea");
+  area.innerHTML = "";
+
+  if (!data.groups || data.groups.length === 0) {
+    showError("Brak danych turnieju");
+    return;
+  }
+
+  data.groups.forEach(group => {
+    area.appendChild(renderBracketGroup(group, TOURNAMENT_COLOR));
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
 //  POMOCNICZE
 // ══════════════════════════════════════════════════════════════
 
@@ -1011,7 +1327,9 @@ init();
 
  // ── AUTO-ODŚWIEŻANIE WYNIKÓW co 8 sekund ────────────────────────
 setInterval(() => {
-  if (state.activeDay && state.activeSeason && state.activeRound && state.activeGroup) {
+  if (state.mode === "tournament") {
+    loadTournament(true);
+  } else if (state.activeDay && state.activeSeason && state.activeRound && state.activeGroup) {
     loadResults(true);
   }
 }, 8000);
