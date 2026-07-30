@@ -1081,6 +1081,10 @@ const TOUR_LABELS = {
   "polfinalB_5-8":  n => ({ title: "PÓŁFINAŁ B", sub: `walka o miejsca ${n+5}-${n+8}` }),
 };
 
+// Pierwsze z dwóch miejsc rozstrzyganych przez dany mecz fazy finałowej
+// (drugie miejsce to zawsze +1). Liczone względem bazy grupy (0 / 8).
+const PLACE_START = { final: 1, trzecie: 3, piate: 5, siodme: 7 };
+
 // Czy mecz ma już wpisany choć jeden set?
 function tourMatchPlayed(m) {
   return m.player1.sets.some(v => v !== "") || m.player2.sets.some(v => v !== "");
@@ -1160,6 +1164,51 @@ function mkMatchCard(m, color, labelInfo, matchKey) {
   return card;
 }
 
+// Buduje kartę wyniku (kolumna po prawej od meczu fazy finałowej):
+// zwycięzca → wyższe miejsce, przegrany → niższe miejsce.
+function mkPlaceCard(m, placeStart, color, matchKey) {
+  const card = document.createElement("div");
+  card.className = "match-card place-card";
+  if (matchKey) card.dataset.matchKey = matchKey;
+
+  const lbl = document.createElement("div");
+  lbl.className = "match-card-label";
+  lbl.innerHTML = `<span class="mcl-title">WYNIK</span>`;
+  card.appendChild(lbl);
+
+  const winner = tourWinnerSide(m);
+  let first = null, second = null;
+  if (winner === 1) { first = m.player1; second = m.player2; }
+  else if (winner === 2) { first = m.player2; second = m.player1; }
+
+  [
+    { place: placeStart,     player: first,  isWinner: true },
+    { place: placeStart + 1, player: second, isWinner: false },
+  ].forEach(r => {
+    const row = document.createElement("div");
+    row.className = "match-card-player";
+    if (r.isWinner && r.player) row.style.color = color;
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "mcp-name";
+
+    const badge = document.createElement("span");
+    badge.className = "mcp-seed";
+    badge.textContent = "M" + r.place;
+    nameSpan.appendChild(badge);
+
+    const txt = document.createElement("span");
+    txt.textContent = r.player ? (r.player.name || "—") : "—";
+    if (!r.player || !r.player.name) txt.style.opacity = "0.4";
+    nameSpan.appendChild(txt);
+
+    row.appendChild(nameSpan);
+    card.appendChild(row);
+  });
+
+  return card;
+}
+
 // Trasy meczów — który mecz dostaje zwycięzcę, a który przegranego.
 // Indeksy 0-3 dla Rundy 1 odpowiadają kolejności meczów zwróconej przez backend (M1..M4).
 const R1_ROUTES = [
@@ -1231,9 +1280,20 @@ function renderBracketGroup(group, color) {
     col3.appendChild(mkMatchCard(m, color, info, tag));
   });
 
+  // Kolumna 4 — wynik: miejsce zwycięzcy i przegranego danego meczu
+  const col4 = document.createElement("div");
+  col4.className = "bracket-column";
+  ["final", "trzecie", "piate", "siodme"].forEach((tag, idx) => {
+    if (idx === 2) col4.appendChild(mkBracketGap());
+    const m = finByTag[tag];
+    if (!m) return;
+    col4.appendChild(mkPlaceCard(m, baseRank + PLACE_START[tag], color, "place-" + tag));
+  });
+
   tree.appendChild(col1);
   tree.appendChild(col2);
   tree.appendChild(col3);
+  tree.appendChild(col4);
   scroll.appendChild(tree);
   wrap.appendChild(scroll);
 
@@ -1304,8 +1364,24 @@ function drawBracketConnectors(tree, group) {
     if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null));
   }
 
+  // Mecz fazy finałowej → karta wyniku: zwycięzca do wiersza 0 (wyższe miejsce),
+  // przegrany do wiersza 1 (niższe miejsce) — połączenie 1:1, więc trafiamy w konkretny wiersz.
+  function connectToPlace(sourceMatch, sourceKey, placeKey) {
+    const sourceCard = findCard(sourceKey);
+    const placeCard = findCard(placeKey);
+    if (!sourceCard || !placeCard) return;
+
+    const winner  = tourWinnerSide(sourceMatch);
+    const winRow  = winner === 1 ? 0 : winner === 2 ? 1 : null;
+    const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
+
+    drawElbow(anchor(sourceCard, "right", winRow), anchor(placeCard, "left", 0));
+    drawElbow(anchor(sourceCard, "right", loseRow), anchor(placeCard, "left", 1));
+  }
+
   (group.round1 || []).forEach((m, i) => connect(m, "r1-" + i, R1_ROUTES[i]));
   (group.round2 || []).forEach(m => connect(m, m.tag, R2_ROUTES[m.tag]));
+  (group.final  || []).forEach(m => connectToPlace(m, m.tag, "place-" + m.tag));
 
   tree.appendChild(svg);
 }
