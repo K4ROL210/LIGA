@@ -320,8 +320,7 @@
   fill: none;
   stroke-width: 2;
 }
-.bracket-line-win  { stroke: var(--c0); }
-.bracket-line-lose { stroke: var(--red); }
+.bracket-line-win { stroke: var(--c0); }
 
 .match-card {
   background: rgba(255,255,255,0.035);
@@ -1326,56 +1325,44 @@ function drawBracketConnectors(tree, group) {
     return [x, y];
   }
 
-  // Linia przegranych ma pionowy odcinek lekko przesunięty w prawo względem
-  // linii wygranych, żeby się wizualnie nie nakładały.
-  const LOSE_X_OFFSET = 10;
-
-  function drawElbow(p1, p2, cls, xOffset) {
-    const midX = (p1[0] + p2[0]) / 2 + (xOffset || 0);
+  function drawElbow(p1, p2, cls) {
+    const midX = (p1[0] + p2[0]) / 2;
     const path = document.createElementNS(svgNS, "path");
     path.setAttribute("d", `M ${p1[0]} ${p1[1]} H ${midX} V ${p2[1]} H ${p2[0]}`);
     path.setAttribute("class", "bracket-line " + cls);
     svg.appendChild(path);
   }
 
+  // Rysujemy tylko ścieżkę zwycięzcy — linie przegranych są celowo pominięte.
   function connect(sourceMatch, sourceKey, routes) {
     if (!routes) return;
     const sourceCard = findCard(sourceKey);
     if (!sourceCard) return;
 
-    const winner  = tourWinnerSide(sourceMatch);
-    const winRow  = winner === 1 ? 0 : winner === 2 ? 1 : null;
-    const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
+    const winner = tourWinnerSide(sourceMatch);
+    const winRow = winner === 1 ? 0 : winner === 2 ? 1 : null;
 
     const winCard = findCard(routes.win);
-    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win", 0);
-
-    const loseCard = findCard(routes.lose);
-    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null), "bracket-line-lose", LOSE_X_OFFSET);
+    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win");
   }
 
-  // Mecz fazy finałowej → dwa osobne okienka z miejscami: zwycięzca do wyższego,
-  // przegrany do niższego (np. finał → Miejsce 1 i Miejsce 2).
-  function connectToPlace(sourceMatch, sourceKey, winPlaceKey, losePlaceKey) {
+  // Mecz fazy finałowej → okienko z miejscem zwycięzcy (przegrany bez linii).
+  function connectToPlace(sourceMatch, sourceKey, winPlaceKey) {
     const sourceCard = findCard(sourceKey);
     if (!sourceCard) return;
 
-    const winner  = tourWinnerSide(sourceMatch);
-    const winRow  = winner === 1 ? 0 : winner === 2 ? 1 : null;
-    const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
+    const winner = tourWinnerSide(sourceMatch);
+    const winRow = winner === 1 ? 0 : winner === 2 ? 1 : null;
 
     const winCard = findCard(winPlaceKey);
-    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win", 0);
-
-    const loseCard = findCard(losePlaceKey);
-    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null), "bracket-line-lose", LOSE_X_OFFSET);
+    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win");
   }
 
   (group.round1 || []).forEach((m, i) => connect(m, "r1-" + i, R1_ROUTES[i]));
   (group.round2 || []).forEach(m => connect(m, m.tag, R2_ROUTES[m.tag]));
   (group.final  || []).forEach(m => {
     const routes = FINAL_PLACE_ROUTES[m.tag];
-    if (routes) connectToPlace(m, m.tag, "place-" + routes.win, "place-" + routes.lose);
+    if (routes) connectToPlace(m, m.tag, "place-" + routes.win);
   });
 
   tree.appendChild(svg);
