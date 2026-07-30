@@ -318,9 +318,10 @@
 }
 .bracket-line {
   fill: none;
-  stroke: var(--border-hi);
   stroke-width: 2;
 }
+.bracket-line-win  { stroke: var(--c0); }
+.bracket-line-lose { stroke: var(--red); }
 
 .match-card {
   background: rgba(255,255,255,0.035);
@@ -1081,10 +1082,6 @@ const TOUR_LABELS = {
   "polfinalB_5-8":  n => ({ title: "PÓŁFINAŁ B", sub: `walka o miejsca ${n+5}-${n+8}` }),
 };
 
-// Pierwsze z dwóch miejsc rozstrzyganych przez dany mecz fazy finałowej
-// (drugie miejsce to zawsze +1). Liczone względem bazy grupy (0 / 8).
-const PLACE_START = { final: 1, trzecie: 3, piate: 5, siodme: 7 };
-
 // Czy mecz ma już wpisany choć jeden set?
 function tourMatchPlayed(m) {
   return m.player1.sets.some(v => v !== "") || m.player2.sets.some(v => v !== "");
@@ -1164,48 +1161,31 @@ function mkMatchCard(m, color, labelInfo, matchKey) {
   return card;
 }
 
-// Buduje kartę wyniku (kolumna po prawej od meczu fazy finałowej):
-// zwycięzca → wyższe miejsce, przegrany → niższe miejsce.
-function mkPlaceCard(m, placeStart, color, matchKey) {
+// Buduje osobne okienko dla jednego miejsca (kolumna po prawej od fazy finałowej),
+// z wartością odczytaną wprost z arkusza (kol. X — patrz backend, pole "standings").
+function mkPlaceCard(placeNum, name, color, matchKey) {
   const card = document.createElement("div");
   card.className = "match-card place-card";
   if (matchKey) card.dataset.matchKey = matchKey;
 
   const lbl = document.createElement("div");
   lbl.className = "match-card-label";
-  lbl.innerHTML = `<span class="mcl-title">WYNIK</span>`;
+  lbl.innerHTML = `<span class="mcl-title">MIEJSCE ${placeNum}</span>`;
   card.appendChild(lbl);
 
-  const winner = tourWinnerSide(m);
-  let first = null, second = null;
-  if (winner === 1) { first = m.player1; second = m.player2; }
-  else if (winner === 2) { first = m.player2; second = m.player1; }
+  const row = document.createElement("div");
+  row.className = "match-card-player";
+  row.style.color = color;
 
-  [
-    { place: placeStart,     player: first,  isWinner: true },
-    { place: placeStart + 1, player: second, isWinner: false },
-  ].forEach(r => {
-    const row = document.createElement("div");
-    row.className = "match-card-player";
-    if (r.isWinner && r.player) row.style.color = color;
+  const nameSpan = document.createElement("span");
+  nameSpan.className = "mcp-name";
+  const txt = document.createElement("span");
+  txt.textContent = name || "—";
+  if (!name) txt.style.opacity = "0.4";
+  nameSpan.appendChild(txt);
+  row.appendChild(nameSpan);
 
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "mcp-name";
-
-    const badge = document.createElement("span");
-    badge.className = "mcp-seed";
-    badge.textContent = "M" + r.place;
-    nameSpan.appendChild(badge);
-
-    const txt = document.createElement("span");
-    txt.textContent = r.player ? (r.player.name || "—") : "—";
-    if (!r.player || !r.player.name) txt.style.opacity = "0.4";
-    nameSpan.appendChild(txt);
-
-    row.appendChild(nameSpan);
-    card.appendChild(row);
-  });
-
+  card.appendChild(row);
   return card;
 }
 
@@ -1222,6 +1202,13 @@ const R2_ROUTES = {
   "polfinalB_1-4": { win: "final",  lose: "trzecie" },
   "polfinalA_5-8": { win: "piate",  lose: "siodme"  },
   "polfinalB_5-8": { win: "piate",  lose: "siodme"  },
+};
+// Mecz fazy finałowej → numery okienek (kolumna 4). Zwycięzca = wyższe miejsce.
+const FINAL_PLACE_ROUTES = {
+  final:   { win: 1, lose: 2 },
+  trzecie: { win: 3, lose: 4 },
+  piate:   { win: 5, lose: 6 },
+  siodme:  { win: 7, lose: 8 },
 };
 
 function mkBracketGap() {
@@ -1280,15 +1267,14 @@ function renderBracketGroup(group, color) {
     col3.appendChild(mkMatchCard(m, color, info, tag));
   });
 
-  // Kolumna 4 — wynik: miejsce zwycięzcy i przegranego danego meczu
+  // Kolumna 4 — osobne okienko na każde miejsce, odczytane z kol. X arkusza
   const col4 = document.createElement("div");
   col4.className = "bracket-column";
-  ["final", "trzecie", "piate", "siodme"].forEach((tag, idx) => {
-    if (idx === 2) col4.appendChild(mkBracketGap());
-    const m = finByTag[tag];
-    if (!m) return;
-    col4.appendChild(mkPlaceCard(m, baseRank + PLACE_START[tag], color, "place-" + tag));
-  });
+  const standings = group.standings || [];
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) col4.appendChild(mkBracketGap());
+    col4.appendChild(mkPlaceCard(baseRank + i + 1, standings[i], color, "place-" + (i + 1)));
+  }
 
   tree.appendChild(col1);
   tree.appendChild(col2);
@@ -1340,11 +1326,15 @@ function drawBracketConnectors(tree, group) {
     return [x, y];
   }
 
-  function drawElbow(p1, p2) {
-    const midX = (p1[0] + p2[0]) / 2;
+  // Linia przegranych ma pionowy odcinek lekko przesunięty w prawo względem
+  // linii wygranych, żeby się wizualnie nie nakładały.
+  const LOSE_X_OFFSET = 10;
+
+  function drawElbow(p1, p2, cls, xOffset) {
+    const midX = (p1[0] + p2[0]) / 2 + (xOffset || 0);
     const path = document.createElementNS(svgNS, "path");
     path.setAttribute("d", `M ${p1[0]} ${p1[1]} H ${midX} V ${p2[1]} H ${p2[0]}`);
-    path.setAttribute("class", "bracket-line");
+    path.setAttribute("class", "bracket-line " + cls);
     svg.appendChild(path);
   }
 
@@ -1358,30 +1348,35 @@ function drawBracketConnectors(tree, group) {
     const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
 
     const winCard = findCard(routes.win);
-    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null));
+    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win", 0);
 
     const loseCard = findCard(routes.lose);
-    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null));
+    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null), "bracket-line-lose", LOSE_X_OFFSET);
   }
 
-  // Mecz fazy finałowej → karta wyniku: zwycięzca do wiersza 0 (wyższe miejsce),
-  // przegrany do wiersza 1 (niższe miejsce) — połączenie 1:1, więc trafiamy w konkretny wiersz.
-  function connectToPlace(sourceMatch, sourceKey, placeKey) {
+  // Mecz fazy finałowej → dwa osobne okienka z miejscami: zwycięzca do wyższego,
+  // przegrany do niższego (np. finał → Miejsce 1 i Miejsce 2).
+  function connectToPlace(sourceMatch, sourceKey, winPlaceKey, losePlaceKey) {
     const sourceCard = findCard(sourceKey);
-    const placeCard = findCard(placeKey);
-    if (!sourceCard || !placeCard) return;
+    if (!sourceCard) return;
 
     const winner  = tourWinnerSide(sourceMatch);
     const winRow  = winner === 1 ? 0 : winner === 2 ? 1 : null;
     const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
 
-    drawElbow(anchor(sourceCard, "right", winRow), anchor(placeCard, "left", 0));
-    drawElbow(anchor(sourceCard, "right", loseRow), anchor(placeCard, "left", 1));
+    const winCard = findCard(winPlaceKey);
+    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null), "bracket-line-win", 0);
+
+    const loseCard = findCard(losePlaceKey);
+    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null), "bracket-line-lose", LOSE_X_OFFSET);
   }
 
   (group.round1 || []).forEach((m, i) => connect(m, "r1-" + i, R1_ROUTES[i]));
   (group.round2 || []).forEach(m => connect(m, m.tag, R2_ROUTES[m.tag]));
-  (group.final  || []).forEach(m => connectToPlace(m, m.tag, "place-" + m.tag));
+  (group.final  || []).forEach(m => {
+    const routes = FINAL_PLACE_ROUTES[m.tag];
+    if (routes) connectToPlace(m, m.tag, "place-" + routes.win, "place-" + routes.lose);
+  });
 
   tree.appendChild(svg);
 }
