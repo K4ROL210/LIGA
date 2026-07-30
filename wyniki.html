@@ -288,57 +288,48 @@
 /* ── DRABINKA TURNIEJU (zakładka Turniej) ───────────────────── */
 .bracket-group { margin-bottom: 40px; }
 
-.bracket-round1 {
-  display: flex; flex-wrap: wrap; gap: 14px;
-  margin-bottom: 26px;
+/* Poziomy scroll na małych ekranach — drzewko się nie ściska */
+.bracket-scroll { overflow-x: auto; padding-bottom: 8px; }
+
+/* Runda 1 w pierwszej kolumnie, wygrani → prawo (ta sama wysokość),
+   przegrani → prawo, niżej — dokładnie jak w arkuszu xlsx.
+   Linie łączące rysowane są dynamicznie (SVG) w drawBracketConnectors(). */
+.bracket-tree {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 72px;
+  padding: 6px 4px;
+  width: max-content;
 }
 
-.branch-wrap { margin-bottom: 22px; }
-.branch-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px; letter-spacing: 1.5px;
-  color: var(--muted); text-transform: uppercase;
-  margin: 0 0 10px;
+.bracket-column {
+  display: flex; flex-direction: column; gap: 24px;
+  flex-shrink: 0;
 }
 
-.bracket-branches { display: flex; flex-direction: column; }
+/* Odstęp oddzielający sekcję "walka o górne miejsca" od "walka o dolne miejsca" */
+.bracket-gap { height: 40px; flex-shrink: 0; }
 
-.bracket-branch {
-  display: flex; align-items: stretch;
-  overflow-x: auto;
+.bracket-lines {
+  position: absolute; top: 0; left: 0;
+  pointer-events: none;
+  overflow: visible;
 }
-
-.bracket-col {
-  display: flex; flex-direction: column; justify-content: space-around;
-  gap: 14px; flex-shrink: 0;
-}
-.bracket-col.single { justify-content: center; }
-
-.bracket-connector { width: 32px; position: relative; flex-shrink: 0; }
-.bracket-connector::before {
-  content: '';
-  position: absolute;
-  left: 0; width: 16px;
-  top: 25%; bottom: 25%;
-  border-top: 2px solid var(--border-hi);
-  border-right: 2px solid var(--border-hi);
-  border-bottom: 2px solid var(--border-hi);
-  border-radius: 0 8px 8px 0;
-}
-.bracket-connector::after {
-  content: '';
-  position: absolute;
-  left: 16px; right: 0; top: 50%;
-  border-top: 2px solid var(--border-hi);
+.bracket-line {
+  fill: none;
+  stroke: var(--border-hi);
+  stroke-width: 2;
 }
 
 .match-card {
   background: rgba(255,255,255,0.035);
   border: 1px solid var(--border);
   border-radius: 12px;
-  min-width: 230px;
+  width: 230px;
   padding: 8px 12px;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  position: relative; z-index: 1;
 }
 
 .match-card-label {
@@ -1115,9 +1106,10 @@ function tourWinnerSide(m) {
 }
 
 // Buduje kartę pojedynczego meczu drabinki.
-function mkMatchCard(m, color, labelInfo) {
+function mkMatchCard(m, color, labelInfo, matchKey) {
   const card = document.createElement("div");
   card.className = "match-card";
+  if (matchKey) card.dataset.matchKey = matchKey;
 
   if (labelInfo) {
     const lbl = document.createElement("div");
@@ -1168,81 +1160,162 @@ function mkMatchCard(m, color, labelInfo) {
   return card;
 }
 
-// Owija gałąź drzewa w nagłówek opisujący, o jakie miejsca toczy się walka.
-function mkBranchWrap(title, branchEl) {
-  const wrap = document.createElement("div");
-  wrap.className = "branch-wrap";
-  const h = document.createElement("div");
-  h.className = "branch-title";
-  h.textContent = title;
-  wrap.appendChild(h);
-  wrap.appendChild(branchEl);
-  return wrap;
+// Trasy meczów — który mecz dostaje zwycięzcę, a który przegranego.
+// Indeksy 0-3 dla Rundy 1 odpowiadają kolejności meczów zwróconej przez backend (M1..M4).
+const R1_ROUTES = [
+  { win: "polfinalA_1-4", lose: "polfinalA_5-8" }, // M1
+  { win: "polfinalA_1-4", lose: "polfinalA_5-8" }, // M2
+  { win: "polfinalB_1-4", lose: "polfinalB_5-8" }, // M3
+  { win: "polfinalB_1-4", lose: "polfinalB_5-8" }, // M4
+];
+const R2_ROUTES = {
+  "polfinalA_1-4": { win: "final",  lose: "trzecie" },
+  "polfinalB_1-4": { win: "final",  lose: "trzecie" },
+  "polfinalA_5-8": { win: "piate",  lose: "siodme"  },
+  "polfinalB_5-8": { win: "piate",  lose: "siodme"  },
+};
+
+function mkBracketGap() {
+  const gap = document.createElement("div");
+  gap.className = "bracket-gap";
+  return gap;
 }
 
-// Buduje jedną gałąź drzewa: kolumna Rundy 2 → łącznik → kolumna fazy finałowej.
-function mkBracketBranch(round2Matches, finalMatches, baseRank, color) {
-  const branch = document.createElement("div");
-  branch.className = "bracket-branch";
-
-  const col1 = document.createElement("div");
-  col1.className = "bracket-col";
-  round2Matches.forEach(m => {
-    const info = TOUR_LABELS[m.tag] ? TOUR_LABELS[m.tag](baseRank) : null;
-    col1.appendChild(mkMatchCard(m, color, info));
-  });
-
-  const connector = document.createElement("div");
-  connector.className = "bracket-connector";
-
-  const col2 = document.createElement("div");
-  col2.className = "bracket-col single";
-  finalMatches.forEach(m => {
-    const info = TOUR_LABELS[m.tag] ? TOUR_LABELS[m.tag](baseRank) : null;
-    col2.appendChild(mkMatchCard(m, color, info));
-  });
-
-  branch.appendChild(col1);
-  branch.appendChild(connector);
-  branch.appendChild(col2);
-  return branch;
-}
-
-// Buduje całą sekcję drabinki dla jednej grupy ("1-8" lub "9-16").
+// Buduje całą sekcję drabinki dla jednej grupy ("1-8" lub "9-16"):
+// Runda 1 w kolumnie 1, wygrani i przegrani przechodzą w prawo (Runda 2),
+// dokładnie tak jak w arkuszu — górna połowa kolumny to walka o miejsca
+// (baseRank+1)-(baseRank+4), dolna to walka o (baseRank+5)-(baseRank+8).
 function renderBracketGroup(group, color) {
   const baseRank = group.key === "9-16" ? 8 : 0;
 
   const wrap = document.createElement("div");
   wrap.className = "bracket-group";
-
   wrap.appendChild(mkSectionTitle("Drabinka — " + group.label, color));
 
-  // Runda 1 — wspólny start obu gałęzi (walka o 1-4 / walka o 5-8)
-  const r1Wrap = document.createElement("div");
-  r1Wrap.className = "bracket-round1";
-  (group.round1 || []).forEach(m => {
-    r1Wrap.appendChild(mkMatchCard(m, color, { title: "RUNDA 1", sub: "" }));
+  const scroll = document.createElement("div");
+  scroll.className = "bracket-scroll";
+
+  const tree = document.createElement("div");
+  tree.className = "bracket-tree";
+
+  // Kolumna 1 — Runda 1
+  const col1 = document.createElement("div");
+  col1.className = "bracket-column";
+  (group.round1 || []).forEach((m, i) => {
+    col1.appendChild(mkMatchCard(m, color, { title: "RUNDA 1", sub: "" }, "r1-" + i));
   });
-  wrap.appendChild(r1Wrap);
 
-  // Gałęzie: walka o miejsca (baseRank+1)-(baseRank+4) oraz (baseRank+5)-(baseRank+8)
-  const branches = document.createElement("div");
-  branches.className = "bracket-branches";
+  // Kolumna 2 — Runda 2 (półfinały): najpierw walka o górne miejsca, niżej o dolne
+  const col2 = document.createElement("div");
+  col2.className = "bracket-column";
+  const r2ByTag = {};
+  (group.round2 || []).forEach(m => { r2ByTag[m.tag] = m; });
+  ["polfinalA_1-4", "polfinalB_1-4", "polfinalA_5-8", "polfinalB_5-8"].forEach((tag, idx) => {
+    if (idx === 2) col2.appendChild(mkBracketGap());
+    const m = r2ByTag[tag];
+    if (!m) return;
+    const info = TOUR_LABELS[tag] ? TOUR_LABELS[tag](baseRank) : null;
+    col2.appendChild(mkMatchCard(m, color, info, tag));
+  });
 
-  const r2Top    = (group.round2 || []).filter(m => m.tag.indexOf("_1-4") >= 0);
-  const r2Bottom = (group.round2 || []).filter(m => m.tag.indexOf("_5-8") >= 0);
-  const finTop    = (group.final || []).filter(m => m.tag === "final" || m.tag === "trzecie");
-  const finBottom = (group.final || []).filter(m => m.tag === "piate" || m.tag === "siodme");
+  // Kolumna 3 — faza finałowa
+  const col3 = document.createElement("div");
+  col3.className = "bracket-column";
+  const finByTag = {};
+  (group.final || []).forEach(m => { finByTag[m.tag] = m; });
+  ["final", "trzecie", "piate", "siodme"].forEach((tag, idx) => {
+    if (idx === 2) col3.appendChild(mkBracketGap());
+    const m = finByTag[tag];
+    if (!m) return;
+    const info = TOUR_LABELS[tag] ? TOUR_LABELS[tag](baseRank) : null;
+    col3.appendChild(mkMatchCard(m, color, info, tag));
+  });
 
-  branches.appendChild(mkBranchWrap(`Walka o miejsca ${baseRank+1}-${baseRank+4}`, mkBracketBranch(r2Top, finTop, baseRank, color)));
-  branches.appendChild(mkBranchWrap(`Walka o miejsca ${baseRank+5}-${baseRank+8}`, mkBracketBranch(r2Bottom, finBottom, baseRank, color)));
-  wrap.appendChild(branches);
+  tree.appendChild(col1);
+  tree.appendChild(col2);
+  tree.appendChild(col3);
+  scroll.appendChild(tree);
+  wrap.appendChild(scroll);
+
+  // Łączniki rysowane po wstawieniu do DOM — potrzebują realnych wymiarów kart.
+  requestAnimationFrame(() => drawBracketConnectors(tree, group));
 
   return wrap;
 }
 
+// Rysuje SVG z liniami łączącymi mecze: zwycięzca → w prawo (ten sam poziom),
+// przegrany → w prawo, niżej. Współrzędne liczone są z realnego layoutu (getBoundingClientRect),
+// więc linie trafiają poprawnie niezależnie od wysokości kart (różna długość nazwisk itp).
+function drawBracketConnectors(tree, group) {
+  const old = tree.querySelector(".bracket-lines");
+  if (old) old.remove();
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "bracket-lines");
+
+  const rect0 = tree.getBoundingClientRect();
+  const w = tree.scrollWidth;
+  const h = tree.scrollHeight;
+  svg.setAttribute("width", w);
+  svg.setAttribute("height", h);
+
+  function findCard(key) {
+    return tree.querySelector('[data-match-key="' + key + '"]');
+  }
+
+  // rowIndex: 0 (górny gracz), 1 (dolny gracz) lub null (środek karty)
+  function anchor(cardEl, side, rowIndex) {
+    const r = cardEl.getBoundingClientRect();
+    const x = side === "right" ? (r.right - rect0.left) : (r.left - rect0.left);
+    let y;
+    if (rowIndex === null || rowIndex === undefined) {
+      y = r.top - rect0.top + r.height / 2;
+    } else {
+      const rows = cardEl.querySelectorAll(".match-card-player");
+      const rowEl = rows[rowIndex] || cardEl;
+      const rr = rowEl.getBoundingClientRect();
+      y = rr.top - rect0.top + rr.height / 2;
+    }
+    return [x, y];
+  }
+
+  function drawElbow(p1, p2) {
+    const midX = (p1[0] + p2[0]) / 2;
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute("d", `M ${p1[0]} ${p1[1]} H ${midX} V ${p2[1]} H ${p2[0]}`);
+    path.setAttribute("class", "bracket-line");
+    svg.appendChild(path);
+  }
+
+  function connect(sourceMatch, sourceKey, routes) {
+    if (!routes) return;
+    const sourceCard = findCard(sourceKey);
+    if (!sourceCard) return;
+
+    const winner  = tourWinnerSide(sourceMatch);
+    const winRow  = winner === 1 ? 0 : winner === 2 ? 1 : null;
+    const loseRow = winner === 1 ? 1 : winner === 2 ? 0 : null;
+
+    const winCard = findCard(routes.win);
+    if (winCard) drawElbow(anchor(sourceCard, "right", winRow), anchor(winCard, "left", null));
+
+    const loseCard = findCard(routes.lose);
+    if (loseCard) drawElbow(anchor(sourceCard, "right", loseRow), anchor(loseCard, "left", null));
+  }
+
+  (group.round1 || []).forEach((m, i) => connect(m, "r1-" + i, R1_ROUTES[i]));
+  (group.round2 || []).forEach(m => connect(m, m.tag, R2_ROUTES[m.tag]));
+
+  tree.appendChild(svg);
+}
+
 // Renderuje całą zakładkę Turniej: najpierw grupa "1-8", pod nią "9-16".
+let lastTournamentData = null;
+
 function renderTournament(data) {
+  lastTournamentData = data;
+
   const area = document.getElementById("contentArea");
   area.innerHTML = "";
 
@@ -1255,6 +1328,14 @@ function renderTournament(data) {
     area.appendChild(renderBracketGroup(group, TOURNAMENT_COLOR));
   });
 }
+
+// Po zmianie rozmiaru okna przerysuj drzewko, żeby linie łączące zostały poprawnie przeliczone.
+let tourResizeTimer = null;
+window.addEventListener("resize", () => {
+  if (state.mode !== "tournament" || !lastTournamentData) return;
+  clearTimeout(tourResizeTimer);
+  tourResizeTimer = setTimeout(() => renderTournament(lastTournamentData), 250);
+});
 
 // ══════════════════════════════════════════════════════════════
 //  POMOCNICZE
