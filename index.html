@@ -3,37 +3,37 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Liga Squasha — Zapisy</title>
+<title>Niedzielna Liga Squasha — Zapisy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:        #080c10;
-    --surface:   rgba(255,255,255,0.04);
-    --glass:     rgba(255,255,255,0.06);
-    --border:    rgba(255,255,255,0.10);
-    --border-hi: rgba(255,255,255,0.18);
-    --muted:     #5a6680;
-    --text:      #dde4f0;
-    --accent:    #c8ff00;
-    --accent2:   #00e5ff;
-    --green:     #c8ff00;
-    --red:       #ff4d4d;
-    --c0: #c8ff00;
-    --c1: #00e5ff;
-    --c2: #ff8c42;
-    --c3: #b06aff;
+    --bg:        #ffffff;
+    --surface:   rgba(0,0,0,0.03);
+    --glass:     rgba(0,0,0,0.04);
+    --border:    rgba(0,0,0,0.12);
+    --border-hi: rgba(0,0,0,0.24);
+    --muted:     #7b7b7b;
+    --text:      #242424;
+    --accent:    #fab400;
+    --accent-dk: #c96f00;
+    --accent2:   #1a1a1a;
+    --green:     #1a1a1a;
+    --red:       #d64545;
+    --c0: #fab400;
+    --c1: #1a1a1a;
+    --c2: #fab400;
+    --c3: #1a1a1a;
   }
 
-  /* ── BODY & BG ── */
   html { scroll-behavior: smooth; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Rajdhani', 'Arial', sans-serif;
+    font-family: 'Poppins', 'Arial', sans-serif;
     min-height: 100vh;
     padding: 0 0 80px;
     position: relative;
@@ -44,57 +44,44 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse 90% 50% at 50% -5%, rgba(200,255,0,0.10) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 95% 95%,  rgba(0,229,255,0.07) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 5%  70%,  rgba(176,106,255,0.05) 0%, transparent 50%);
+      radial-gradient(ellipse 90% 45% at 50% -5%, rgba(250,180,0,0.07) 0%, transparent 55%);
     pointer-events: none;
     z-index: 0;
   }
 
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(200,255,0,0.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(200,255,0,0.022) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
+  .rezerwa-separator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    color: var(--accent);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border-top: 1px dashed rgba(250,180,0,0.35);
+    border-bottom: 1px dashed rgba(250,180,0,0.35);
+    background: rgba(250,180,0,0.06);
+    user-select: none;
   }
- .rezerwa-separator {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  color: var(--c2);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 13px;
-  letter-spacing: 2px;
-  border-top: 1px dashed rgba(255,140,66,0.3);
-  border-bottom: 1px dashed rgba(255,140,66,0.3);
-  background: rgba(255,140,66,0.05);
-  user-select: none;
-}
-.rezerwa-separator::before,
-.rezerwa-separator::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255,140,66,0.25);
-}
+  .rezerwa-separator::before,
+  .rezerwa-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(250,180,0,0.3);
+  }
 
   /* ── NAV ── */
   .nav {
-    background: rgba(8,12,16,0.85);
-    border-bottom: 1px solid var(--border);
+    background: rgba(255,241,214,0.94);
+    border-bottom: 1px solid rgba(250,180,0,0.3);
     position: sticky;
     top: 0;
     z-index: 100;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
-
   .nav-inner {
     max-width: 1200px;
     margin: 0 auto;
@@ -106,27 +93,25 @@
     padding: 0 16px;
   }
   .nav-inner::-webkit-scrollbar { display: none; }
-
   .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--c0);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: var(--accent2);
     padding: 14px 16px 14px 0;
     margin-right: 8px;
     border-right: 1px solid var(--border);
     white-space: nowrap;
     flex-shrink: 0;
-    text-shadow: 0 0 20px rgba(200,255,0,0.4);
   }
-
   .nav-link {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 14px 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.5px;
     color: var(--muted);
@@ -137,18 +122,15 @@
     flex-shrink: 0;
     text-transform: uppercase;
   }
-  .nav-link:hover { color: var(--text); }
+  .nav-link:hover { color: var(--accent2); }
   .nav-link.active {
-    color: var(--c0);
-    border-bottom-color: var(--c0);
-    text-shadow: 0 0 12px rgba(200,255,0,0.3);
+    color: var(--accent-dk);
+    border-bottom-color: var(--accent-dk);
   }
 
   /* ── PAGE WRAP ── */
   .page-wrap {
     padding: 36px 16px 0;
-   
-  
     position: relative;
     z-index: 1;
   }
@@ -158,36 +140,37 @@
 
   .pill {
     display: inline-block;
-    background: var(--c0);
-    color: #0a0f08;
-    font-family: 'Rajdhani', sans-serif;
+    background: var(--accent);
+    color: #1a1200;
+    font-family: 'Montserrat', sans-serif;
     font-size: 11px;
-    font-weight: 900;
+    font-weight: 800;
     letter-spacing: 3px;
-    padding: 4px 14px;
+    padding: 5px 14px;
     border-radius: 100px;
     margin-bottom: 14px;
     text-transform: uppercase;
   }
 
   h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 9vw, 76px);
-    line-height: .92;
-    letter-spacing: 2px;
-    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 6.5vw, 54px);
+    line-height: 1.05;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent2);
   }
   h1 span {
-    color: var(--c0);
-    text-shadow: 0 0 30px rgba(200,255,0,0.4), 0 0 60px rgba(200,255,0,0.15);
+    color: var(--accent);
   }
 
   .sub {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
     color: var(--muted);
     margin-top: 12px;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
   }
 
   /* ── CONTACT BUTTONS ── */
@@ -198,17 +181,17 @@
     flex-wrap: wrap;
     margin-top: 16px;
   }
-
   .contact-btn {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     padding: 12px 22px;
-    border-radius: 10px;
-    font-family: 'Rajdhani', sans-serif;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.3px;
+    text-transform: uppercase;
     text-decoration: none;
     transition: transform .15s, box-shadow .15s, opacity .15s;
     cursor: pointer;
@@ -216,25 +199,22 @@
   }
   .contact-btn:hover { transform: translateY(-2px); }
   .contact-btn:active { transform: translateY(0); }
-
   .contact-btn-fb {
-    background: var(--c0);
-    color: #0a0f08;
-    box-shadow: 0 4px 20px rgba(200,255,0,0.3);
+    background: var(--accent);
+    color: #1a1200;
+    box-shadow: 0 4px 20px rgba(250,180,0,0.3);
   }
-  .contact-btn-fb:hover { box-shadow: 0 6px 30px rgba(200,255,0,0.5); }
-
+  .contact-btn-fb:hover { box-shadow: 0 6px 30px rgba(250,180,0,0.45); }
   .contact-btn-sms {
     background: transparent;
-    color: var(--c2);
-    border: 1.5px solid var(--c2);
-    box-shadow: 0 4px 16px rgba(255,140,66,0.12);
+    color: var(--accent2);
+    border: 1.5px solid var(--accent2);
   }
-  .contact-btn-sms:hover { box-shadow: 0 6px 24px rgba(255,140,66,0.3); background: rgba(255,140,66,0.07); }
+  .contact-btn-sms:hover { background: rgba(0,0,0,0.05); }
 
   /* ── TODAY LABEL ── */
-  .today-label { font-family: 'Bebas Neue', sans-serif; color: var(--muted); font-size: 42px; letter-spacing: 2px; }
-  .today-date  { font-family: 'Bebas Neue', sans-serif; color: var(--c0); font-size: 42px; letter-spacing: 1px; text-shadow: 0 0 20px rgba(200,255,0,0.4); }
+  .today-label { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--muted); font-size: 30px; letter-spacing: 1px; }
+  .today-date  { font-family: 'Montserrat', sans-serif; font-weight: 800; color: var(--accent); font-size: 30px; letter-spacing: 0.5px; }
 
   /* ── TOP BAR ── */
   .top-bar {
@@ -248,9 +228,9 @@
   .btn {
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 0.5px;
     padding: 8px 16px;
     transition: all .15s;
@@ -258,32 +238,36 @@
     border: none;
   }
   .btn:hover { transform: translateY(-1px); }
-
   .btn-dark {
     background: var(--glass);
     color: var(--text);
     border: 1.5px solid var(--border);
     backdrop-filter: blur(8px);
   }
-  .btn-dark:hover { border-color: var(--border-hi); background: rgba(255,255,255,0.09); }
-
+  .btn-dark:hover { border-color: var(--border-hi); background: rgba(0,0,0,0.08); }
   .btn-yellow {
-    background: var(--c0);
-    color: #0a0f08;
-    box-shadow: 0 4px 16px rgba(200,255,0,0.3);
+    background: var(--accent);
+    color: #1a1200;
+    box-shadow: 0 4px 16px rgba(250,180,0,0.3);
   }
-  .btn-yellow:hover { box-shadow: 0 6px 24px rgba(200,255,0,0.5); }
-
+  .btn-yellow:hover { box-shadow: 0 6px 24px rgba(250,180,0,0.45); }
   .btn-red {
-    background: rgba(255,77,77,0.1);
+    background: rgba(214,69,69,0.08);
     color: var(--red);
-    border: 1.5px solid rgba(255,77,77,0.35);
+    border: 1.5px solid rgba(214,69,69,0.35);
   }
-  .btn-red:hover { background: rgba(255,77,77,0.18); }
+  .btn-red:hover { background: rgba(214,69,69,0.15); }
+  .btn-addlist {
+    background: #fab400;
+    color: #1a1200;
+    border: none;
+    box-shadow: 0 4px 16px rgba(250,180,0,0.3);
+  }
+  .btn-addlist:hover { box-shadow: 0 6px 24px rgba(250,180,0,0.45); }
 
   /* ── LOGIN BOX ── */
   .login-box {
-    background: rgba(255,255,255,0.04);
+    background: var(--surface);
     border: 1.5px solid var(--border);
     border-radius: 14px;
     padding: 18px;
@@ -302,55 +286,173 @@
   .login-row { display: flex; gap: 8px; }
   .err-msg { font-size: 12px; color: var(--red); margin-top: 8px; font-weight: 600; }
 
+  .gate-box {
+    max-width: 380px;
+    margin: 40px auto;
+    text-align: center;
+    padding: 28px 22px;
+  }
+  .gate-box p { text-align: center; }
+  .gate-box .login-row { flex-direction: column; }
+
   /* ── ADMIN BAR ── */
   .admin-bar {
-    background: rgba(200,255,0,0.06);
-    border: 1.5px solid rgba(200,255,0,0.25);
+    background: rgba(250,180,0,0.08);
+    border: 1.5px solid rgba(250,180,0,0.3);
     border-radius: 10px;
     padding: 10px 16px;
     margin-bottom: 16px;
     font-size: 13px;
     font-weight: 700;
-    color: var(--c0);
+    color: #a06400;
     letter-spacing: 0.3px;
     text-transform: uppercase;
   }
 
-  /* ── GRID ── */
+  /* ── ADMIN SHORTCUTS ── */
+  .admin-shortcuts {
+    margin-bottom: 20px;
+    animation: fadeIn .25s ease;
+  }
+  .admin-shortcuts-label {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .admin-shortcuts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .admin-shortcut-tile {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, background .15s;
+    border: 1.5px solid rgba(250,180,0,0.35);
+    background: rgba(250,180,0,0.07);
+    color: #a06400;
+    box-shadow: 0 2px 12px rgba(250,180,0,0.10);
+    position: relative;
+    overflow: hidden;
+  }
+  .admin-shortcut-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(250,180,0,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .admin-shortcut-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(250,180,0,0.25);
+    background: rgba(250,180,0,0.13);
+    border-color: rgba(250,180,0,0.6);
+  }
+  .admin-shortcut-tile:active { transform: translateY(0); }
+  .admin-shortcut-tile .tile-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .admin-shortcut-tile .tile-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .admin-shortcut-tile .tile-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .admin-shortcut-tile .tile-desc {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(160,100,0,0.65);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .admin-shortcut-tile .tile-arrow {
+    margin-left: 4px;
+    font-size: 16px;
+    opacity: 0.6;
+    transition: transform .15s, opacity .15s;
+  }
+  .admin-shortcut-tile:hover .tile-arrow {
+    transform: translateX(3px);
+    opacity: 1;
+  }
+
+  /* ── GRID — 3 kolumny jak w szablonie ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
   }
-  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px)  { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
+
+  .grid.grid-tenis {
+    grid-template-columns: minmax(0, 360px);
+    justify-content: center;
+  }
+
+  /* ── SECTION HEADING ── */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin: 30px 0 14px;
+  }
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
   /* ── CARD ── */
   .card {
-    background: rgba(255,255,255,0.035);
+    background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
     transition: border-color .2s, box-shadow .2s;
     position: relative;
   }
-
   .card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 2px;
+    height: 3px;
     background: var(--accent);
-    opacity: 0.7;
   }
-
   .card:hover {
-    border-color: rgba(255,255,255,0.18);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    border-color: rgba(0,0,0,0.2);
+    box-shadow: 0 10px 34px rgba(0,0,0,0.12);
   }
 
   /* ── CARD HEAD ── */
@@ -362,24 +464,49 @@
     justify-content: space-between;
     align-items: flex-start;
   }
-
   .card-head-text { flex: 1; }
 
   .day-label {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 35px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 30px;
     color: var(--accent);
-    letter-spacing: 1px;
+    letter-spacing: 0.3px;
     line-height: 1.1;
-    text-shadow: 0 0 15px color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+
+  .day-sub {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+  .day-sub-groups {
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  .level-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 11px;
+    border-radius: 100px;
   }
 
   .date-label {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 35px;
-    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
     color: var(--muted);
-    margin-top: 2px;
+    margin-top: 6px;
     letter-spacing: 0.3px;
   }
 
@@ -395,20 +522,41 @@
   }
   .lock-btn:hover { opacity: .75; transform: scale(1.15); }
 
+  .panel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity .15s, transform .15s;
+  }
+  .panel-btn:hover  { opacity: .85; transform: translateY(-1px); }
+  .panel-btn:active { transform: translateY(0); }
+
   /* ── PLAYER LIST ── */
   .player-list { flex: 1; min-height: 60px; }
-
   .player-row {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     animation: fadeIn .2s ease;
     transition: background .15s;
   }
   .player-row:last-child { border-bottom: none; }
-  .player-row:hover { background: rgba(255,255,255,0.03); }
+  .player-row:hover { background: rgba(0,0,0,0.02); }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-4px); }
@@ -416,24 +564,24 @@
   }
 
   .num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
     color: var(--accent);
     min-width: 18px;
     text-align: right;
-    opacity: 0.6;
+    opacity: 0.7;
   }
-
   .pname {
     flex: 1;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
     color: var(--text);
     letter-spacing: 0.2px;
   }
 
   .empty       { text-align: center; padding: 20px 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
-  .loading-txt { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 8px; color: #fff; font-size: 12px; }
+  .loading-txt { text-align: center; padding: 20px 8px; color: var(--muted); font-size: 12px; }
   .closed-txt  { text-align: center; padding: 20px 8px; color: var(--red); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
   /* ── ICON BUTTONS ── */
@@ -453,10 +601,9 @@
     font-weight: 700;
   }
   .icon-btn:hover { opacity: .75; transform: scale(1.1); }
-
-  .icon-edit { color: var(--c0);  border: 1px solid rgba(200,255,0,0.4); }
-  .icon-del  { color: var(--red); border: 1px solid rgba(255,77,77,0.4); }
-  .icon-ok   { color: var(--c1);  border: 1px solid rgba(0,229,255,0.4); }
+  .icon-edit { color: var(--accent);  border: 1px solid rgba(250,180,0,0.4); }
+  .icon-del  { color: var(--red); border: 1px solid rgba(214,69,69,0.4); }
+  .icon-ok   { color: var(--accent2);  border: 1px solid rgba(0,0,0,0.3); }
 
   /* ── INPUT ROW ── */
   .input-row {
@@ -464,258 +611,180 @@
     border-top: 1px solid var(--border);
     display: flex;
     gap: 8px;
-    background: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.02);
   }
   .input-row.closed { opacity: 0.4; pointer-events: none; }
 
   .field {
     flex: 1;
-    background: rgba(255,255,255,0.05);
+    background: #ffffff;
     border: 1.5px solid var(--border);
     border-radius: 8px;
     color: var(--text);
     padding: 9px 12px;
-    font-size: 15px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
     outline: none;
     transition: border-color .15s, box-shadow .15s;
   }
   .field::placeholder { color: var(--muted); }
   .field:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(200,255,0,0.12);
+    box-shadow: 0 0 0 2px rgba(250,180,0,0.15);
   }
-  .field.err { border-color: var(--red); box-shadow: 0 0 0 2px rgba(255,77,77,0.15); }
+  .field.err { border-color: var(--red); box-shadow: 0 0 0 2px rgba(214,69,69,0.15); }
 
   .add-btn {
     background: var(--accent);
-    color: #0a0f08;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     padding: 8px 14px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    font-weight: 400;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
     cursor: pointer;
     transition: all .15s;
     line-height: 1;
-    box-shadow: 0 2px 12px rgba(200,255,0,0.25);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 35%, transparent);
     min-width: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .add-btn:hover   { box-shadow: 0 4px 20px rgba(200,255,0,0.45); transform: translateY(-1px); }
+  .add-btn:hover    { box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-1px); }
   .add-btn:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
 
   /* ── FOOTER ── */
   footer {
     text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.1);
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(0,0,0,0.32);
     margin-top: 40px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     text-transform: uppercase;
   }
 
   /* ── SPINNER ── */
   .spinner {
     display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(10,15,8,0.3);
-    border-top-color: #0a0f08;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(26,18,0,0.3);
+    border-top-color: #1a1200;
     border-radius: 50%;
     animation: spin .6s linear infinite;
   }
+  .add-btn .spinner {
+    border-color: rgba(255,255,255,0.35);
+    border-top-color: #ffffff;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-txt .spinner { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
 
- .info-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 14px;
-  border-radius: 100px;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  background: transparent;
-  color: var(--c1);
-  border: 1.5px solid var(--c1);
-  cursor: pointer;
-  transition: background .15s, box-shadow .15s;
-  vertical-align: middle;
-  margin-left: 10px;
-}
-.info-btn:hover {
-  background: rgba(0,229,255,0.08);
-  box-shadow: 0 0 14px rgba(0,229,255,0.25);
-}
+  .info-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--accent2);
+    border: 1.5px solid var(--accent2);
+    cursor: pointer;
+    transition: background .15s, box-shadow .15s;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
+  .info-btn:hover {
+    background: rgba(0,0,0,0.05);
+  }
 
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 999;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 16px;
-  animation: fadeIn .2s ease;
-}
-.modal {
-  background: #0e1318;
-  border: 1.5px solid var(--border-hi);
-  border-radius: 18px;
-  max-width: 520px; width: 100%;
-  max-height: 90vh; overflow-y: auto;
-  padding: 28px 24px 24px;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-.modal-close {
-  position: absolute; top: 14px; right: 16px;
-  background: transparent; border: none;
-  color: var(--muted); font-size: 20px;
-  cursor: pointer; line-height: 1;
-  transition: color .15s;
-}
-.modal-close:hover { color: var(--text); }
-.modal h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; letter-spacing: 2px;
-  color: var(--c0); margin-bottom: 16px;
-}
-.modal-section { margin-bottom: 16px; }
-.modal-section h3 {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px; font-weight: 900;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--c1); margin-bottom: 6px;
-}
-.modal-section p, .modal-section li {
-  font-size: 15px; font-weight: 500;
-  color: var(--text); line-height: 1.6;
-}
-.modal-section ul { list-style: none; padding: 0; }
-.modal-section ul li::before { content: "— "; color: var(--c0); }
-.modal-section a { color: var(--c0); text-decoration: none; word-break: break-all; }
-.modal-section a:hover { text-decoration: underline; }
-.modal-note {
-  font-size: 12px; color: var(--muted);
-  border-top: 1px solid var(--border);
-  padding-top: 12px; margin-top: 4px;
-  font-style: italic;
-}
- .input-error {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--red);
-  padding: 8px 14px 10px;
-  border-top: 1px solid rgba(255,77,77,0.15);
-  background: rgba(255,77,77,0.06);
-  line-height: 1.4;
-  animation: fadeIn .2s ease;
-}
-.input-error a {
-  color: var(--c0);
-  text-decoration: underline;
-  cursor: pointer;
-}
-.input-info {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  padding: 10px 14px;
-  border-top: 1px solid rgba(0,229,255,0.15);
-  background: rgba(0,229,255,0.06);
-  line-height: 1.4;
-  animation: fadeIn .2s ease;
-}
-.dopisz-btn {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 9px 18px;
-  background: var(--c0);
-  color: #0a0f08;
-  font-weight: 900;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  box-shadow: 0 2px 12px rgba(200,255,0,0.3);
-  transition: box-shadow .15s, transform .15s;
-}
-.dopisz-btn:hover { box-shadow: 0 4px 18px rgba(200,255,0,0.5); transform: translateY(-1px); }
-.input-info .alt-links {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.input-info .alt-links a { color: var(--c0); }
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    animation: fadeIn .2s ease;
+  }
+  .modal {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    max-width: 520px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    padding: 28px 24px 24px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: transparent; border: none;
+    color: var(--muted); font-size: 20px;
+    cursor: pointer; line-height: 1;
+    transition: color .15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 22px; letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 16px;
+  }
+  .modal-section { margin-bottom: 16px; }
+  .modal-section h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .modal-section p, .modal-section li {
+    font-size: 15px; font-weight: 400;
+    color: var(--text); line-height: 1.6;
+  }
+  .modal-section ul { list-style: none; padding: 0; }
+  .modal-section ul li::before { content: "— "; color: var(--accent); }
+  .modal-section a { color: var(--accent2); text-decoration: none; word-break: break-all; font-weight: 600; }
+  .modal-section a:hover { text-decoration: underline; }
+  .modal-note {
+    font-size: 12px; color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 12px; margin-top: 4px;
+    font-style: italic;
+  }
 
-.badge-18 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 11px;
-  background: rgba(0,229,255,0.12);
-  color: var(--c1);
-  border: 1px solid rgba(0,229,255,0.35);
-  border-radius: 4px;
-  padding: 1px 6px;
-  letter-spacing: 0.5px;
-  flex-shrink: 0;
-}
-.icon-18on  { color: var(--c1);   border: 1px solid rgba(0,229,255,0.4);    font-size: 10px; }
-.icon-18off { color: var(--muted); border: 1px solid rgba(90,102,128,0.4); font-size: 10px; }
-
-.thu18-pill {
-  display: inline-block;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  border-radius: 100px;
-  padding: 5px 16px;
-  cursor: pointer;
-  user-select: none;
-  transition: color .15s, border-color .15s, background .15s;
-  border: 1px solid rgba(90,102,128,0.3);
-  color: var(--muted);
-  background: transparent;
-}
-.thu18-pill.active {
-  color: var(--c1);
-  border-color: rgba(0,229,255,0.4);
-  background: rgba(0,229,255,0.08);
-}
-.thu18-pill-wrap {
-  background: rgba(0,0,0,0.15);
-  padding: 0 14px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.thu18-pill-hint {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--green);
-}
-
+  .input-error {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--red);
+    padding: 8px 14px 10px;
+    border-top: 1px solid rgba(214,69,69,0.15);
+    background: rgba(214,69,69,0.05);
+    line-height: 1.4;
+    animation: fadeIn .2s ease;
+  }
+  .input-error a {
+    color: var(--accent2);
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
 
-
 <!-- ═══ NAV ════════════════════════════════════════════════════ -->
 <nav class="nav">
   <div class="nav-inner">
-    <div class="nav-logo" id="navLogo" style="cursor:default;touch-action:manipulation;">🎾 WPC</div>
+    <div class="nav-logo" id="navLogo" style="cursor:default;touch-action:manipulation;">🎾 Odlewnicza</div>
     <a class="nav-link active" href="index.html">📋 Zapisy</a>
     <a class="nav-link"        href="wyniki.html">🏆 Wyniki</a>
     <a class="nav-link"        href="ranking.html">📊 Ranking</a>
@@ -724,27 +793,28 @@
 
 <!-- ═══ KONFIGURACJA ════════════════════════════════════════════ -->
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGbiyNzfPJIUINDedgllhRVHOgm2eLS5MyYe34t6oj7-yCT0I8VzKqmzX2-DE6-8dC/exec";
-  const CUTOFF_HOUR = 19;
-const today = new Date();
-const todayDateStr = today.toLocaleDateString("pl-PL", {
-  day: "2-digit",
-  month: "2-digit",
-  timeZone: "Europe/Warsaw"
-});
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkHLvjtq2LegCNM4yETGkzf7rzB6c80Pci5KnYWLFcTFF7qZRJF0tUIDew01oEgnNY/exec";
+  const CUTOFF_HOUR = 23;
+
+ const today = new Date();
+  const todayDateStr = today.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Europe/Warsaw"
+  });
 </script>
 
 <div class="page-wrap">
   <div class="header">
-    <div class="pill">🎾 Liga Squasha WPC</div>
+    <div class="pill">🎾 Liga Squasha Odlewnicza</div>
     <h1>ZAPISY NA <span>LIGĘ</span></h1>
-<p class="sub">Pierwszy raz na lidze? <button class="info-btn" onclick="openModal()">ℹ INFO</button>
+    <p class="sub">Pierwszy raz na lidze? <button class="info-btn" onclick="openModal()">ℹ INFO</button>
       <div class="contact-btns">
-        <a href="https://m.me/karol.kreczmanski" class="contact-btn contact-btn-fb" target="_blank">
-          ⓕ &nbsp;Napisz do nas
+        <a href="mailto:kontakt@odlewnicza7.pl" class="contact-btn contact-btn-fb">
+          @ &nbsp;Napisz do nas
         </a>
-        <a href="tel:+48511915628" class="contact-btn contact-btn-sms">
-          ✉︎ &nbsp;SMS 511 915 628
+        <a href="tel:888222811" class="contact-btn contact-btn-sms">
+          📞 &nbsp;888 222 811
         </a>
       </div>
       <br>
@@ -752,243 +822,220 @@ const todayDateStr = today.toLocaleDateString("pl-PL", {
     </p>
   </div>
 
-  <div class="top-bar" id="topBar"></div>
-  <div id="loginBox"></div>
-  <div id="adminBar"></div>
-  <div class="grid" id="grid"></div>
+  <div id="gate"></div>
+  <div class="top-bar gated" id="topBar"></div>
+  <div id="loginBox" class="gated"></div>
+  <div id="adminBar" class="gated"></div>
+  <div class="section-heading gated">Squash</div>
+  <div class="grid gated" id="gridSquash"></div>
+  <div class="section-heading gated">Tenis stołowy</div>
+  <div class="grid grid-tenis gated" id="gridTenis"></div>
+
   <footer>Administratorem danych jest Karol Kreczmański. Dane (imię i nazwisko) są zbierane w celu organizacji ligi i będą publicznie widoczne na liście uczestników. Uczestnik może żądać ich usunięcia. <br> Made by Karol Kreczmański</footer>
 </div>
 
 <script>
-const DAYS_BASE = [
-  { key:"mon", label:"Poniedziałek 20:00", short:"Pn",  dow:1 },
-  { key:"tue", label:"Wtorek 20:00",                 short:"Wt",  dow:2 },
-  { key:"thu", label:"Czwartek 20:00",               short:"Czw", dow:4 },
-  { key:"fri", label:"Piątek 19:00 <br> KRÓL KORTU",                 short:"Pt",  dow:5 },
-  // Sobota wyłączona (zastąpiona piątkiem) — odkomentuj, żeby przywrócić:
-  // { key:"sat", label:"Sobota 10:00",              short:"Sob", dow:6 },
-];
- const DAYS = [
-  ...DAYS_BASE,
-  ...DAYS_BASE.map(d => ({ ...d, key: d.key + "_w2", weekOffset: 7 })),
+// ══════════════════════════════════════════════════════════════
+//  SEKCJE — każda to jedna karta w gridzie
+// ══════════════════════════════════════════════════════════════
+const SECTIONS = [
+  {
+    key:    "sun_ab",
+    label:  "Niedziela · 20:00",
+    sub:    "A / B",
+    level:  "Zaawansowani",
+    color:  "#c2680a",
+    group:  "squash",
+    dow:    0,
+  },
+  {
+    key:    "sun_cd",
+    label:  "Niedziela · 17:30",
+    sub:    "C / D",
+    level:  "Średniozaawansowani",
+    color:  "#1a1a1a",
+    group:  "squash",
+    dow:    0,
+  },
+  {
+    key:    "sun_ef",
+    label:  "Niedziela · 15:00",
+    sub:    "E / F",
+    level:  "Początkujący",
+    color:  "#a13d2b",
+    group:  "squash",
+    dow:    0,
+  },
+  {
+    key:    "sr_tenis",
+    label:  "Środa · 18:30 i 20:00",
+    sub:    "",
+    level:  "Zapisy otwarte",
+    color:  "#2f7d5c",
+    group:  "tenis",
+    dow:    3,
+    panelUrl: "https://script.google.com/macros/s/AKfycbwCGx8QaRz0gAs0ps4gj-d_6vwyxMplll_P4r0yzgf8TWPf-NxeErOnMGg8aIX3qRf67A/exec?liga=pingpong",
+  },
 ];
 
-// Dodatkowa opcja zapisu (pigułka + odznaka przy nazwisku), per dzień tygodnia
-const EXTRA_OPTIONS = {
-  thu: { pill: "Mogę też na 18:00",              badge: "18:00", short: "18" },
-  mon: { pill: "Poziom Pocz./Śr-zaaw. 21:00",    badge: "21:00", short: "21" },
-};
- const REZERWA_MARKER = "REZERWA"; // dokładnie tak wpisz w arkuszu
-const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff","#c8ff00","#00e5ff","#ff8c42","#b06aff"];
+const REZERWA_MARKER = "REZERWA";
 
-function getNextDate(dow, weekOffset) {
+function getNextDow(dow) {
   const now   = new Date();
   const today = now.getDay();
-  const hour = parseInt(new Date().toLocaleString("pl-PL", { hour: "2-digit", hour12: false, timeZone: "Europe/Warsaw" }));
+  const hour  = parseInt(new Date().toLocaleString("pl-PL", {
+    hour: "2-digit", hour12: false, timeZone: "Europe/Warsaw"
+  }));
   let diff = (dow - today + 7) % 7;
   if (diff === 0 && hour >= CUTOFF_HOUR) diff = 7;
   const d = new Date(now);
-  d.setDate(d.getDate() + diff + (weekOffset || 0));
-  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
   return d;
 }
 
 function dateKey(d) {
-  const day   = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year  = d.getFullYear();
-  return `${year}-${month}-${day}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function formatPL(d) {
-  return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit",year:"numeric"});
+  return d.toLocaleDateString("pl-PL", { day:"2-digit", month:"2-digit", year:"numeric" });
 }
 
-const _savedName = localStorage.getItem("lastPlayerName") || "";
+for (const sec of SECTIONS) { sec.date = getNextDow(sec.dow); }
+
+function sectionOf(key) { return SECTIONS.find(s => s.key === key); }
+
 let state = {
-  days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow, d.weekOffset), color: COLORS[i % COLORS.length] })),
-  lists:     {},
-  loading:   {},
-  inputs: Object.fromEntries(DAYS.map(d => [d.key, _savedName])),
-  saving:    {},
-  editing:   null,
-  editVal:   "",
-  adminMode: false,
-  showLogin: false,
-  passInput: "",
-  passErr:   false,
-  passErrMsg: "",
-  locked:    {},
+  lists:         {},
+  loading:       {},
+  inputs:        {},
+  saving:        {},
+  editing:       null,
+  editVal:       "",
+  errors:        {},
+  locked:        {},
+  adminMode:     false,
+  showLogin:     false,
+  passInput:     "",
+  passErr:       false,
   adminPassword: "",
-  errors: {},
-  thu18:  Object.fromEntries(DAYS.map(d => [d.key, false])),
-  labels: {},
+  viewUnlocked:  false,
+  gateInput:     "",
+  gateErr:       false,
+  addListConfirm: null,
+  addListSaving:  false,
 };
 
-function saveLockedState() {
-  localStorage.setItem('lockedDays', JSON.stringify(state.locked));
-}
-
-function apiOnce(params) {
+// ── API (JSONP) ─────────────────────────────────────────────────
+function api(params) {
   return new Promise((resolve, reject) => {
     const cbName = "jsonp_" + Math.random().toString(36).slice(2);
     let script;
-    const cleanup = () => {
-      clearTimeout(timeout);
-      // Zastępujemy no-opem zamiast usuwać: gdy Apps Script odpowie
-      // spóźniony (po timeoucie/błędzie), wywołanie nie wywali ReferenceError.
-      window[cbName] = () => {};
-      if (script) script.remove();
-    };
     const timeout = setTimeout(() => {
-      cleanup();
+      delete window[cbName]; if (script) script.remove();
       reject(new Error("timeout"));
-    }, 25000);
+    }, 10000);
     window[cbName] = (data) => {
-      cleanup();
+      clearTimeout(timeout); delete window[cbName]; if (script) script.remove();
       resolve(data);
     };
     script = document.createElement("script");
     const p = { ...params, callback: cbName };
     script.src = APPS_SCRIPT_URL + "?" + new URLSearchParams(p).toString();
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("script error"));
-    };
+    script.onerror = () => { clearTimeout(timeout); delete window[cbName]; reject(new Error("script error")); };
     document.head.appendChild(script);
   });
 }
 
-// Endpoint Apps Script bywa przejściowo zawodny (404 / brak odpowiedzi),
-// dlatego ponawiamy próbę zamiast od razu zgłaszać błąd użytkownikowi.
-async function api(params, retries = 2) {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await apiOnce(params);
-    } catch (e) {
-      if (attempt >= retries) throw e;
-      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
-    }
-  }
-}
-
-async function loadDay(day) {
-  state.loading[day.key] = true; render();
-  const res = await api({ action:"list", dayKey:day.key.replace(/_w2$/, ""), dateStr:dateKey(day.date) });
-  if (res.ok) {
-    state.lists[day.key]  = normalizePlayers(res.players);
-    state.locked[day.key] = res.locked;
-    if (res.label) state.labels[day.key] = res.label;
-  }
-  state.loading[day.key] = false; render();
-}
-
-// Ładuje wszystkie dni jednym zapytaniem (backend otwiera arkusz raz zamiast
-// osobno dla każdego dnia) — dużo szybsze niż 8 osobnych żądań "list".
-async function loadAllDays(days) {
-  days.forEach(d => state.loading[d.key] = true);
-  render();
+// ── Akcje ──────────────────────────────────────────────────────
+async function loadSection(sec) {
+  state.loading[sec.key] = true; render();
   try {
-    const payload = days.map(d => ({
-      fullKey: d.key,
-      dayKey:  d.key.replace(/_w2$/, ""),
-      dateStr: dateKey(d.date),
-    }));
-    const res = await api({ action:"listAll", days: JSON.stringify(payload) });
-    if (!res.ok) throw new Error(res.error || "listAll failed");
-    for (const fullKey in res.data) {
-      const entry = res.data[fullKey];
-      state.lists[fullKey]  = normalizePlayers(entry.players);
-      state.locked[fullKey] = entry.locked;
-      if (entry.label) state.labels[fullKey] = entry.label;
-    }
-    days.forEach(d => state.loading[d.key] = false);
-    render();
-  } catch (e) {
-    // Backend bez akcji "listAll" (np. przed redeployem) albo inny błąd —
-    // wracamy do ładowania dzień po dniu, żeby strona nie została pusta.
-    days.forEach(d => state.loading[d.key] = false);
-    await loadDaysStaggered(days, 2);
-  }
+    const res = await api({ action:"list", dayKey:sec.key, dateStr:dateKey(sec.date) });
+    if (res.ok) { state.lists[sec.key] = res.players; state.locked[sec.key] = res.locked; }
+  } catch(e) {}
+  state.loading[sec.key] = false; render();
 }
 
-async function addPlayer(dayKey) {
-  if (state.locked[dayKey]) return;
-  const day  = state.days.find(d => d.key === dayKey);
-  const name = (state.inputs[dayKey]||"").trim();
+async function addPlayer(key) {
+  if (state.locked[key]) return;
+  const name = (state.inputs[key] || "").trim();
   if (!name) return;
-  state.saving[dayKey] = true;
-  state.errors[dayKey] = null;
-  render();
-  const extraOpt = EXTRA_OPTIONS[dayKey.replace(/_w2$/, "")];
-  const addParams = { action:"add", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), name };
-  if (extraOpt) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
-  const res = await api(addParams);
-  if (res.ok) {
-    state.lists[dayKey] = normalizePlayers(res.players);
-    state.errors[dayKey] = null;
-    localStorage.setItem("lastPlayerName", name);
-    state.days.forEach(d => { state.inputs[d.key] = name; });
-  } else {
-    state.errors[dayKey] = res.error;
-  }
-  state.saving[dayKey] = false;
-  render();
+  state.saving[key] = true; state.errors[key] = null; render();
+  const res = await api({ action:"add", dayKey:key, dateStr:dateKey(sectionOf(key).date), name });
+  if (res.ok) { state.lists[key] = res.players; state.inputs[key] = ""; state.errors[key] = null; }
+  else { state.errors[key] = res.error; }
+  state.saving[key] = false; render();
 }
 
-async function removePlayer(dayKey, idx) {
-  const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"remove", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, password:state.adminPassword });
-  if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); render(); }
+async function removePlayer(key, idx) {
+  const res = await api({ action:"remove", dayKey:key, dateStr:dateKey(sectionOf(key).date), idx, password:state.adminPassword });
+  if (res.ok) { state.lists[key] = res.players; render(); }
 }
 
-async function saveEdit(dayKey) {
+async function saveEdit(key) {
   if (!state.editing) return;
-  const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"edit", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
-  if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); state.editing = null; render(); }
+  const res = await api({ action:"edit", dayKey:key, dateStr:dateKey(sectionOf(key).date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
+  if (res.ok) { state.lists[key] = res.players; state.editing = null; render(); }
 }
 
-async function toggleLocked(dayKey) {
-  const day    = state.days.find(d => d.key === dayKey);
-  const action = state.locked[dayKey] ? "unlock" : "lock";
-  state.errors[dayKey] = null;
-  try {
-    const res = await api({ action, dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), password:state.adminPassword });
-    if (res.ok) {
-      state.locked[dayKey] = res.locked;
-      saveLockedState();
-    } else {
-      state.errors[dayKey] = res.error;
-    }
-  } catch (e) {
-    state.errors[dayKey] = "Błąd połączenia z serwerem, spróbuj ponownie";
-  }
-  render();
+async function toggleLocked(key) {
+  const action = state.locked[key] ? "unlock" : "lock";
+  const res    = await api({ action, dayKey:key, dateStr:dateKey(sectionOf(key).date), password:state.adminPassword });
+  if (res.ok) { state.locked[key] = res.locked; render(); }
 }
 
-function normalizePlayers(arr) {
-  return (arr || []).map(p => {
-    if (typeof p === "string") return { name: p, early18: false };
-    const e18 = p.early18;
-    return { ...p, early18: e18 === true || e18 === 1 || e18 === "1" || e18 === "true" };
-  });
-}
-
-async function toggleEarly18(dayKey, idx) {
-  const day     = state.days.find(d => d.key === dayKey);
-  const players = state.lists[dayKey] || [];
-  const current = players[idx]?.early18 || false;
-  const res = await api({ action:"setEarly18", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, early18: current ? "0" : "1", password:state.adminPassword });
-  if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); render(); }
-}
-
+// ── Render ─────────────────────────────────────────────────────
 function render() {
-  renderTopBar();
-  renderLoginBox();
-  renderAdminBar();
-  renderGrid();
   renderTodayDate();
+  renderGate();
+  if (!state.viewUnlocked) return;
+  renderTopBar(); renderLoginBox(); renderAdminBar(); renderGrid(); renderAddListModal();
+}
+
+function renderGate() {
+  const gate = document.getElementById("gate");
+
+  if (state.viewUnlocked) {
+    gate.innerHTML = "";
+    document.querySelectorAll(".gated").forEach(el => { el.style.display = ""; });
+    return;
+  }
+
+  document.querySelectorAll(".gated").forEach(el => { el.style.display = "none"; });
+
+  gate.innerHTML = `
+    <div class="login-box gate-box">
+      <p>Podaj hasło administratora, aby zobaczyć zapisy:</p>
+      <div class="login-row">
+        <input class="field${state.gateErr?" err":""}" id="gateInp" type="password" placeholder="Wpisz hasło…" value="${esc(state.gateInput)}" />
+        <button class="btn btn-yellow" id="gateOk">Odblokuj</button>
+      </div>
+      ${state.gateErr ? '<p class="err-msg">Błędne hasło</p>' : ""}
+    </div>`;
+  const inp = gate.querySelector("#gateInp");
+  inp.addEventListener("input",   e => { state.gateInput = e.target.value; state.gateErr = false; });
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+  gate.querySelector("#gateOk").addEventListener("click", tryUnlock);
+  inp.focus();
+}
+
+const GATE_STORAGE_KEY = "wpc_view_password";
+
+async function tryUnlock() {
+  const res = await api({ action: "checkPassword", password: state.gateInput });
+  if (res.ok) {
+    state.viewUnlocked = true;
+    try { localStorage.setItem(GATE_STORAGE_KEY, state.gateInput); } catch(e) {}
+    state.gateInput = ""; state.gateErr = false;
+    render();
+    Promise.all(SECTIONS.map(loadSection));
+  } else {
+    state.gateErr = true;
+    try { localStorage.removeItem(GATE_STORAGE_KEY); } catch(e) {}
+    render();
+  }
 }
 
 function renderTodayDate() {
@@ -1019,13 +1066,13 @@ function renderLoginBox() {
         <button class="btn btn-yellow" id="passOk">OK</button>
         <button class="btn btn-dark"   id="passX">✕</button>
       </div>
-      ${state.passErr ? `<p class="err-msg">${esc(state.passErrMsg || "Błędne hasło")}</p>` : ""}
+      ${state.passErr ? '<p class="err-msg">Błędne hasło</p>' : ""}
     </div>`;
   const inp = el.querySelector("#passInp");
-  inp.addEventListener("input",  e => { state.passInput=e.target.value; state.passErr=false; });
+  inp.addEventListener("input",   e => { state.passInput=e.target.value; state.passErr=false; });
   inp.addEventListener("keydown", e => { if(e.key==="Enter") tryLogin(); });
   el.querySelector("#passOk").addEventListener("click", tryLogin);
-  el.querySelector("#passX").addEventListener("click", () => { state.showLogin=false; state.passInput=""; state.passErr=false; render(); });
+  el.querySelector("#passX").addEventListener("click",  () => { state.showLogin=false; state.passInput=""; state.passErr=false; render(); });
   inp.focus();
 }
 
@@ -1037,37 +1084,123 @@ function renderAdminBar() {
 }
 
 function renderGrid() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-  for (const day of [...state.days].sort((a, b) => a.date - b.date)) {
-    grid.appendChild(mkCard(day));
+  const gridSquash = document.getElementById("gridSquash");
+  const gridTenis  = document.getElementById("gridTenis");
+  gridSquash.innerHTML = ""; gridTenis.innerHTML = "";
+  for (const sec of SECTIONS) {
+    const target = sec.group === "tenis" ? gridTenis : gridSquash;
+    target.appendChild(mkCard(sec));
   }
 }
 
-function mkCard(day) {
-  const players  = state.lists[day.key] || [];
-  const loading  = state.loading[day.key];
-  const saving   = state.saving[day.key];
-  const isClosed = state.locked[day.key];
-  const extraOpt = EXTRA_OPTIONS[day.key.replace(/_w2$/, "")];
-  const cardLabel = state.labels[day.key] || day.label;
+// ── Modal: dodaj do listy graczy ──────────────────────────────
+function renderAddListModal() {
+  const existing = document.getElementById("addListModal");
+  if (existing) existing.remove();
+  if (!state.addListConfirm) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "addListModal";
+  overlay.className = "modal-overlay";
+  overlay.addEventListener("click", e => { if (e.target === overlay) { state.addListConfirm = null; render(); } });
+
+  const saving = state.addListSaving;
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:400px;text-align:center;">
+      <h2>Potwierdź dane</h2>
+      <p>Dodajemy Cię do listy graczy jako:</p>
+      <p style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--accent2);margin:14px 0 18px;">${esc(state.addListConfirm.name)}</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Sprawdź, czy imię i nazwisko są zapisane poprawnie (Nazwisko Imię), zanim potwierdzisz.</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-dark" id="addListCancel" ${saving?"disabled":""}>Anuluj</button>
+        <button class="btn btn-yellow" id="addListOk" ${saving?"disabled":""}>${saving ? '<span class="spinner"></span>' : "Tak, dodaj mnie"}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector("#addListCancel").addEventListener("click", () => { state.addListConfirm = null; render(); });
+  overlay.querySelector("#addListOk").addEventListener("click", confirmAddToList);
+}
+
+async function confirmAddToList() {
+  if (!state.addListConfirm || state.addListSaving) return;
+  const { key, name } = state.addListConfirm;
+  state.addListSaving = true; render();
+  try {
+    const res = await api({ action: "addToAllowedList", name });
+    if (res.ok) {
+      state.addListConfirm = null;
+      state.addListSaving  = false;
+      await addPlayer(key);
+      return;
+    } else {
+      state.errors[key] = res.error || "Nie udało się dodać do listy";
+    }
+  } catch (e) {
+    state.errors[key] = "Błąd połączenia, spróbuj ponownie";
+  }
+  state.addListConfirm = null;
+  state.addListSaving  = false;
+  render();
+}
+
+// ── mkCard ──────────────────────────────────────────────────────
+function mkCard(sec) {
+  const players  = state.lists[sec.key] || [];
+  const loading  = state.loading[sec.key];
+  const saving   = state.saving[sec.key];
+  const isClosed = state.locked[sec.key];
 
   const card = document.createElement("div");
   card.className = "card";
-  card.style.setProperty("--accent", day.color);
+  card.style.setProperty("--accent", sec.color);
 
   const headDiv = document.createElement("div");
   headDiv.className = "card-head";
+
   const textDiv = document.createElement("div");
   textDiv.className = "card-head-text";
-  textDiv.innerHTML = `<div class="day-label">${cardLabel}</div><div class="date-label">${formatPL(day.date)}</div>`;
+
+  const dayEl = document.createElement("div");
+  dayEl.className = "day-label";
+  dayEl.textContent = sec.label;
+
+  const badge = document.createElement("span");
+  badge.className = "level-badge";
+  badge.textContent = sec.level;
+  badge.style.cssText = `background:${sec.color}22;color:#1a1200;border:1px solid ${sec.color}80;`;
+
+  const dateEl = document.createElement("div");
+  dateEl.className = "date-label";
+  dateEl.textContent = formatPL(sec.date);
+
+  textDiv.appendChild(dayEl);
+  if (sec.sub) {
+    const subEl = document.createElement("div");
+    subEl.className = "day-sub";
+    subEl.innerHTML = `Grupy <span class="day-sub-groups">${esc(sec.sub)}</span>`;
+    textDiv.appendChild(subEl);
+  }
+  textDiv.appendChild(badge);
+  textDiv.appendChild(dateEl);
+
+  if (sec.panelUrl) {
+    const panelBtn = document.createElement("a");
+    panelBtn.className = "panel-btn";
+    panelBtn.href = sec.panelUrl;
+    panelBtn.target = "_blank";
+    panelBtn.rel = "noopener";
+    panelBtn.textContent = "🖥 PANEL";
+    textDiv.appendChild(panelBtn);
+  }
+
   headDiv.appendChild(textDiv);
 
   if (state.adminMode) {
     const lockBtn = document.createElement("button");
-    lockBtn.className = "lock-btn";
+    lockBtn.className   = "lock-btn";
     lockBtn.textContent = isClosed ? "🔒" : "🔓";
-    lockBtn.addEventListener("click", () => toggleLocked(day.key));
+    lockBtn.addEventListener("click", () => toggleLocked(sec.key));
     headDiv.appendChild(lockBtn);
   }
   card.appendChild(headDiv);
@@ -1078,21 +1211,17 @@ function mkCard(day) {
   if (isClosed) {
     list.innerHTML = `<div class="closed-txt">🔒 Zapisy zamknięte</div>`;
   } else if (loading) {
-    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span>Ładowanie</div>`;
+    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span></div>`;
   } else if (players.length === 0) {
     list.innerHTML = `<div class="empty">Brak zapisanych graczy</div>`;
   } else {
-    players.forEach((player, i) => {
-      const name    = player.name;
-      const early18 = player.early18 || false;
-
-      // ── Separator REZERWA ──────────────────────────────────
+    players.forEach((name, i) => {
       if (name === REZERWA_MARKER) {
         const sep = document.createElement("div");
         sep.className = "rezerwa-separator";
         sep.textContent = "▼  REZERWA  ▼";
         if (state.adminMode) {
-          const btnDel = mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i));
+          const btnDel = mkIconBtn("✕","icon-btn icon-del", () => removePlayer(sec.key, i));
           btnDel.style.marginLeft = "4px";
           sep.appendChild(btnDel);
         }
@@ -1100,61 +1229,41 @@ function mkCard(day) {
         return;
       }
 
-      // ── Normalny gracz ─────────────────────────────────────
-      const isRezerwa = players.slice(0, i).some(p => p.name === REZERWA_MARKER);
-      const isEdit    = state.editing && state.editing.dayKey === day.key && state.editing.idx === i;
+      const isRezerwa = players.slice(0, i).includes(REZERWA_MARKER);
+      const isEdit    = state.editing && state.editing.key === sec.key && state.editing.idx === i;
       const row       = document.createElement("div");
       row.className   = "player-row";
 
-      if (!isRezerwa) {
-        const numBefore = players.slice(0, i).filter(p => p.name !== REZERWA_MARKER).length;
-        row.innerHTML = `<span class="num">${numBefore + 1}</span>`;
-      } else {
-        row.innerHTML = `<span class="num" style="color:var(--c2);opacity:0.5">—</span>`;
-      }
+      const numBefore = players.slice(0, i).filter(p => p !== REZERWA_MARKER).length;
+      row.innerHTML = isRezerwa
+        ? `<span class="num" style="color:var(--c2);opacity:0.5">—</span>`
+        : `<span class="num">${numBefore + 1}</span>`;
 
       if (state.adminMode && isEdit) {
         const inp = document.createElement("input");
         inp.className = "field"; inp.value = state.editVal; inp.style.flex = "1";
-        inp.addEventListener("input", e => state.editVal = e.target.value);
+        inp.addEventListener("input",   e => state.editVal = e.target.value);
         inp.addEventListener("keydown", e => {
-          if (e.key === "Enter")  saveEdit(day.key);
-          if (e.key === "Escape") { state.editing = null; render(); }
+          if (e.key==="Enter")  saveEdit(sec.key);
+          if (e.key==="Escape") { state.editing=null; render(); }
         });
         row.appendChild(inp);
         setTimeout(() => inp.focus(), 0);
-        row.appendChild(mkIconBtn("✓", "icon-btn icon-ok", () => saveEdit(day.key)));
+        row.appendChild(mkIconBtn("✓","icon-btn icon-ok", () => saveEdit(sec.key)));
       } else {
         const span = document.createElement("span");
-        span.className = "pname";
+        span.className   = "pname";
         span.textContent = name;
         if (isRezerwa) span.style.opacity = "0.55";
         row.appendChild(span);
-
-        // Odznaka dodatkowej opcji (np. 18:00 dla czwartku, 21:00 dla poniedziałku)
-        if (extraOpt && early18) {
-          const badge = document.createElement("span");
-          badge.className = "badge-18";
-          badge.textContent = extraOpt.badge;
-          row.appendChild(badge);
-        }
-
         if (state.adminMode) {
           const wrap = document.createElement("div");
           wrap.style.display = "flex"; wrap.style.gap = "4px";
-          // Toggle dodatkowej opcji
-          if (extraOpt) {
-            const btn18 = mkIconBtn(early18 ? extraOpt.short + "✓" : extraOpt.short + "+", early18 ? "icon-btn icon-18on" : "icon-btn icon-18off", () => toggleEarly18(day.key, i));
-            btn18.style.width = "32px";
-            btn18.title = early18 ? `Usuń ${extraOpt.badge}` : `Dodaj ${extraOpt.badge}`;
-            wrap.appendChild(btn18);
-          }
-          wrap.appendChild(mkIconBtn("✎", "icon-btn icon-edit", () => {
-            state.editing = { dayKey: day.key, idx: i };
-            state.editVal = name;
-            render();
+          wrap.appendChild(mkIconBtn("✎","icon-btn icon-edit", () => {
+            state.editing = { key: sec.key, idx: i };
+            state.editVal = name; render();
           }));
-          wrap.appendChild(mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i)));
+          wrap.appendChild(mkIconBtn("✕","icon-btn icon-del", () => removePlayer(sec.key, i)));
           row.appendChild(wrap);
         }
       }
@@ -1166,114 +1275,77 @@ function mkCard(day) {
   const inputRow = document.createElement("div");
   inputRow.className = "input-row" + (isClosed ? " closed" : "");
   const inp = document.createElement("input");
-  inp.className = "field"; inp.type = "text";
-  inp.placeholder = isClosed ? "Zapisy zamknięte" : "Imię i nazwisko…";
-  inp.value = state.inputs[day.key] || "";
-  inp.disabled = isClosed;
-  inp.addEventListener("input",  e => state.inputs[day.key] = e.target.value);
-  inp.addEventListener("keydown", e => { if(e.key==="Enter" && !isClosed) addPlayer(day.key); });
+  inp.className   = "field"; inp.type = "text";
+  inp.placeholder = isClosed ? "Zapisy zamknięte" : "Nazwisko i Imię";
+  inp.value       = state.inputs[sec.key] || "";
+  inp.disabled    = isClosed;
+  inp.addEventListener("input",   e => state.inputs[sec.key] = e.target.value);
+  inp.addEventListener("keydown", e => { if(e.key==="Enter" && !isClosed) addPlayer(sec.key); });
   const addB = document.createElement("button");
-  addB.className = "add-btn"; addB.style.background = day.color;
-  addB.disabled = !!saving || isClosed;
+  addB.className = "add-btn"; addB.style.background = sec.color;
+  addB.disabled  = !!saving || isClosed;
   addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
-  addB.addEventListener("click", () => addPlayer(day.key));
+  addB.addEventListener("click", () => addPlayer(sec.key));
   inputRow.appendChild(inp); inputRow.appendChild(addB);
   card.appendChild(inputRow);
 
-  // Pigułka dodatkowej opcji (tylko gdy lista otwarta)
-  if (extraOpt && !isClosed) {
-    const pillWrap = document.createElement("div");
-    pillWrap.className = "thu18-pill-wrap";
-    const pill = document.createElement("div");
-    pill.className = "thu18-pill" + (state.thu18[day.key] ? " active" : "");
-    pill.textContent = extraOpt.pill;
-    pill.addEventListener("click", () => { state.thu18[day.key] = !state.thu18[day.key]; render(); });
-    pillWrap.appendChild(pill);
-    const hint = document.createElement("span");
-    hint.className = "thu18-pill-hint";
-    hint.textContent = "<- ZAZNACZ PRZY ZAPISIE";
-    pillWrap.appendChild(hint);
-    card.appendChild(pillWrap);
-  }
-
-  // Komunikat błędu pod polem wpisywania
-  const err = state.errors[day.key];
+  const err = state.errors[sec.key];
   if (err) {
     const errDiv = document.createElement("div");
+    errDiv.className = "input-error";
     if (err === "NOT_ON_LIST") {
-      errDiv.className = "input-info";
-      const nameVal = (state.inputs[day.key] || '').trim();
-      errDiv.innerHTML = `Nie mamy jeszcze "${esc(nameVal)}" na liście graczy.<br>
-        <a href="#" id="dopisz-btn-${day.key}" class="dopisz-btn">
-          ➕ Dopisz mnie do listy
-        </a>
-        <span class="alt-links">albo napisz do nas: <a href="https://m.me/karol.kreczmanski" target="_blank">FB</a> / <a href="tel:+48511915628">SMS 511 915 628</a></span>`;
-      setTimeout(function() {
-        const btn = document.getElementById('dopisz-btn-' + day.key);
-        if (btn) btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.startRejestracja(nameVal, day.key);
-        });
-      }, 0);
+      errDiv.innerHTML = `⚠️ Nie znaleziono Cię na liście graczy!`;
+      const addListBtn = document.createElement("button");
+      addListBtn.className   = "btn btn-addlist";
+      addListBtn.style.cssText = "margin-top:10px;width:100%;";
+      addListBtn.textContent = "DODAJ DO LISTY GRACZY";
+      addListBtn.addEventListener("click", () => {
+        const name = (state.inputs[sec.key] || "").trim();
+        if (!name) return;
+        state.addListConfirm = { key: sec.key, name };
+        render();
+      });
+      errDiv.appendChild(addListBtn);
     } else {
-      errDiv.className = "input-error";
       errDiv.textContent = "⚠️ " + err;
     }
     card.appendChild(errDiv);
   }
 
-  // Czyść błąd gdy użytkownik zaczyna pisać
   inp.addEventListener("input", () => {
-    if (state.errors[day.key]) {
-      state.errors[day.key] = null;
-      render();
-    }
+    if (state.errors[sec.key]) { state.errors[sec.key] = null; render(); }
   });
 
   return card;
 }
 
+// ── Helpers ─────────────────────────────────────────────────────
 function mkBtn(label, cls, onClick) {
   const b = document.createElement("button");
   b.className = cls; b.textContent = label;
-  b.addEventListener("click", onClick);
-  return b;
+  b.addEventListener("click", onClick); return b;
 }
 function mkIconBtn(label, cls, onClick) {
   const b = document.createElement("button");
   b.className = cls; b.textContent = label;
-  b.addEventListener("click", onClick);
-  return b;
+  b.addEventListener("click", onClick); return b;
 }
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
 
 async function tryLogin() {
-  try {
-    const res = await api({ action:"checkPassword", password: state.passInput });
-    if (res.ok) {
-      state.adminMode     = true;
-      state.adminPassword = state.passInput;
-      state.showLogin     = false;
-      state.passInput     = "";
-      state.passErr       = false;
-    } else {
-      state.passErr    = true;
-      state.passErrMsg = "Błędne hasło";
-    }
-  } catch (e) {
-    state.passErr    = true;
-    state.passErrMsg = "Błąd połączenia z serwerem, spróbuj ponownie";
-  }
+  const res = await api({ action:"checkPassword", password:state.passInput });
+  if (res.ok) {
+    state.adminMode=true; state.adminPassword=state.passInput;
+    state.showLogin=false; state.passInput=""; state.passErr=false;
+  } else { state.passErr=true; }
   render();
 }
 
+// ── Init ─────────────────────────────────────────────────────────
+try { state.gateInput = localStorage.getItem(GATE_STORAGE_KEY) || ""; } catch(e) {}
 render();
-async function loadDaysStaggered(days, batchSize) {
-  for (let i = 0; i < days.length; i += batchSize) {
-    await Promise.all(days.slice(i, i + batchSize).map(loadDay));
-  }
-}
-loadAllDays(state.days);
+if (state.gateInput) { tryUnlock(); }
+
 // potrojny klik
 (function() {
   var clicks = 0, timer;
@@ -1285,13 +1357,14 @@ loadAllDays(state.days);
     if (clicks >= 3) {
       clearTimeout(timer);
       clicks = 0;
-      window.open("https://script.google.com/macros/s/AKfycbwCGx8QaRz0gAs0ps4gj-d_6vwyxMplll_P4r0yzgf8TWPf-NxeErOnMGg8aIX3qRf67A/exec?liga=wpc", "_blank");
+      window.open("https://script.google.com/macros/s/AKfycbwCGx8QaRz0gAs0ps4gj-d_6vwyxMplll_P4r0yzgf8TWPf-NxeErOnMGg8aIX3qRf67A/exec?liga=odlewnicza", "_blank");
     }
   });
 })();
- 
 </script>
- <div class="modal-overlay" id="infoModal" style="display:none" onclick="if(event.target===this)closeModal()">
+
+<!-- ═══ MODAL INFO ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="infoModal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2>Informacje ogólne</h2>
@@ -1302,51 +1375,38 @@ loadAllDays(state.days);
 
     <div class="modal-section">
       <h3>Dla kogo?</h3>
-      <p>Początkujący i średnio-zaawansowani+</p>
-    </div>
-
-    <div class="modal-section">
-      <h3>Koszt</h3>
-      <p>70 zł (55 zł z Multisportem) — płatne na recepcji. 2H gry.</p>
+      <p>Trzy poziomy zaawansowania — znajdziesz grupę dla siebie!</p>
+      <ul>
+        <li>Grupy A/B (20:00) — zaawansowani</li>
+        <li>Grupy C/D (17:30) — średniozaawansowani</li>
+        <li>Grupy E/F (15:00) — początkujący</li>
+      </ul>
     </div>
 
     <div class="modal-section">
       <h3>Kiedy?</h3>
-      <ul>
-        <li>Poniedziałek 20:00</li>
-        <li>Wtorek 20:00</li>
-        <li>Czwartek 20:00 (i 18:00 — jeśli na 20:00 jest więcej niż 14 osób)</li>
-        <li>Piątek 19:00</li>
-        <!-- Sobota wyłączona (zastąpiona piątkiem) — odkomentuj, żeby przywrócić:
-        <li>Sobota 10:00</li>
-        -->
-      </ul>
-      <p style="margin-top:6px">Nie ma obowiązku być co tydzień — przychodzisz kiedy chcesz!</p>
+      <p>Niedziela — trzy bloki godzinowe (15:00, 17:30, 20:00)</p>
+    </div>
+
+   <div class="modal-section">
+      <h3>Koszt</h3>
+      <p>70 zł lub 55 zł z multisportem</p>
     </div>
 
     <div class="modal-section">
-      <h3>Gdzie?</h3>
-      <p>Warsaw Padel Club<br>ul. Annopol 3, Warszawa</p>
-      <a href="https://maps.app.goo.gl/8jomtCJRo2VoTQQY9?g_st=ac" target="_blank">📍 Otwórz w Mapach Google</a>
-    </div>
-
-    <div class="modal-section">
-      <h3>Zapisy i linki</h3>
-      <p>Zapisy na tej stronie. Dołącz do grupy na Messengerze lub napisz na priv (przycisk na stronie głównej).<br>
-      Przed każdą ligą wysyłam informacje w wiadomości prywatnej.</p>
-      <p style="margin-top:8px">Grupa FB (ogólne info):<br>
-      <a href="https://www.facebook.com/groups/1934793757286180/" target="_blank">facebook.com/groups/1934793757286180</a></p>
-      
+      <h3>Zapisy i kontakt</h3>
+      <p>Zapisy na tej stronie. W razie pytań napisz do nas mailowo lub zadzwoń.</p>
     </div>
 
     <p class="modal-note">* Odwołanie obecności tego samego dnia co liga wiąże się z obowiązkiem uiszczenia pełnej opłaty za udział.</p>
   </div>
 </div>
- <script>
+
+<script>
   function openModal()  { document.getElementById("infoModal").style.display = "flex"; }
   function closeModal() { document.getElementById("infoModal").style.display = "none"; }
-  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+  document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
 </script>
- <script src="chat-widget.js"></script>
+
 </body>
 </html>
