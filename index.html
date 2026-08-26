@@ -295,6 +295,16 @@
   .gate-box p { text-align: center; }
   .gate-box .login-row { flex-direction: column; }
 
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   /* ── ADMIN BAR ── */
   .admin-bar {
     background: rgba(250,180,0,0.08);
@@ -1006,18 +1016,19 @@ function renderGate() {
   document.querySelectorAll(".gated").forEach(el => { el.style.display = "none"; });
 
   gate.innerHTML = `
-    <div class="login-box gate-box">
+    <form class="login-box gate-box" id="gateForm" autocomplete="on">
       <p>Podaj hasło administratora, aby zobaczyć zapisy:</p>
       <div class="login-row">
-        <input class="field${state.gateErr?" err":""}" id="gateInp" type="password" placeholder="Wpisz hasło…" value="${esc(state.gateInput)}" />
-        <button class="btn btn-yellow" id="gateOk">Odblokuj</button>
+        <input class="visually-hidden" type="text" name="username" autocomplete="username" value="widz-wpc" readonly tabindex="-1" aria-hidden="true" />
+        <input class="field${state.gateErr?" err":""}" id="gateInp" name="password" type="password" autocomplete="current-password" placeholder="Wpisz hasło…" value="${esc(state.gateInput)}" />
+        <button class="btn btn-yellow" id="gateOk" type="submit">Odblokuj</button>
       </div>
       ${state.gateErr ? '<p class="err-msg">Błędne hasło</p>' : ""}
-    </div>`;
+    </form>`;
+  const form = gate.querySelector("#gateForm");
   const inp = gate.querySelector("#gateInp");
-  inp.addEventListener("input",   e => { state.gateInput = e.target.value; state.gateErr = false; });
-  inp.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
-  gate.querySelector("#gateOk").addEventListener("click", tryUnlock);
+  inp.addEventListener("input", e => { state.gateInput = e.target.value; state.gateErr = false; });
+  form.addEventListener("submit", e => { e.preventDefault(); tryUnlock(); });
   inp.focus();
 }
 
