@@ -707,6 +707,59 @@
   color: var(--green);
 }
 
+/* Pigułki wyboru godziny (zapisy godzinowe, np. TEST RAKIET) */
+.hour-pill-wrap {
+  background: rgba(0,0,0,0.15);
+  padding: 10px 14px 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hour-pill {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 100px;
+  padding: 5px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: color .15s, border-color .15s, background .15s;
+  border: 1px solid rgba(90,102,128,0.3);
+  color: var(--muted);
+  background: transparent;
+}
+.hour-pill.full {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.hour-pill-sm {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.hour-group-head {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 8px 14px 2px;
+  opacity: 0.9;
+}
+.hour-group-empty {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 14px 4px;
+  opacity: 0.6;
+}
+.badge-hour {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
 </style>
 </head>
 <body>
@@ -768,16 +821,40 @@ const DAYS_BASE = [
   // Sobota wyłączona (zastąpiona piątkiem) — odkomentuj, żeby przywrócić:
   // { key:"sat", label:"Sobota 10:00",              short:"Sob", dow:6 },
 ];
- const DAYS = [
+ // Dni jednorazowe, ze sztywną datą (nie cotygodniowe) — np. wydarzenia specjalne.
+const SPECIAL_DAYS = [
+  { key: "sun_test_rakiet", dayKey: "sun", label: "TEST RAKIET", short: "TR", fixedDate: "2026-10-04" },
+];
+
+const DAYS = [
   ...DAYS_BASE,
   ...DAYS_BASE.map(d => ({ ...d, key: d.key + "_w2", weekOffset: 7 })),
+  ...SPECIAL_DAYS,
 ];
+
+// Klucz dnia jaki wysyłamy do backendu (Apps Script) — zwykłe dni tygodnia
+// wyprowadzają go z klucza karty (usuwając sufiks drugiego tygodnia),
+// dni specjalne (SPECIAL_DAYS) mają go podany wprost jako dayKey.
+function backendDayKey(day) {
+  return day.dayKey || day.key.replace(/_w2$/, "");
+}
 
 // Dodatkowa opcja zapisu (pigułka + odznaka przy nazwisku), per dzień tygodnia
 const EXTRA_OPTIONS = {
   thu: { pill: "Mogę też na 18:00",              badge: "18:00", short: "18" },
   mon: { pill: "Poziom Pocz./Śr-zaaw. 21:00",    badge: "21:00", short: "21" },
 };
+
+// Dni z zapisem na konkretną godzinę zamiast zwykłej listy — każdy wybiera
+// dokładnie jedną godzinę (wymagane), limit miejsc na godzinę. Klucz = klucz karty.
+const HOUR_EVENTS = {
+  sun_test_rakiet: {
+    hours: ["10", "11", "12", "13", "14"],
+    capacity: 10,
+    colors: { "10": "#c8ff00", "11": "#00e5ff", "12": "#ff8c42", "13": "#b06aff", "14": "#ff4d6d" },
+  },
+};
+
  const REZERWA_MARKER = "REZERWA"; // dokładnie tak wpisz w arkuszu
 const COLORS = ["#c8ff00","#00e5ff","#ff8c42","#b06aff","#c8ff00","#00e5ff","#ff8c42","#b06aff"];
 
@@ -789,6 +866,19 @@ function getNextDate(dow, weekOffset) {
   if (diff === 0 && hour >= CUTOFF_HOUR) diff = 7;
   const d = new Date(now);
   d.setDate(d.getDate() + diff + (weekOffset || 0));
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function parseFixedDate(s) {
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+function todayMidnight() {
+  const d = new Date();
   d.setHours(0,0,0,0);
   return d;
 }
@@ -806,13 +896,16 @@ function formatPL(d) {
 
 const _savedName = localStorage.getItem("lastPlayerName") || "";
 let state = {
-  days:      DAYS.map((d,i) => ({ ...d, date: getNextDate(d.dow, d.weekOffset), color: COLORS[i % COLORS.length] })),
+  days: DAYS
+    .map((d,i) => ({ ...d, date: d.fixedDate ? parseFixedDate(d.fixedDate) : getNextDate(d.dow, d.weekOffset), color: COLORS[i % COLORS.length] }))
+    .filter(d => !d.fixedDate || d.date >= todayMidnight()),
   lists:     {},
   loading:   {},
   inputs: Object.fromEntries(DAYS.map(d => [d.key, _savedName])),
   saving:    {},
   editing:   null,
   editVal:   "",
+  editHour:  "",
   adminMode: false,
   showLogin: false,
   passInput: "",
@@ -822,6 +915,7 @@ let state = {
   adminPassword: "",
   errors: {},
   thu18:  Object.fromEntries(DAYS.map(d => [d.key, false])),
+  hourSel: Object.fromEntries(DAYS.map(d => [d.key, ""])),
   labels: {},
 };
 
@@ -874,7 +968,7 @@ async function api(params, retries = 2) {
 
 async function loadDay(day) {
   state.loading[day.key] = true; render();
-  const res = await api({ action:"list", dayKey:day.key.replace(/_w2$/, ""), dateStr:dateKey(day.date) });
+  const res = await api({ action:"list", dayKey:backendDayKey(day), dateStr:dateKey(day.date) });
   if (res.ok) {
     state.lists[day.key]  = normalizePlayers(res.players);
     state.locked[day.key] = res.locked;
@@ -891,7 +985,7 @@ async function loadAllDays(days) {
   try {
     const payload = days.map(d => ({
       fullKey: d.key,
-      dayKey:  d.key.replace(/_w2$/, ""),
+      dayKey:  backendDayKey(d),
       dateStr: dateKey(d.date),
     }));
     const res = await api({ action:"listAll", days: JSON.stringify(payload) });
@@ -917,12 +1011,19 @@ async function addPlayer(dayKey) {
   const day  = state.days.find(d => d.key === dayKey);
   const name = (state.inputs[dayKey]||"").trim();
   if (!name) return;
+  const hourEvt = HOUR_EVENTS[dayKey];
+  if (hourEvt && !state.hourSel[dayKey]) {
+    state.errors[dayKey] = "Wybierz godzinę";
+    render();
+    return;
+  }
   state.saving[dayKey] = true;
   state.errors[dayKey] = null;
   render();
-  const extraOpt = EXTRA_OPTIONS[dayKey.replace(/_w2$/, "")];
-  const addParams = { action:"add", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), name };
+  const extraOpt = EXTRA_OPTIONS[backendDayKey(day)];
+  const addParams = { action:"add", dayKey:backendDayKey(day), dateStr:dateKey(day.date), name };
   if (extraOpt) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
+  if (hourEvt) addParams.hour = state.hourSel[dayKey];
   const res = await api(addParams);
   if (res.ok) {
     state.lists[dayKey] = normalizePlayers(res.players);
@@ -938,15 +1039,28 @@ async function addPlayer(dayKey) {
 
 async function removePlayer(dayKey, idx) {
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"remove", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, password:state.adminPassword });
+  const res = await api({ action:"remove", dayKey:backendDayKey(day), dateStr:dateKey(day.date), idx, password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); render(); }
 }
 
 async function saveEdit(dayKey) {
   if (!state.editing) return;
   const day = state.days.find(d => d.key === dayKey);
-  const res = await api({ action:"edit", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword });
-  if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); state.editing = null; render(); }
+  const hourEvt = HOUR_EVENTS[dayKey];
+  const editParams = { action:"edit", dayKey:backendDayKey(day), dateStr:dateKey(day.date), idx:state.editing.idx, newName:state.editVal, password:state.adminPassword };
+  if (hourEvt) {
+    if (!state.editHour) { state.errors[dayKey] = "Wybierz godzinę"; render(); return; }
+    editParams.newHour = state.editHour;
+  }
+  const res = await api(editParams);
+  if (res.ok) {
+    state.lists[dayKey] = normalizePlayers(res.players);
+    state.editing = null;
+    state.errors[dayKey] = null;
+  } else {
+    state.errors[dayKey] = res.error;
+  }
+  render();
 }
 
 async function toggleLocked(dayKey) {
@@ -954,7 +1068,7 @@ async function toggleLocked(dayKey) {
   const action = state.locked[dayKey] ? "unlock" : "lock";
   state.errors[dayKey] = null;
   try {
-    const res = await api({ action, dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), password:state.adminPassword });
+    const res = await api({ action, dayKey:backendDayKey(day), dateStr:dateKey(day.date), password:state.adminPassword });
     if (res.ok) {
       state.locked[dayKey] = res.locked;
       saveLockedState();
@@ -969,9 +1083,9 @@ async function toggleLocked(dayKey) {
 
 function normalizePlayers(arr) {
   return (arr || []).map(p => {
-    if (typeof p === "string") return { name: p, early18: false };
+    if (typeof p === "string") return { name: p, early18: false, hour: "" };
     const e18 = p.early18;
-    return { ...p, early18: e18 === true || e18 === 1 || e18 === "1" || e18 === "true" };
+    return { ...p, early18: e18 === true || e18 === 1 || e18 === "1" || e18 === "true", hour: p.hour || "" };
   });
 }
 
@@ -979,7 +1093,7 @@ async function toggleEarly18(dayKey, idx) {
   const day     = state.days.find(d => d.key === dayKey);
   const players = state.lists[dayKey] || [];
   const current = players[idx]?.early18 || false;
-  const res = await api({ action:"setEarly18", dayKey:dayKey.replace(/_w2$/, ""), dateStr:dateKey(day.date), idx, early18: current ? "0" : "1", password:state.adminPassword });
+  const res = await api({ action:"setEarly18", dayKey:backendDayKey(day), dateStr:dateKey(day.date), idx, early18: current ? "0" : "1", password:state.adminPassword });
   if (res.ok) { state.lists[dayKey] = normalizePlayers(res.players); render(); }
 }
 
@@ -1044,12 +1158,101 @@ function renderGrid() {
   }
 }
 
+// Renderuje listę graczy pogrupowaną wg wybranej godziny (dni z HOUR_EVENTS).
+// `_idx` zachowuje oryginalny indeks z arkusza (dla edit/remove po stronie backendu).
+function renderHourGroupedList(list, day, players, hourEvt) {
+  const withIdx = players.map((p, i) => ({ ...p, _idx: i }));
+
+  hourEvt.hours.forEach(h => {
+    const color = hourEvt.colors[h];
+    const group = withIdx.filter(p => p.hour === h);
+
+    const head = document.createElement("div");
+    head.className = "hour-group-head";
+    head.style.color = color;
+    head.textContent = `${h}:00 — ${group.length}/${hourEvt.capacity}`;
+    list.appendChild(head);
+
+    if (group.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "hour-group-empty";
+      empty.textContent = "Brak zapisanych";
+      list.appendChild(empty);
+      return;
+    }
+
+    group.forEach((player, gi) => {
+      const i      = player._idx;
+      const isEdit = state.editing && state.editing.dayKey === day.key && state.editing.idx === i;
+      const row    = document.createElement("div");
+      row.className = "player-row";
+      row.innerHTML = `<span class="num">${gi + 1}</span>`;
+
+      if (state.adminMode && isEdit) {
+        const inp = document.createElement("input");
+        inp.className = "field"; inp.value = state.editVal; inp.style.flex = "1";
+        inp.addEventListener("input", e => state.editVal = e.target.value);
+        inp.addEventListener("keydown", e => {
+          if (e.key === "Enter")  saveEdit(day.key);
+          if (e.key === "Escape") { state.editing = null; render(); }
+        });
+        row.appendChild(inp);
+        setTimeout(() => inp.focus(), 0);
+
+        const pillsWrap = document.createElement("div");
+        pillsWrap.style.display = "flex"; pillsWrap.style.gap = "3px"; pillsWrap.style.flexShrink = "0";
+        hourEvt.hours.forEach(hh => {
+          const hc  = hourEvt.colors[hh];
+          const sel = state.editHour === hh;
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "hour-pill hour-pill-sm" + (sel ? " active" : "");
+          b.textContent = hh;
+          if (sel) { b.style.color = hc; b.style.borderColor = hc; b.style.background = hc + "22"; }
+          b.addEventListener("click", () => { state.editHour = hh; render(); });
+          pillsWrap.appendChild(b);
+        });
+        row.appendChild(pillsWrap);
+        row.appendChild(mkIconBtn("✓", "icon-btn icon-ok", () => saveEdit(day.key)));
+      } else {
+        const span = document.createElement("span");
+        span.className = "pname";
+        span.textContent = player.name;
+        row.appendChild(span);
+
+        const badge = document.createElement("span");
+        badge.className = "badge-hour";
+        badge.textContent = h + ":00";
+        badge.style.color = color;
+        badge.style.borderColor = color + "66";
+        badge.style.background = color + "22";
+        row.appendChild(badge);
+
+        if (state.adminMode) {
+          const wrap = document.createElement("div");
+          wrap.style.display = "flex"; wrap.style.gap = "4px";
+          wrap.appendChild(mkIconBtn("✎", "icon-btn icon-edit", () => {
+            state.editing  = { dayKey: day.key, idx: i };
+            state.editVal  = player.name;
+            state.editHour = player.hour || hourEvt.hours[0];
+            render();
+          }));
+          wrap.appendChild(mkIconBtn("✕", "icon-btn icon-del", () => removePlayer(day.key, i)));
+          row.appendChild(wrap);
+        }
+      }
+      list.appendChild(row);
+    });
+  });
+}
+
 function mkCard(day) {
   const players  = state.lists[day.key] || [];
   const loading  = state.loading[day.key];
   const saving   = state.saving[day.key];
   const isClosed = state.locked[day.key];
-  const extraOpt = EXTRA_OPTIONS[day.key.replace(/_w2$/, "")];
+  const extraOpt = EXTRA_OPTIONS[backendDayKey(day)];
+  const hourEvt   = HOUR_EVENTS[day.key];
   const cardLabel = state.labels[day.key] || day.label;
 
   const card = document.createElement("div");
@@ -1081,6 +1284,8 @@ function mkCard(day) {
     list.innerHTML = `<div class="loading-txt"><span class="spinner"></span>Ładowanie</div>`;
   } else if (players.length === 0) {
     list.innerHTML = `<div class="empty">Brak zapisanych graczy</div>`;
+  } else if (hourEvt) {
+    renderHourGroupedList(list, day, players, hourEvt);
   } else {
     players.forEach((player, i) => {
       const name    = player.name;
@@ -1194,6 +1399,37 @@ function mkCard(day) {
     hint.textContent = "<- ZAZNACZ PRZY ZAPISIE";
     pillWrap.appendChild(hint);
     card.appendChild(pillWrap);
+  }
+
+  // Pigułki wyboru godziny (wymagane, jedna na osobę, limit miejsc na godzinę)
+  if (hourEvt && !isClosed) {
+    const counts = {};
+    hourEvt.hours.forEach(h => counts[h] = players.filter(p => p.hour === h).length);
+
+    const hourWrap = document.createElement("div");
+    hourWrap.className = "hour-pill-wrap";
+    hourEvt.hours.forEach(h => {
+      const c        = hourEvt.colors[h];
+      const full     = counts[h] >= hourEvt.capacity;
+      const selected = state.hourSel[day.key] === h;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "hour-pill" + (selected ? " active" : "") + (full ? " full" : "");
+      btn.textContent = full ? `${h} pełne` : `${h}:00 (${counts[h]}/${hourEvt.capacity})`;
+      btn.disabled = full;
+      if (selected && !full) {
+        btn.style.color = c; btn.style.borderColor = c; btn.style.background = c + "22";
+      }
+      btn.addEventListener("click", () => { state.hourSel[day.key] = h; state.errors[day.key] = null; render(); });
+      hourWrap.appendChild(btn);
+    });
+    card.appendChild(hourWrap);
+
+    const hourHint = document.createElement("div");
+    hourHint.className = "thu18-pill-hint";
+    hourHint.style.padding = "0 14px 10px";
+    hourHint.textContent = "WYBIERZ GODZINĘ ↑ (wymagane)";
+    card.appendChild(hourHint);
   }
 
   // Komunikat błędu pod polem wpisywania
