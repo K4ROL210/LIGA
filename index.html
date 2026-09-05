@@ -325,6 +325,32 @@
   @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 500px)  { .grid { grid-template-columns: 1fr; } }
 
+  /* ── WYRÓŻNIONE WYDARZENIE ── */
+  .featured-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .featured-wrap:empty { display: none; margin: 0; }
+  .featured-wrap .card {
+    width: 100%;
+    max-width: 560px;
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+      0 10px 50px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .featured-wrap .card::before { height: 3px; opacity: 1; }
+  .featured-ribbon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 6px 0;
+    color: #080c10;
+    background: var(--accent);
+  }
+
   /* ── CARD ── */
   .card {
     background: rgba(255,255,255,0.035);
@@ -808,6 +834,7 @@ const todayDateStr = today.toLocaleDateString("pl-PL", {
   <div class="top-bar" id="topBar"></div>
   <div id="loginBox"></div>
   <div id="adminBar"></div>
+  <div class="featured-wrap" id="featuredWrap"></div>
   <div class="grid" id="grid"></div>
   <footer>Administratorem danych jest Karol Kreczmański. Dane (imię i nazwisko) są zbierane w celu organizacji ligi i będą publicznie widoczne na liście uczestników. Uczestnik może żądać ich usunięcia. <br> Made by Karol Kreczmański</footer>
 </div>
@@ -822,8 +849,9 @@ const DAYS_BASE = [
   // { key:"sat", label:"Sobota 10:00",              short:"Sob", dow:6 },
 ];
  // Dni jednorazowe, ze sztywną datą (nie cotygodniowe) — np. wydarzenia specjalne.
+// `featured: true` = wyróżniona karta na górze strony, na środku, w osobnym kolorze.
 const SPECIAL_DAYS = [
-  { key: "sun_test_rakiet", dayKey: "sun", label: "TEST RAKIET", short: "TR", fixedDate: "2026-10-04" },
+  { key: "sun_test_rakiet", dayKey: "sun", label: "TEST RAKIET", short: "TR", fixedDate: "2026-10-04", featured: true, color: "#ffd700" },
 ];
 
 const DAYS = [
@@ -897,7 +925,7 @@ function formatPL(d) {
 const _savedName = localStorage.getItem("lastPlayerName") || "";
 let state = {
   days: DAYS
-    .map((d,i) => ({ ...d, date: d.fixedDate ? parseFixedDate(d.fixedDate) : getNextDate(d.dow, d.weekOffset), color: COLORS[i % COLORS.length] }))
+    .map((d,i) => ({ ...d, date: d.fixedDate ? parseFixedDate(d.fixedDate) : getNextDate(d.dow, d.weekOffset), color: d.color || COLORS[i % COLORS.length] }))
     .filter(d => !d.fixedDate || d.date >= todayMidnight()),
   lists:     {},
   loading:   {},
@@ -1151,9 +1179,18 @@ function renderAdminBar() {
 }
 
 function renderGrid() {
+  const featuredWrap = document.getElementById("featuredWrap");
   const grid = document.getElementById("grid");
+  featuredWrap.innerHTML = "";
   grid.innerHTML = "";
-  for (const day of [...state.days].sort((a, b) => a.date - b.date)) {
+
+  const featured = state.days.filter(d => d.featured);
+  const rest     = state.days.filter(d => !d.featured);
+
+  for (const day of featured) {
+    featuredWrap.appendChild(mkCard(day));
+  }
+  for (const day of [...rest].sort((a, b) => a.date - b.date)) {
     grid.appendChild(mkCard(day));
   }
 }
@@ -1256,8 +1293,15 @@ function mkCard(day) {
   const cardLabel = state.labels[day.key] || day.label;
 
   const card = document.createElement("div");
-  card.className = "card";
+  card.className = "card" + (day.featured ? " featured" : "");
   card.style.setProperty("--accent", day.color);
+
+  if (day.featured) {
+    const ribbon = document.createElement("div");
+    ribbon.className = "featured-ribbon";
+    ribbon.textContent = "⭐ GŁÓWNE WYDARZENIE";
+    card.appendChild(ribbon);
+  }
 
   const headDiv = document.createElement("div");
   headDiv.className = "card-head";
