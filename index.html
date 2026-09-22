@@ -939,10 +939,12 @@ function formatPL(d) {
   return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit",year:"numeric"});
 }
 
+const BASE_KEYS = DAYS_BASE.map(d => d.key);
+
 const _savedName = localStorage.getItem("lastPlayerName") || "";
 let state = {
   days: DAYS
-    .map((d,i) => ({ ...d, date: d.fixedDate ? parseFixedDate(d.fixedDate) : getNextDate(d.dow, d.weekOffset), color: d.color || COLORS[i % COLORS.length] }))
+    .map(d => ({ ...d, date: d.fixedDate ? parseFixedDate(d.fixedDate) : getNextDate(d.dow, d.weekOffset), color: d.color || COLORS[BASE_KEYS.indexOf(d.key.replace(/_w2$/, "")) % COLORS.length] }))
     .filter(d => !d.fixedDate || d.date >= todayMidnight()),
   lists:     {},
   loading:   {},
