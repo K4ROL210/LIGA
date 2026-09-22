@@ -858,7 +858,7 @@ const todayDateStr = today.toLocaleDateString("pl-PL", {
 <script>
 const DAYS_BASE = [
   { key:"mon", label:"Trening Poniedziałek 20:00", short:"Pn",  dow:1 },
-  { key:"tue", label:"Wtorek 20:00",                 short:"Wt",  dow:2 },
+  { key:"tue", label:"Wtorek 19:00",                 short:"Wt",  dow:2 },
   { key:"thu", label:"Czwartek 20:00",               short:"Czw", dow:4 },
   // Piątek 19:00 (Król Kortu) wyłączony tymczasowo — odkomentuj, żeby przywrócić:
   // { key:"fri", label:"Piątek 19:00 <br> KRÓL KORTU",                 short:"Pt",  dow:5 },
@@ -1613,7 +1613,7 @@ loadAllDays(state.days);
       <h3>Kiedy?</h3>
       <ul>
         <li>Poniedziałek 20:00</li>
-        <li>Wtorek 20:00</li>
+        <li>Wtorek 19:00</li>
         <li>Czwartek 20:00 (i 18:00 — jeśli na 20:00 jest więcej niż 14 osób)</li>
         <!-- Piątek 19:00 (Król Kortu) wyłączony tymczasowo — odkomentuj, żeby przywrócić:
         <li>Piątek 19:00</li>
