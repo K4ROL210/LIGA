@@ -740,7 +740,17 @@ async function loadResults(silent = false) {
 function renderResults(data) {
   const area  = document.getElementById("contentArea");
   const color = DAY_CONFIG[state.activeDay]?.color || "#c8ff00";
+
+  // Pomiń przerysowanie, gdy dane są identyczne — bez migotania i bez gubienia
+  // pozycji przewinięcia tabel przy auto-odświeżaniu co kilka sekund.
+  const sig = JSON.stringify([data.rankingHeaders, data.rankingRows, data.matchData]);
+  if (area.dataset.sig === sig) return;
+
+  // Zapamiętaj poziome/pionowe przewinięcie tabel przed przebudową DOM
+  const scrollMem = saveScroll(area);
+
   area.innerHTML = "";
+  area.dataset.sig = sig;
 
   // ── Ranking kolejki ──────────────────────────────────────────
   if (data.rankingRows && data.rankingRows.length > 0) {
@@ -750,6 +760,7 @@ function renderResults(data) {
     const card   = mkCard(color);
     const scroll = document.createElement("div");
     scroll.className = "table-scroll";
+    scroll.dataset.scrollKey = "ranking";
 
     const table = document.createElement("table");
     table.className = "rank-table";
@@ -823,6 +834,7 @@ function renderResults(data) {
     const card2   = mkCard(color);
     const scroll2 = document.createElement("div");
     scroll2.className = "table-scroll";
+    scroll2.dataset.scrollKey = "matches";
 
     const matchGrid = renderMatchGrid(data.matchData, color);
     if (matchGrid) {
@@ -838,7 +850,33 @@ function renderResults(data) {
   if ((!data.rankingRows || data.rankingRows.length === 0) &&
       (!data.matchData   || data.matchData.length === 0)) {
     showError("Brak danych w tym pliku");
+    return;
   }
+
+  // Przywróć zapamiętane przewinięcie tabel po przebudowie
+  restoreScroll(area, scrollMem);
+}
+
+// Zapamiętuje przewinięcie wszystkich przewijanych tabel/drabinek w obszarze
+function saveScroll(area) {
+  const mem = {};
+  area.querySelectorAll("[data-scroll-key]").forEach(el => {
+    mem[el.dataset.scrollKey] = { left: el.scrollLeft, top: el.scrollTop };
+  });
+  return mem;
+}
+
+// Przywraca przewinięcie zapamiętane przez saveScroll (też w następnej klatce,
+// bo szerokość tabel bywa znana dopiero po layoucie)
+function restoreScroll(area, mem) {
+  const apply = () => {
+    area.querySelectorAll("[data-scroll-key]").forEach(el => {
+      const m = mem[el.dataset.scrollKey];
+      if (m) { el.scrollLeft = m.left; el.scrollTop = m.top; }
+    });
+  };
+  apply();
+  requestAnimationFrame(apply);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1223,6 +1261,7 @@ function renderBracketGroup(group, color) {
 
   const scroll = document.createElement("div");
   scroll.className = "bracket-scroll";
+  scroll.dataset.scrollKey = "bracket-" + group.key;
 
   const tree = document.createElement("div");
   tree.className = "bracket-tree";
@@ -1365,11 +1404,18 @@ function drawBracketConnectors(tree, group) {
 // Renderuje całą zakładkę Turniej: najpierw grupa "1-8", pod nią "9-16".
 let lastTournamentData = null;
 
-function renderTournament(data) {
+function renderTournament(data, force = false) {
   lastTournamentData = data;
 
   const area = document.getElementById("contentArea");
+
+  // Jak w wynikach: bez zmian w danych nie przebudowuj drabinki
+  const sig = "T" + JSON.stringify(data.groups);
+  if (!force && area.dataset.sig === sig) return;
+
+  const scrollMem = saveScroll(area);
   area.innerHTML = "";
+  area.dataset.sig = sig;
 
   if (!data.groups || data.groups.length === 0) {
     showError("Brak danych turnieju");
@@ -1379,6 +1425,8 @@ function renderTournament(data) {
   data.groups.forEach(group => {
     area.appendChild(renderBracketGroup(group, TOURNAMENT_COLOR));
   });
+
+  restoreScroll(area, scrollMem);
 }
 
 // Po zmianie rozmiaru okna przerysuj drzewko, żeby linie łączące zostały poprawnie przeliczone.
@@ -1386,7 +1434,7 @@ let tourResizeTimer = null;
 window.addEventListener("resize", () => {
   if (state.mode !== "tournament" || !lastTournamentData) return;
   clearTimeout(tourResizeTimer);
-  tourResizeTimer = setTimeout(() => renderTournament(lastTournamentData), 250);
+  tourResizeTimer = setTimeout(() => renderTournament(lastTournamentData, true), 250);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -1440,17 +1488,23 @@ function mkCard(color) {
 
 // ── Stan UI ────────────────────────────────────────────────────
 function showContentLoading() {
-  document.getElementById("contentArea").innerHTML =
+  const el = document.getElementById("contentArea");
+  el.dataset.sig = "";               // wymuś pełne przerysowanie po załadowaniu
+  el.innerHTML =
     `<div class="state-box"><div class="spinner"></div><p>Ładowanie wyników…</p></div>`;
 }
 
 function showError(msg) {
-  document.getElementById("contentArea").innerHTML =
+  const el = document.getElementById("contentArea");
+  el.dataset.sig = "";
+  el.innerHTML =
     `<div class="state-box"><div class="icon">❌</div><p>${msg}</p></div>`;
 }
 
 function clearContent() {
-  document.getElementById("contentArea").innerHTML =
+  const el = document.getElementById("contentArea");
+  el.dataset.sig = "";
+  el.innerHTML =
     `<div class="state-box"><div class="icon">🏆</div><p>Wybierz kolejkę aby zobaczyć wyniki</p></div>`;
 }
 
