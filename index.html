@@ -478,6 +478,25 @@
   .loading-txt { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 8px; color: #fff; font-size: 12px; }
   .closed-txt  { text-align: center; padding: 20px 8px; color: var(--red); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
+  /* ── UKRYTA LISTA (widok gracza) ── */
+  .hidden-txt  { text-align: center; padding: 18px 8px 14px; color: var(--muted); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .me-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 0 14px 10px; padding: 10px 12px; border-radius: 10px;
+    background: rgba(200,255,0,0.08); border: 1px solid rgba(200,255,0,0.35);
+  }
+  .me-row .me-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .me-row .me-tag  { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--green); }
+  .me-row .me-sub  { font-size: 12px; font-weight: 700; color: var(--c2); text-transform: uppercase; }
+  .check-msg { margin: 0 14px 10px; padding: 8px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center;
+               background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3); color: #ffb3b3; }
+  .check-btn {
+    background: transparent; color: var(--text); border: 1.5px solid var(--border-hi); border-radius: 8px;
+    padding: 8px 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;
+  }
+  .check-btn:hover { border-color: var(--text); }
+  .input-row.closed.can-check { opacity: 1; pointer-events: auto; }
+
   /* ── ICON BUTTONS ── */
   .icon-btn {
     background: transparent;
@@ -964,7 +983,26 @@ let state = {
   thu18:  Object.fromEntries(DAYS.map(d => [d.key, false])),
   hourSel: Object.fromEntries(DAYS.map(d => [d.key, ""])),
   labels: {},
+  checkMsg: {},
 };
+
+// ── Imiona zapisane z tego urządzenia (lista graczy jest ukryta dla nie-adminów) ──
+const MY_NAMES_KEY = "myPlayerNames";
+function normName(n) { return String(n || "").trim().replace(/\s+/g, " ").toLowerCase(); }
+function getMyNames() {
+  let arr = [];
+  try { arr = JSON.parse(localStorage.getItem(MY_NAMES_KEY) || "[]") || []; } catch (e) {}
+  if (_savedName) arr.push(_savedName);
+  return [...new Set(arr.map(normName).filter(Boolean))];
+}
+function addMyName(name) {
+  const n = normName(name);
+  if (!n) return;
+  let arr = [];
+  try { arr = JSON.parse(localStorage.getItem(MY_NAMES_KEY) || "[]") || []; } catch (e) {}
+  if (!arr.map(normName).includes(n)) arr.push(name.trim());
+  try { localStorage.setItem(MY_NAMES_KEY, JSON.stringify(arr.slice(-10))); } catch (e) {}
+}
 
 function saveLockedState() {
   localStorage.setItem('lockedDays', JSON.stringify(state.locked));
@@ -1072,11 +1110,17 @@ async function addPlayer(dayKey) {
   if (extraOpt) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
   if (hourEvt) addParams.hour = state.hourSel[dayKey];
   const res = await api(addParams);
+  state.checkMsg[dayKey] = null;
   if (res.ok) {
     state.lists[dayKey] = normalizePlayers(res.players);
     state.errors[dayKey] = null;
     localStorage.setItem("lastPlayerName", name);
+    addMyName(name);
     state.days.forEach(d => { state.inputs[d.key] = name; });
+  } else if (res.error === "Już jesteś na liście!") {
+    // Lista jest ukryta — zamiast błędu pokazujemy po prostu "ZAPISANY".
+    addMyName(name);
+    state.errors[dayKey] = null;
   } else {
     state.errors[dayKey] = res.error;
   }
@@ -1341,7 +1385,9 @@ function mkCard(day) {
   const list = document.createElement("div");
   list.className = "player-list";
 
-  if (isClosed) {
+  if (!state.adminMode) {
+    renderHiddenList(list, day, players, isClosed, loading, extraOpt);
+  } else if (isClosed) {
     list.innerHTML = `<div class="closed-txt">🔒 Zapisy zamknięte</div>`;
   } else if (loading) {
     list.innerHTML = `<div class="loading-txt"><span class="spinner"></span>Ładowanie</div>`;
@@ -1431,21 +1477,39 @@ function mkCard(day) {
   }
   card.appendChild(list);
 
+  const canCheck = !state.adminMode;   // gracz może sprawdzić zapis także przy zamkniętej liście
   const inputRow = document.createElement("div");
-  inputRow.className = "input-row" + (isClosed ? " closed" : "");
+  inputRow.className = "input-row" + (isClosed ? " closed" : "") + (isClosed && canCheck ? " can-check" : "");
   const inp = document.createElement("input");
   inp.className = "field"; inp.type = "text";
-  inp.placeholder = isClosed ? "Zapisy zamknięte" : "Imię i nazwisko…";
+  inp.placeholder = isClosed ? (canCheck ? "Imię i nazwisko — sprawdź zapis" : "Zapisy zamknięte") : "Imię i nazwisko…";
   inp.value = state.inputs[day.key] || "";
-  inp.disabled = isClosed;
+  inp.disabled = isClosed && !canCheck;
   inp.addEventListener("input",  e => state.inputs[day.key] = e.target.value);
-  inp.addEventListener("keydown", e => { if(e.key==="Enter" && !isClosed) addPlayer(day.key); });
-  const addB = document.createElement("button");
-  addB.className = "add-btn"; addB.style.background = day.color;
-  addB.disabled = !!saving || isClosed;
-  addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
-  addB.addEventListener("click", () => addPlayer(day.key));
-  inputRow.appendChild(inp); inputRow.appendChild(addB);
+  inp.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    if (!isClosed) addPlayer(day.key);
+    else if (canCheck) checkPlayer(day.key);
+  });
+  inputRow.appendChild(inp);
+  if (canCheck) {
+    const chkB = document.createElement("button");
+    chkB.className = "check-btn";
+    chkB.textContent = "Sprawdź";
+    chkB.title = "Sprawdź, czy jesteś zapisany";
+    chkB.disabled = !!loading;
+    chkB.addEventListener("click", () => checkPlayer(day.key));
+    inputRow.appendChild(chkB);
+  }
+  if (!isClosed || !canCheck) {
+    const addB = document.createElement("button");
+    addB.className = "add-btn"; addB.style.background = day.color;
+    addB.disabled = !!saving || isClosed;
+    addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
+    addB.title = "Zapisz się";
+    addB.addEventListener("click", () => addPlayer(day.key));
+    inputRow.appendChild(addB);
+  }
   card.appendChild(inputRow);
 
   // Pigułka dodatkowej opcji (tylko gdy lista otwarta)
@@ -1478,7 +1542,8 @@ function mkCard(day) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "hour-pill" + (selected ? " active" : "") + (full ? " full" : "");
-      btn.textContent = full ? `${h} pełne` : `${h}:00 (${counts[h]}/${hourEvt.capacity})`;
+      // Liczby zapisanych widzi tylko admin — gracz widzi tylko, czy godzina jest pełna.
+      btn.textContent = full ? `${h} pełne` : (state.adminMode ? `${h}:00 (${counts[h]}/${hourEvt.capacity})` : `${h}:00`);
       btn.disabled = full;
       if (selected && !full) {
         btn.style.color = c; btn.style.borderColor = c; btn.style.background = c + "22";
@@ -1523,13 +1588,71 @@ function mkCard(day) {
 
   // Czyść błąd gdy użytkownik zaczyna pisać
   inp.addEventListener("input", () => {
-    if (state.errors[day.key]) {
+    if (state.errors[day.key] || state.checkMsg[day.key]) {
       state.errors[day.key] = null;
+      state.checkMsg[day.key] = null;
       render();
     }
   });
 
   return card;
+}
+
+// Widok gracza: lista ukryta, pokazujemy tylko "ZAPISANY" dla imion zapamiętanych na tym urządzeniu.
+function renderHiddenList(list, day, players, isClosed, loading, extraOpt) {
+  if (loading) {
+    list.innerHTML = `<div class="loading-txt"><span class="spinner"></span>Ładowanie</div>`;
+    return;
+  }
+  list.innerHTML = isClosed
+    ? `<div class="closed-txt">🔒 Zapisy zamknięte</div>`
+    : `<div class="hidden-txt">🔒 Lista graczy ukryta</div>`;
+
+  const mine = getMyNames();
+  const rezIdx = players.findIndex(p => p.name === REZERWA_MARKER);
+  players.forEach((p, i) => {
+    if (p.name === REZERWA_MARKER || !mine.includes(normName(p.name))) return;
+    const row = document.createElement("div");
+    row.className = "me-row";
+    const nm = document.createElement("span");
+    nm.className = "me-name"; nm.textContent = p.name;
+    const tag = document.createElement("span");
+    tag.className = "me-tag"; tag.textContent = "✅ ZAPISANY";
+    row.appendChild(nm); row.appendChild(tag);
+    const extras = [];
+    if (rezIdx !== -1 && i > rezIdx) extras.push("rezerwa");
+    if (p.hour) extras.push(p.hour + ":00");
+    if (extraOpt && p.early18) extras.push(extraOpt.badge);
+    if (extras.length) {
+      const sub = document.createElement("span");
+      sub.className = "me-sub"; sub.textContent = extras.join(" · ");
+      row.appendChild(sub);
+    }
+    list.appendChild(row);
+  });
+
+  const msg = state.checkMsg[day.key];
+  if (msg) {
+    const m = document.createElement("div");
+    m.className = "check-msg"; m.textContent = msg;
+    list.appendChild(m);
+  }
+}
+
+// "Sprawdź" — porównuje wpisane imię z listą (pobraną w tle) i zapamiętuje je na tym urządzeniu.
+function checkPlayer(dayKey) {
+  const name = (state.inputs[dayKey] || "").trim();
+  if (!name) { state.checkMsg[dayKey] = "Wpisz imię i nazwisko, żeby sprawdzić."; render(); return; }
+  const players = state.lists[dayKey] || [];
+  const found = players.find(p => p.name !== REZERWA_MARKER && normName(p.name) === normName(name));
+  if (found) {
+    addMyName(found.name);
+    state.checkMsg[dayKey] = null;
+  } else {
+    state.checkMsg[dayKey] = `Nie ma „${name}” na liście na ten dzień.`;
+  }
+  state.errors[dayKey] = null;
+  render();
 }
 
 function mkBtn(label, cls, onClick) {
