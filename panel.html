@@ -235,18 +235,9 @@ function messengerUrl(raw) {
   const t = messengerTarget(raw);
   return t ? "https://m.me/" + encodeURIComponent(t) : "";
 }
-// Link otwierany po kliknięciu. Na Androidzie przy numerycznym ID — intent prosto do
-// aplikacji Messenger (com.facebook.orca), z m.me jako zapasem, gdy aplikacja go nie obsłuży.
-const IS_ANDROID = /Android/i.test(navigator.userAgent);
-function openUrl(raw) {
-  const t = messengerTarget(raw);
-  if (!t) return "";
-  const mme = "https://m.me/" + encodeURIComponent(t);
-  if (IS_ANDROID && /^\d+$/.test(t)) {
-    return "intent://user/" + t + "/#Intent;scheme=fb-messenger;package=com.facebook.orca;S.browser_fallback_url=" + encodeURIComponent(mme) + ";end";
-  }
-  return mme;
-}
+// Zawsze m.me — tak jak przycisk kontaktu w index.html (intent fb-messenger://
+// otwierał czat jako „Instagram” i Messenger go blokował).
+function openUrl(raw) { return messengerUrl(raw); }
 
 /* ---------- wiadomość ---------- */
 function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
@@ -499,7 +490,7 @@ function renderPanel() {
             <div class="status">${st.join(" · ") || "&nbsp;"}</div>
           </div>
           ${hasLink
-            ? `<a class="send${wasSent ? " was-sent" : ""}" data-send="${i}" href="${esc(openUrl(c.link))}" aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</a>`
+            ? `<a class="send${wasSent ? " was-sent" : ""}" data-send="${i}" href="${esc(openUrl(c.link))}" target="_blank" rel="noopener" aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</a>`
             : `<button class="send" disabled>💬 Napisz</button>`}
           <button class="toggle${isIn ? " on" : ""}${busy ? " busy" : ""}" data-toggle="${i}" aria-pressed="${isIn}" aria-label="Zapisany na ${state.date.long} ${state.date.label}">
             <span class="box">${isIn ? "✓" : ""}</span>Gra
