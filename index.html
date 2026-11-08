@@ -488,14 +488,6 @@
   .me-row .me-name { font-size: 16px; font-weight: 700; color: var(--text); }
   .me-row .me-tag  { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--green); }
   .me-row .me-sub  { font-size: 12px; font-weight: 700; color: var(--c2); text-transform: uppercase; }
-  .check-msg { margin: 0 14px 10px; padding: 8px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center;
-               background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3); color: #ffb3b3; }
-  .check-btn {
-    background: transparent; color: var(--text); border: 1.5px solid var(--border-hi); border-radius: 8px;
-    padding: 8px 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;
-  }
-  .check-btn:hover { border-color: var(--text); }
-  .input-row.closed.can-check { opacity: 1; pointer-events: auto; }
 
   /* ── ICON BUTTONS ── */
   .icon-btn {
@@ -887,7 +879,8 @@ const DAYS_BASE = [
  // Dni jednorazowe, ze sztywną datą (nie cotygodniowe) — np. wydarzenia specjalne.
 // `featured: true` = wyróżniona karta na górze strony, na środku, w osobnym kolorze.
 const SPECIAL_DAYS = [
-  { key: "sun_test_rakiet", dayKey: "sun", label: 'TEST RAKIET <span class="day-label-sub">(Niedziela)</span>', priceLabel: "70 zł/h", short: "TR", fixedDate: "2026-11-08", featured: true, color: "#ffd700" },
+  // TEST RAKIET ukryty tymczasowo — odkomentuj, żeby przywrócić:
+  // { key: "sun_test_rakiet", dayKey: "sun", label: 'TEST RAKIET <span class="day-label-sub">(Niedziela)</span>', priceLabel: "70 zł/h", short: "TR", fixedDate: "2026-11-08", featured: true, color: "#ffd700" },
 ];
 
 const DAYS = [
@@ -905,8 +898,9 @@ function backendDayKey(day) {
 
 // Dodatkowa opcja zapisu (pigułka + odznaka przy nazwisku), per dzień tygodnia
 const EXTRA_OPTIONS = {
-  thu: { pill: "Mogę też na 18:00",              badge: "18:00", short: "18" },
-  mon: { pill: "Poziom Pocz./Śr-zaaw. 21:00",    badge: "21:00", short: "21" },
+  // Wyłączone tymczasowo — odkomentuj, żeby przywrócić:
+  // thu: { pill: "Mogę też na 18:00",              badge: "18:00", short: "18" },
+  // mon: { pill: "Poziom Pocz./Śr-zaaw. 21:00",    badge: "21:00", short: "21" },
 };
 
 // Dni z zapisem na konkretną godzinę zamiast zwykłej listy — każdy wybiera
@@ -983,7 +977,6 @@ let state = {
   thu18:  Object.fromEntries(DAYS.map(d => [d.key, false])),
   hourSel: Object.fromEntries(DAYS.map(d => [d.key, ""])),
   labels: {},
-  checkMsg: {},
 };
 
 // ── Imiona zapisane z tego urządzenia (lista graczy jest ukryta dla nie-adminów) ──
@@ -1110,7 +1103,6 @@ async function addPlayer(dayKey) {
   if (extraOpt) addParams.early18 = state.thu18[dayKey] ? "1" : "0";
   if (hourEvt) addParams.hour = state.hourSel[dayKey];
   const res = await api(addParams);
-  state.checkMsg[dayKey] = null;
   if (res.ok) {
     state.lists[dayKey] = normalizePlayers(res.players);
     state.errors[dayKey] = null;
@@ -1477,39 +1469,22 @@ function mkCard(day) {
   }
   card.appendChild(list);
 
-  const canCheck = !state.adminMode;   // gracz może sprawdzić zapis także przy zamkniętej liście
   const inputRow = document.createElement("div");
-  inputRow.className = "input-row" + (isClosed ? " closed" : "") + (isClosed && canCheck ? " can-check" : "");
+  inputRow.className = "input-row" + (isClosed ? " closed" : "");
   const inp = document.createElement("input");
   inp.className = "field"; inp.type = "text";
-  inp.placeholder = isClosed ? (canCheck ? "Imię i nazwisko — sprawdź zapis" : "Zapisy zamknięte") : "Imię i nazwisko…";
+  inp.placeholder = isClosed ? "Zapisy zamknięte" : "Imię i nazwisko…";
   inp.value = state.inputs[day.key] || "";
-  inp.disabled = isClosed && !canCheck;
+  inp.disabled = isClosed;
   inp.addEventListener("input",  e => state.inputs[day.key] = e.target.value);
-  inp.addEventListener("keydown", e => {
-    if (e.key !== "Enter") return;
-    if (!isClosed) addPlayer(day.key);
-    else if (canCheck) checkPlayer(day.key);
-  });
-  inputRow.appendChild(inp);
-  if (canCheck) {
-    const chkB = document.createElement("button");
-    chkB.className = "check-btn";
-    chkB.textContent = "Sprawdź";
-    chkB.title = "Sprawdź, czy jesteś zapisany";
-    chkB.disabled = !!loading;
-    chkB.addEventListener("click", () => checkPlayer(day.key));
-    inputRow.appendChild(chkB);
-  }
-  if (!isClosed || !canCheck) {
-    const addB = document.createElement("button");
-    addB.className = "add-btn"; addB.style.background = day.color;
-    addB.disabled = !!saving || isClosed;
-    addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
-    addB.title = "Zapisz się";
-    addB.addEventListener("click", () => addPlayer(day.key));
-    inputRow.appendChild(addB);
-  }
+  inp.addEventListener("keydown", e => { if(e.key==="Enter" && !isClosed) addPlayer(day.key); });
+  const addB = document.createElement("button");
+  addB.className = "add-btn"; addB.style.background = day.color;
+  addB.disabled = !!saving || isClosed;
+  addB.innerHTML = saving ? '<span class="spinner"></span>' : "+";
+  addB.title = "Zapisz się";
+  addB.addEventListener("click", () => addPlayer(day.key));
+  inputRow.appendChild(inp); inputRow.appendChild(addB);
   card.appendChild(inputRow);
 
   // Pigułka dodatkowej opcji (tylko gdy lista otwarta)
@@ -1588,9 +1563,8 @@ function mkCard(day) {
 
   // Czyść błąd gdy użytkownik zaczyna pisać
   inp.addEventListener("input", () => {
-    if (state.errors[day.key] || state.checkMsg[day.key]) {
+    if (state.errors[day.key]) {
       state.errors[day.key] = null;
-      state.checkMsg[day.key] = null;
       render();
     }
   });
@@ -1630,29 +1604,6 @@ function renderHiddenList(list, day, players, isClosed, loading, extraOpt) {
     }
     list.appendChild(row);
   });
-
-  const msg = state.checkMsg[day.key];
-  if (msg) {
-    const m = document.createElement("div");
-    m.className = "check-msg"; m.textContent = msg;
-    list.appendChild(m);
-  }
-}
-
-// "Sprawdź" — porównuje wpisane imię z listą (pobraną w tle) i zapamiętuje je na tym urządzeniu.
-function checkPlayer(dayKey) {
-  const name = (state.inputs[dayKey] || "").trim();
-  if (!name) { state.checkMsg[dayKey] = "Wpisz imię i nazwisko, żeby sprawdzić."; render(); return; }
-  const players = state.lists[dayKey] || [];
-  const found = players.find(p => p.name !== REZERWA_MARKER && normName(p.name) === normName(name));
-  if (found) {
-    addMyName(found.name);
-    state.checkMsg[dayKey] = null;
-  } else {
-    state.checkMsg[dayKey] = `Nie ma „${name}” na liście na ten dzień.`;
-  }
-  state.errors[dayKey] = null;
-  render();
 }
 
 function mkBtn(label, cls, onClick) {
