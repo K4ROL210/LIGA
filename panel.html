@@ -93,6 +93,32 @@
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; outline: none; line-height: 1.35;
   }
   .tpl p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .tpl-item { border: 1px solid var(--border); border-radius: 12px; padding: 8px; margin-bottom: 8px; background: rgba(255,255,255,0.02); }
+  .tpl-item.active { border-color: rgba(200,255,0,0.45); background: rgba(200,255,0,0.04); }
+  .tpl-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .tpl-radio {
+    flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    border: 2px solid var(--muted); background: transparent; color: #0b0f14; font-size: 14px; line-height: 1;
+    display: grid; place-items: center;
+  }
+  .tpl-item.active .tpl-radio { border-color: var(--accent); background: var(--accent); }
+  .tpl-name {
+    flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px dashed var(--border-hi);
+    padding: 4px 2px; font-weight: 700; outline: none;
+  }
+  .tpl-name:focus { border-bottom-color: var(--accent2); }
+  .tpl-badge { flex: 0 0 auto; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .5px; }
+  .tpl-del { flex: 0 0 auto; background: transparent; border: 0; cursor: pointer; font-size: 16px; padding: 4px; opacity: .7; }
+  .tpl-add {
+    width: 100%; padding: 9px; border-radius: 10px; cursor: pointer; font-weight: 700;
+    background: transparent; border: 1.5px dashed var(--border-hi); color: var(--text);
+  }
+  .tpl-chip {
+    margin-top: 8px; max-width: 100%; padding: 6px 12px; border-radius: 10px; cursor: pointer;
+    background: var(--glass); border: 1px solid var(--border); font-size: 15px; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .tpl-chip b { color: var(--text); }
   .tpl code { color: var(--accent2); font-family: inherit; font-weight: 700; }
 
   ul.list { list-style: none; margin-top: 12px; }
@@ -174,7 +200,9 @@ const DATES_AHEAD = 6; // ile najbliższych wtorków/czwartków pokazać
 
 const LS = {
   pass: "mp_pass",
-  tpl: "mp_tpl2",       // nowy klucz — stary zapisany szablon ("we wtorek") nie nadpisze nowego domyślnego
+  tpl: "mp_tpl2",       // stary pojedynczy szablon — tylko do migracji
+  tpls: "mp_tpls",      // lista szablonów [{id, name, text}]
+  tplActive: "mp_tpl_active",
   cache: "mp_cache_",   // + dateKey
   sent: "mp_sent_",     // + dateKey
   filter: "mp_filter",
@@ -228,7 +256,10 @@ function messengerTarget(raw) {
   if (parts[0] === "people" && parts[2]) return parts[2];    // facebook.com/people/Imie-Nazwisko/1000…/
   const t = parts.indexOf("t");
   if (t !== -1 && parts[t + 1]) return parts[t + 1];
-  if (/facebook\.com$|messenger\.com$|fb\.com$/.test(host) && parts[0] && parts[0] !== "messages") return parts[0];
+  // Adresy, które nie są profilem (np. wyniki wyszukiwania facebook.com/search/top?q=…)
+  const NOT_PROFILE = ["search", "messages", "groups", "pages", "watch", "events", "marketplace", "hashtag",
+                       "photo", "photo.php", "story.php", "permalink.php", "reel", "posts", "friends", "home.php"];
+  if (/facebook\.com$|messenger\.com$|fb\.com$/.test(host) && parts[0] && !NOT_PROFILE.includes(parts[0].toLowerCase())) return parts[0];
   return "";
 }
 function messengerUrl(raw) {
@@ -242,7 +273,7 @@ function openUrl(raw) { return messengerUrl(raw); }
 /* ---------- wiadomość ---------- */
 function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
 function buildMessage(contact, date) {
-  const tpl = contact.msg || state.template;
+  const tpl = contact.msg || activeTemplate().text || DEFAULT_TEMPLATE;
   return tpl
     .replace(/\{imie\}|\{imię\}/gi, firstName(contact.name))
     .replace(/\{dzien\}|\{dzień\}/gi, date.phrase)
@@ -277,7 +308,8 @@ const state = {
   loginErr: "",
   loggingIn: false,
   date: dates[0],
-  template: lsGet(LS.tpl, DEFAULT_TEMPLATE),
+  templates: [],
+  activeTpl: "",
   tplOpen: false,
   contacts: [],
   players: new Set(),   // znormalizowane imiona zapisanych na wybrany termin
@@ -289,6 +321,48 @@ const state = {
   search: "",
   filter: lsGet(LS.filter, "all"),
 };
+/* ---------- szablony wiadomości (zapisane w tym telefonie) ---------- */
+const DEFAULT_TEMPLATES = [
+  { id: "t1", name: "Zaproszenie", text: DEFAULT_TEMPLATE },
+  { id: "t2", name: "Ostatnie miejsca", text: "Hej {imie}! Zostały ostatnie wolne miejsca na {dzien} {data} 🎾 Wpadasz?" },
+];
+function loadTemplates() {
+  let list = lsJson(LS.tpls, null);
+  if (!Array.isArray(list) || !list.length) {
+    list = DEFAULT_TEMPLATES.map(t => ({ ...t }));
+    const old = lsGet(LS.tpl, "");                       // migracja starego pojedynczego szablonu
+    if (old && old !== DEFAULT_TEMPLATE) list.unshift({ id: "t0", name: "Mój szablon", text: old });
+  }
+  state.templates = list;
+  const act = lsGet(LS.tplActive, "");
+  state.activeTpl = list.some(t => t.id === act) ? act : list[0].id;
+}
+function saveTemplates() {
+  lsSet(LS.tpls, JSON.stringify(state.templates));
+  lsSet(LS.tplActive, state.activeTpl);
+}
+function activeTemplate() {
+  return state.templates.find(t => t.id === state.activeTpl) || state.templates[0] || { name: "", text: DEFAULT_TEMPLATE };
+}
+function addTemplate() {
+  const id = "t" + Date.now().toString(36);
+  state.templates.push({ id, name: "Nowy szablon", text: "Hej {imie}! " });
+  state.activeTpl = id;
+  saveTemplates(); render();
+  const el = document.getElementById("tplText_" + id);
+  if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+}
+function deleteTemplate(id) {
+  if (state.templates.length <= 1) { toast("Musi zostać przynajmniej jeden szablon", true); return; }
+  const t = state.templates.find(x => x.id === id);
+  if (!t || !confirm(`Usunąć szablon „${t.name}”?`)) return;
+  state.templates = state.templates.filter(x => x.id !== id);
+  if (state.activeTpl === id) state.activeTpl = state.templates[0].id;
+  saveTemplates(); render();
+}
+function previewText() { return buildMessage({ name: "Marek Nowak", msg: "" }, state.date); }
+loadTemplates();
+
 function norm(n) { return String(n).trim().toLowerCase(); }
 function dateKey() { return state.date.key + "_" + state.date.dateStr; }
 
@@ -481,7 +555,7 @@ function renderPanel() {
       const st = [];
       if (isIn) st.push(`<span class="s-in">✓ zapisany</span>`);
       if (wasSent) st.push(`<span class="s-sent">wysłano ${timeStr(state.sent[c.name])}</span>`);
-      if (!hasLink) st.push(`<span class="s-nolink">${c.link ? "zły link w kol. C (np. /share/)" : "brak linku w kol. C"}</span>`);
+      if (!hasLink) st.push(`<span class="s-nolink">${c.link ? "zły link w kol. C (to nie profil)" : "brak linku w kol. C"}</span>`);
       if (c.msg) st.push(`<span>własna wiadomość</span>`);
       return `
         <li class="row${isIn ? " is-in" : ""}">
@@ -520,6 +594,7 @@ function renderPanel() {
           <span>Graczy <b>${all.length}</b></span>
           ${noLink ? `<span>Bez linku <b>${noLink}</b></span>` : ""}
         </div>
+        <button class="tpl-chip" id="tplChip" aria-label="Zmień szablon wiadomości">✉️ Szablon: <b id="tplChipName">${esc(activeTemplate().name)}</b> ▾</button>
         <div class="tools">
           <input class="search" id="search" type="search" placeholder="Szukaj gracza…" value="${esc(state.search)}" />
         </div>
@@ -530,10 +605,23 @@ function renderPanel() {
     </header>
     <main class="wrap">
       <div class="tpl${state.tplOpen ? " open" : ""}">
-        <textarea id="tplInp" aria-label="Szablon wiadomości">${esc(state.template)}</textarea>
+        ${state.templates.map(t => {
+          const on = t.id === state.activeTpl;
+          return `
+          <div class="tpl-item${on ? " active" : ""}">
+            <div class="tpl-head">
+              <button class="tpl-radio" data-tpl-pick="${t.id}" aria-pressed="${on}" aria-label="Ustaw jako aktywny">${on ? "●" : ""}</button>
+              <input class="tpl-name" id="tplName_${t.id}" data-tpl-name="${t.id}" value="${esc(t.name)}" aria-label="Nazwa szablonu" />
+              ${on ? `<span class="tpl-badge">AKTYWNY</span>` : ""}
+              <button class="tpl-del" data-tpl-del="${t.id}" aria-label="Usuń szablon">🗑</button>
+            </div>
+            <textarea id="tplText_${t.id}" data-tpl-text="${t.id}" aria-label="Treść szablonu ${esc(t.name)}">${esc(t.text)}</textarea>
+          </div>`;
+        }).join("")}
+        <button class="tpl-add" id="tplAdd">+ Dodaj szablon</button>
         <p>Zmienne: <code>{imie}</code> → Marek, <code>{dzien}</code> → ${esc(state.date.phrase)}, <code>{data}</code> → ${esc(state.date.label)}.
-           Jeśli gracz ma tekst w kolumnie D, użyty zostanie on (zmienne też działają).<br>
-           Podgląd: <i>${esc(buildMessage({ name: "Marek Nowak", msg: "" }, state.date))}</i></p>
+           Jeśli gracz ma tekst w kolumnie D, użyty zostanie on zamiast szablonu (zmienne też działają).<br>
+           Podgląd aktywnego: <i id="tplPreview">${esc(previewText())}</i></p>
       </div>
       ${state.locked ? `<div class="banner">🔒 Zapisy na ${esc(state.date.short)} ${esc(state.date.label)} są zamknięte na stronie — panel nadal może dopisywać i usuwać graczy.</div>` : ""}
       ${list}
@@ -562,16 +650,26 @@ document.addEventListener("click", (e) => {
   if (b.dataset.date !== undefined) return selectDate(+b.dataset.date);
   if (b.dataset.filter) { state.filter = b.dataset.filter; lsSet(LS.filter, state.filter); return render(); }
   if (b.id === "refreshBtn") return refresh();
-  if (b.id === "tplBtn") { state.tplOpen = !state.tplOpen; return render(); }
+  if (b.id === "tplBtn" || b.id === "tplChip") { state.tplOpen = !state.tplOpen; return render(); }
+  if (b.id === "tplAdd") return addTemplate();
+  if (b.dataset.tplPick) { state.activeTpl = b.dataset.tplPick; saveTemplates(); return render(); }
+  if (b.dataset.tplDel) return deleteTemplate(b.dataset.tplDel);
 });
 document.addEventListener("input", (e) => {
-  if (e.target.id === "search") { state.search = e.target.value; render(); }
-  if (e.target.id === "tplInp") {
-    state.template = e.target.value || DEFAULT_TEMPLATE;
-    lsSet(LS.tpl, e.target.value);
-    const p = e.target.parentElement.querySelector("i");
-    if (p) p.textContent = buildMessage({ name: "Marek Nowak", msg: "" }, state.date);
-  }
+  const el = e.target;
+  if (el.id === "search") { state.search = el.value; render(); return; }
+  const id = el.dataset.tplText || el.dataset.tplName;
+  if (!id) return;
+  const t = state.templates.find(x => x.id === id);
+  if (!t) return;
+  if (el.dataset.tplText) t.text = el.value;
+  else t.name = el.value;
+  saveTemplates();
+  // Bez pełnego przerysowania (żeby nie gubić kursora) — tylko podgląd i nazwa w nagłówku.
+  const p = document.getElementById("tplPreview");
+  if (p) p.textContent = previewText();
+  const chip = document.getElementById("tplChipName");
+  if (chip) chip.textContent = activeTemplate().name;
 });
 document.addEventListener("submit", (e) => {
   if (e.target.id === "loginForm") {
