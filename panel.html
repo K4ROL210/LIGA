@@ -169,12 +169,12 @@
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGbiyNzfPJIUINDedgllhRVHOgm2eLS5MyYe34t6oj7-yCT0I8VzKqmzX2-DE6-8dC/exec";
 
-const DEFAULT_TEMPLATE = "Cześć {imie}! Grasz w lidze {dzien} {data}? Daj znać 🙂";
+const DEFAULT_TEMPLATE = "Hej {imie}! Zbieram chętnych na {dzien} {data} 💪 Zagrasz? Daj znać 🙂";
 const DATES_AHEAD = 6; // ile najbliższych wtorków/czwartków pokazać
 
 const LS = {
   pass: "mp_pass",
-  tpl: "mp_tpl",
+  tpl: "mp_tpl2",       // nowy klucz — stary zapisany szablon ("we wtorek") nie nadpisze nowego domyślnego
   cache: "mp_cache_",   // + dateKey
   sent: "mp_sent_",     // + dateKey
   filter: "mp_filter",
@@ -186,8 +186,8 @@ function lsJson(k, fallback) { try { return JSON.parse(lsGet(k, "")) || fallback
 
 /* ---------- daty: najbliższe wtorki i czwartki ---------- */
 const DAY_INFO = {
-  2: { key: "tue", short: "Wt", long: "wtorek", phrase: "we wtorek" },
-  4: { key: "thu", short: "Czw", long: "czwartek", phrase: "w czwartek" },
+  2: { key: "tue", short: "Wt", long: "wtorek", phrase: "wtorek" },
+  4: { key: "thu", short: "Czw", long: "czwartek", phrase: "czwartek" },
 };
 function pad(n) { return String(n).padStart(2, "0"); }
 function upcomingDates() {
