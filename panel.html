@@ -112,7 +112,8 @@
   .send {
     flex: 0 0 auto; height: 44px; padding: 0 16px; border-radius: 12px; cursor: pointer;
     background: linear-gradient(135deg, #0a84ff, #a033ff); border: 0; color: #fff; font-weight: 700; font-size: 16px;
-    display: inline-flex; align-items: center; gap: 6px;
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .send.was-sent { background: var(--glass); border: 1px solid var(--border-hi); color: var(--text); }
   .send:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -234,6 +235,18 @@ function messengerUrl(raw) {
   const t = messengerTarget(raw);
   return t ? "https://m.me/" + encodeURIComponent(t) : "";
 }
+// Link otwierany po kliknięciu. Na Androidzie przy numerycznym ID — intent prosto do
+// aplikacji Messenger (com.facebook.orca), z m.me jako zapasem, gdy aplikacja go nie obsłuży.
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+function openUrl(raw) {
+  const t = messengerTarget(raw);
+  if (!t) return "";
+  const mme = "https://m.me/" + encodeURIComponent(t);
+  if (IS_ANDROID && /^\d+$/.test(t)) {
+    return "intent://user/" + t + "/#Intent;scheme=fb-messenger;package=com.facebook.orca;S.browser_fallback_url=" + encodeURIComponent(mme) + ";end";
+  }
+  return mme;
+}
 
 /* ---------- wiadomość ---------- */
 function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
@@ -331,31 +344,34 @@ async function refresh() {
 }
 
 /* ---------- akcje ---------- */
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); return true; }
-  catch (e) {
-    const ta = document.createElement("textarea");
-    ta.value = text; ta.setAttribute("readonly", "");
-    ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select();
-    let ok = false;
-    try { ok = document.execCommand("copy"); } catch (e2) {}
-    ta.remove();
-    return ok;
+// Kopiowanie SYNCHRONICZNE — musi się wydarzyć w tym samym kliknięciu, które otwiera
+// link, zanim przeglądarka przekaże sterowanie aplikacji Messenger.
+function copyTextSync(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly", "");
+  ta.style.position = "fixed"; ta.style.top = "0"; ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, text.length);
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) {}
+  ta.remove();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+    ok = true;
   }
+  return ok;
 }
 
-async function sendTo(i) {
+// Wywoływane w handlerze kliknięcia linku <a>. NIE blokuje nawigacji —
+// to samo stuknięcie otwiera Messengera (Android wymaga gestu użytkownika).
+function onSendClick(i) {
   const c = state.contacts[i];
-  const url = messengerUrl(c.link);
-  if (!url) { toast("Brak poprawnego linku w kolumnie C dla: " + c.name, true); return; }
-  const text = buildMessage(c, state.date);
-  const copied = await copyText(text);
+  const copied = copyTextSync(buildMessage(c, state.date));
   state.sent[c.name] = Date.now();
   lsSet(LS.sent + dateKey(), JSON.stringify(state.sent));
-  render();
-  toast(copied ? "📋 Skopiowano — wklej w czacie" : "⚠️ Nie udało się skopiować tekstu");
-  setTimeout(() => { window.location.href = url; }, copied ? 150 : 900);
+  toast(copied ? "📋 Skopiowano — wklej w czacie" : "⚠️ Nie udało się skopiować tekstu", !copied);
+  // Przerysowanie odkładamy, żeby nie usunąć klikniętego linku z DOM przed nawigacją.
+  setTimeout(render, 600);
 }
 
 async function togglePlayer(i) {
@@ -482,7 +498,9 @@ function renderPanel() {
             <div class="name">${esc(c.name)}</div>
             <div class="status">${st.join(" · ") || "&nbsp;"}</div>
           </div>
-          <button class="send${wasSent ? " was-sent" : ""}" data-send="${i}" ${hasLink ? "" : "disabled"} aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</button>
+          ${hasLink
+            ? `<a class="send${wasSent ? " was-sent" : ""}" data-send="${i}" href="${esc(openUrl(c.link))}" aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</a>`
+            : `<button class="send" disabled>💬 Napisz</button>`}
           <button class="toggle${isIn ? " on" : ""}${busy ? " busy" : ""}" data-toggle="${i}" aria-pressed="${isIn}" aria-label="Zapisany na ${state.date.long} ${state.date.label}">
             <span class="box">${isIn ? "✓" : ""}</span>Gra
           </button>
@@ -545,9 +563,10 @@ function render() {
 
 /* ---------- zdarzenia (delegacja) ---------- */
 document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-send]");
+  if (a) return onSendClick(+a.dataset.send);   // bez preventDefault — link otwiera Messengera
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.send !== undefined) return sendTo(+b.dataset.send);
   if (b.dataset.toggle !== undefined) return togglePlayer(+b.dataset.toggle);
   if (b.dataset.date !== undefined) return selectDate(+b.dataset.date);
   if (b.dataset.filter) { state.filter = b.dataset.filter; lsSet(LS.filter, state.filter); return render(); }
