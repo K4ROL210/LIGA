@@ -223,6 +223,8 @@ function messengerTarget(raw) {
   if (host === "me" || url.hostname === "m.me") return parts[0] || "";
   const id = url.searchParams.get("id");
   if (id) return id;
+  if (parts[0] === "share") return "";                       // facebook.com/share/… — brak ID, tylko przekierowanie
+  if (parts[0] === "people" && parts[2]) return parts[2];    // facebook.com/people/Imie-Nazwisko/1000…/
   const t = parts.indexOf("t");
   if (t !== -1 && parts[t + 1]) return parts[t + 1];
   if (/facebook\.com$|messenger\.com$|fb\.com$/.test(host) && parts[0] && parts[0] !== "messages") return parts[0];
@@ -472,7 +474,7 @@ function renderPanel() {
       const st = [];
       if (isIn) st.push(`<span class="s-in">✓ zapisany</span>`);
       if (wasSent) st.push(`<span class="s-sent">wysłano ${timeStr(state.sent[c.name])}</span>`);
-      if (!hasLink) st.push(`<span class="s-nolink">brak linku w kol. C</span>`);
+      if (!hasLink) st.push(`<span class="s-nolink">${c.link ? "zły link w kol. C (np. /share/)" : "brak linku w kol. C"}</span>`);
       if (c.msg) st.push(`<span>własna wiadomość</span>`);
       return `
         <li class="row${isIn ? " is-in" : ""}">
