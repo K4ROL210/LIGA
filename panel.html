@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#080c10" />
+<title>Panel Messenger — Liga Squasha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #080c10;
+    --surface:   rgba(255,255,255,0.04);
+    --glass:     rgba(255,255,255,0.07);
+    --border:    rgba(255,255,255,0.10);
+    --border-hi: rgba(255,255,255,0.20);
+    --muted:     #6b7794;
+    --text:      #dde4f0;
+    --accent:    #c8ff00;
+    --accent2:   #00e5ff;
+    --red:       #ff4d4d;
+    --orange:    #ff8c42;
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', Arial, sans-serif;
+    font-size: 17px;
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(8,12,16,0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0 10px;
+  }
+  .titlebar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 28px; letter-spacing: 1px; line-height: 1; }
+  h1 span { color: var(--accent); }
+  .icon-btn {
+    background: var(--glass); border: 1px solid var(--border); border-radius: 10px;
+    width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; font-size: 18px;
+  }
+
+  .dates { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 2px; scrollbar-width: none; }
+  .dates::-webkit-scrollbar { display: none; }
+  .date-chip {
+    flex: 0 0 auto; padding: 8px 14px; border-radius: 12px; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--border);
+    font-weight: 700; line-height: 1.1; text-align: center;
+  }
+  .date-chip small { display: block; font-weight: 500; font-size: 13px; color: var(--muted); }
+  .date-chip.active { background: var(--accent); color: #0b0f14; border-color: var(--accent); }
+  .date-chip.active small { color: #2a3a00; }
+
+  .stats { display: flex; gap: 14px; font-size: 15px; color: var(--muted); padding-top: 8px; flex-wrap: wrap; }
+  .stats b { color: var(--text); }
+  .stats .ok b { color: var(--accent); }
+  .stats .sent b { color: var(--accent2); }
+
+  .tools { display: flex; gap: 8px; padding-top: 10px; }
+  .search {
+    flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 12px; outline: none;
+  }
+  .search:focus { border-color: var(--border-hi); }
+  .filters { display: flex; gap: 6px; padding-top: 8px; overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter {
+    flex: 0 0 auto; padding: 5px 12px; border-radius: 99px; font-size: 15px; font-weight: 600; cursor: pointer;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+  }
+  .filter.active { color: var(--text); border-color: var(--border-hi); background: var(--glass); }
+
+  .banner {
+    margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 15px;
+    border: 1px solid rgba(255,140,66,0.35); background: rgba(255,140,66,0.08); color: #ffc49b;
+  }
+
+  .tpl { margin-top: 12px; display: none; }
+  .tpl.open { display: block; }
+  .tpl textarea {
+    width: 100%; min-height: 96px; resize: vertical; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; outline: none; line-height: 1.35;
+  }
+  .tpl p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .tpl code { color: var(--accent2); font-family: inherit; font-weight: 700; }
+
+  ul.list { list-style: none; margin-top: 12px; }
+  .row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; margin-bottom: 8px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .row.is-in { border-color: rgba(200,255,0,0.35); background: rgba(200,255,0,0.05); }
+  .who { flex: 1; min-width: 0; }
+  .who .name { font-weight: 700; font-size: 18px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who .status { font-size: 14px; color: var(--muted); line-height: 1.2; margin-top: 2px; }
+  .status .s-sent { color: var(--accent2); }
+  .status .s-in { color: var(--accent); }
+  .status .s-nolink { color: var(--orange); }
+
+  .send {
+    flex: 0 0 auto; height: 44px; padding: 0 16px; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(135deg, #0a84ff, #a033ff); border: 0; color: #fff; font-weight: 700; font-size: 16px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .send.was-sent { background: var(--glass); border: 1px solid var(--border-hi); color: var(--text); }
+  .send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .toggle {
+    flex: 0 0 auto; width: 54px; height: 44px; border-radius: 12px; cursor: pointer;
+    background: transparent; border: 1.5px solid var(--border-hi);
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--muted); line-height: 1;
+  }
+  .toggle .box {
+    width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--muted);
+    display: grid; place-items: center; font-size: 15px; margin-bottom: 2px;
+  }
+  .toggle.on { border-color: var(--accent); color: var(--accent); background: rgba(200,255,0,0.08); }
+  .toggle.on .box { background: var(--accent); border-color: var(--accent); color: #0b0f14; }
+  .toggle.busy { opacity: 0.45; pointer-events: none; }
+
+  .empty, .loading { text-align: center; color: var(--muted); padding: 40px 0; }
+
+  .login { max-width: 360px; margin: 18vh auto 0; padding: 0 16px; text-align: center; }
+  .login h1 { font-size: 40px; margin-bottom: 18px; }
+  .login input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; outline: none; text-align: center; font-size: 18px;
+  }
+  .login button {
+    width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px; border: 0; cursor: pointer;
+    background: var(--accent); color: #0b0f14; font-weight: 700; font-size: 18px;
+  }
+  .login .err { color: var(--red); margin-top: 10px; min-height: 1.2em; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px);
+    max-width: calc(100% - 32px); width: max-content;
+    background: #141b24; border: 1px solid var(--border-hi); border-radius: 12px;
+    padding: 10px 14px; font-size: 15px; line-height: 1.3; opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.err { border-color: rgba(255,77,77,0.5); color: #ffb3b3; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* =========================================================================
+   PANEL MESSENGER — Liga Squasha
+   Dane: zakładka GRACZE (A = imię i nazwisko, C = link Messenger, D = własna wiadomość)
+   Zapisy: zakładki "Zapisy Wtorek/Czwartek dd.mm.rrrr" przez Zapisy.gs
+   ========================================================================= */
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGbiyNzfPJIUINDedgllhRVHOgm2eLS5MyYe34t6oj7-yCT0I8VzKqmzX2-DE6-8dC/exec";
+
+const DEFAULT_TEMPLATE = "Cześć {imie}! Grasz w lidze {dzien} {data}? Daj znać 🙂";
+const DATES_AHEAD = 6; // ile najbliższych wtorków/czwartków pokazać
+
+const LS = {
+  pass: "mp_pass",
+  tpl: "mp_tpl",
+  cache: "mp_cache_",   // + dateKey
+  sent: "mp_sent_",     // + dateKey
+  filter: "mp_filter",
+};
+function lsGet(k, fallback) { try { const v = localStorage.getItem(k); return v === null ? fallback : v; } catch (e) { return fallback; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function lsJson(k, fallback) { try { return JSON.parse(lsGet(k, "")) || fallback; } catch (e) { return fallback; } }
+
+/* ---------- daty: najbliższe wtorki i czwartki ---------- */
+const DAY_INFO = {
+  2: { key: "tue", short: "Wt", long: "wtorek", phrase: "we wtorek" },
+  4: { key: "thu", short: "Czw", long: "czwartek", phrase: "w czwartek" },
+};
+function pad(n) { return String(n).padStart(2, "0"); }
+function upcomingDates() {
+  const out = [];
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  while (out.length < DATES_AHEAD) {
+    const info = DAY_INFO[d.getDay()];
+    if (info) {
+      out.push({
+        ...info,
+        dateStr: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+        label: `${pad(d.getDate())}.${pad(d.getMonth() + 1)}`,
+      });
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+
+/* ---------- link Messengera ---------- */
+// Przyjmuje: messenger.com/t/X, facebook.com/messages/t/X, m.me/X,
+// facebook.com/profile.php?id=N, facebook.com/X, albo samo X.
+function messengerTarget(raw) {
+  let s = String(raw || "").trim();
+  if (!s) return "";
+  if (!/^https?:\/\//i.test(s)) {
+    if (/^(www\.|m\.|web\.)?(facebook\.com|messenger\.com|fb\.com|m\.me)\b/i.test(s)) s = "https://" + s;
+    else return /^[\w.\-]+$/.test(s) ? s : "";   // sama nazwa użytkownika lub ID
+  }
+  let url;
+  try { url = new URL(s); } catch (e) { return /^[\w.\-]+$/.test(s) ? s : ""; }
+  const host = url.hostname.replace(/^www\.|^m\.|^web\./, "");
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (host === "me" || url.hostname === "m.me") return parts[0] || "";
+  const id = url.searchParams.get("id");
+  if (id) return id;
+  const t = parts.indexOf("t");
+  if (t !== -1 && parts[t + 1]) return parts[t + 1];
+  if (/facebook\.com$|messenger\.com$|fb\.com$/.test(host) && parts[0] && parts[0] !== "messages") return parts[0];
+  return "";
+}
+function messengerUrl(raw) {
+  const t = messengerTarget(raw);
+  return t ? "https://m.me/" + encodeURIComponent(t) : "";
+}
+
+/* ---------- wiadomość ---------- */
+function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
+function buildMessage(contact, date) {
+  const tpl = contact.msg || state.template;
+  return tpl
+    .replace(/\{imie\}|\{imię\}/gi, firstName(contact.name))
+    .replace(/\{dzien\}|\{dzień\}/gi, date.phrase)
+    .replace(/\{data\}/gi, date.label);
+}
+
+/* ---------- API (JSONP, jak na stronie zapisów) ---------- */
+function apiOnce(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = "jsonp_" + Math.random().toString(36).slice(2);
+    let script;
+    const cleanup = () => { clearTimeout(timer); window[cbName] = () => {}; if (script) script.remove(); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 25000);
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    script = document.createElement("script");
+    script.src = APPS_SCRIPT_URL + "?" + new URLSearchParams({ ...params, callback: cbName }).toString();
+    script.onerror = () => { cleanup(); reject(new Error("network")); };
+    document.body.appendChild(script);
+  });
+}
+async function api(params, retries = 2) {
+  for (let attempt = 0; ; attempt++) {
+    try { return await apiOnce(params); }
+    catch (e) { if (attempt >= retries) throw e; await new Promise(r => setTimeout(r, 600 * (attempt + 1))); }
+  }
+}
+
+/* ---------- stan ---------- */
+const dates = upcomingDates();
+const state = {
+  password: lsGet(LS.pass, ""),
+  loginErr: "",
+  loggingIn: false,
+  date: dates[0],
+  template: lsGet(LS.tpl, DEFAULT_TEMPLATE),
+  tplOpen: false,
+  contacts: [],
+  players: new Set(),   // znormalizowane imiona zapisanych na wybrany termin
+  locked: false,
+  loading: false,
+  loadedOnce: false,
+  busy: new Set(),
+  sent: {},             // name -> timestamp
+  search: "",
+  filter: lsGet(LS.filter, "all"),
+};
+function norm(n) { return String(n).trim().toLowerCase(); }
+function dateKey() { return state.date.key + "_" + state.date.dateStr; }
+
+function loadLocal() {
+  const c = lsJson(LS.cache + dateKey(), null);
+  if (c) {
+    state.contacts = c.contacts || [];
+    state.players = new Set((c.players || []).map(norm));
+    state.locked = !!c.locked;
+    state.loadedOnce = true;
+  } else {
+    state.players = new Set();
+    state.loadedOnce = state.contacts.length > 0;
+  }
+  state.sent = lsJson(LS.sent + dateKey(), {});
+}
+function saveCache() {
+  lsSet(LS.cache + dateKey(), JSON.stringify({
+    contacts: state.contacts, players: [...state.players], locked: state.locked,
+  }));
+}
+
+async function refresh() {
+  const forDate = dateKey();
+  state.loading = true; render();
+  try {
+    const res = await api({ action: "contacts", dayKey: state.date.key, dateStr: state.date.dateStr, password: state.password });
+    if (forDate !== dateKey()) return;
+    if (!res.ok) {
+      if (res.error === "Brak uprawnień") { logout("Hasło nieaktualne — zaloguj się ponownie."); return; }
+      toast(res.error || "Błąd serwera", true);
+    } else {
+      state.contacts = res.contacts || [];
+      state.players = new Set((res.players || []).map(norm));
+      state.locked = !!res.locked;
+      state.loadedOnce = true;
+      saveCache();
+    }
+  } catch (e) {
+    if (forDate === dateKey()) toast("Brak połączenia z arkuszem. Spróbuj odświeżyć.", true);
+  } finally {
+    if (forDate === dateKey()) { state.loading = false; render(); }
+  }
+}
+
+/* ---------- akcje ---------- */
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e2) {}
+    ta.remove();
+    return ok;
+  }
+}
+
+async function sendTo(i) {
+  const c = state.contacts[i];
+  const url = messengerUrl(c.link);
+  if (!url) { toast("Brak poprawnego linku w kolumnie C dla: " + c.name, true); return; }
+  const text = buildMessage(c, state.date);
+  const copied = await copyText(text);
+  state.sent[c.name] = Date.now();
+  lsSet(LS.sent + dateKey(), JSON.stringify(state.sent));
+  render();
+  toast(copied ? "📋 Skopiowano — wklej w czacie" : "⚠️ Nie udało się skopiować tekstu");
+  setTimeout(() => { window.location.href = url; }, copied ? 150 : 900);
+}
+
+async function togglePlayer(i) {
+  const c = state.contacts[i];
+  const n = norm(c.name);
+  if (state.busy.has(n)) return;
+  const wasIn = state.players.has(n);
+  const forDate = dateKey();
+  state.busy.add(n);
+  if (wasIn) state.players.delete(n); else state.players.add(n);
+  render();
+  try {
+    const res = await api({
+      action: wasIn ? "adminRemove" : "adminAdd",
+      dayKey: state.date.key, dateStr: state.date.dateStr,
+      name: c.name, password: state.password,
+    }, 1);
+    if (forDate !== dateKey()) return;
+    if (!res.ok) throw new Error(res.error || "Błąd");
+    state.players = new Set((res.players || []).map(norm));
+    saveCache();
+    toast(wasIn ? `Usunięto: ${c.name}` : `✅ Zapisano: ${c.name} (${state.date.short} ${state.date.label})`);
+  } catch (e) {
+    if (forDate === dateKey()) {
+      if (wasIn) state.players.add(n); else state.players.delete(n);
+      toast("Nie udało się zapisać zmiany: " + e.message, true);
+    }
+  } finally {
+    state.busy.delete(n);
+    render();
+  }
+}
+
+function selectDate(idx) {
+  state.date = dates[idx];
+  loadLocal();
+  render();
+  refresh();
+}
+
+async function login(pass) {
+  state.loggingIn = true; state.loginErr = ""; render();
+  try {
+    const res = await api({ action: "checkPassword", password: pass });
+    if (res.ok) {
+      state.password = pass; lsSet(LS.pass, pass);
+      state.loggingIn = false;
+      loadLocal(); render(); refresh();
+      return;
+    }
+    state.loginErr = "Błędne hasło";
+  } catch (e) {
+    state.loginErr = "Brak połączenia";
+  }
+  state.loggingIn = false; render();
+}
+function logout(msg) {
+  state.password = ""; lsDel(LS.pass);
+  state.loginErr = msg || "";
+  render();
+}
+
+/* ---------- UI ---------- */
+let toastTimer;
+function toast(msg, isErr) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast show" + (isErr ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = "toast" + (isErr ? " err" : ""); }, isErr ? 4000 : 2200);
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
+function timeStr(ts) { const d = new Date(ts); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+
+function visibleRows() {
+  const q = norm(state.search);
+  return state.contacts
+    .map((c, i) => ({ c, i, isIn: state.players.has(norm(c.name)), wasSent: !!state.sent[c.name], hasLink: !!messengerUrl(c.link) }))
+    .filter(r => !q || norm(r.c.name).includes(q))
+    .filter(r => {
+      switch (state.filter) {
+        case "todo": return r.hasLink && !r.wasSent && !r.isIn;
+        case "sent": return r.wasSent && !r.isIn;
+        case "in":   return r.isIn;
+        case "nolink": return !r.hasLink;
+        default: return true;
+      }
+    });
+}
+
+function renderLogin() {
+  return `
+    <form class="login" id="loginForm">
+      <h1>PANEL <span style="color:var(--accent)">MSG</span></h1>
+      <input id="passInp" type="password" placeholder="Hasło admina" autocomplete="current-password" ${state.loggingIn ? "disabled" : ""} />
+      <button type="submit" ${state.loggingIn ? "disabled" : ""}>${state.loggingIn ? "Sprawdzam…" : "Wejdź"}</button>
+      <div class="err">${esc(state.loginErr)}</div>
+    </form>`;
+}
+
+function renderPanel() {
+  const all = state.contacts;
+  const inCount = all.filter(c => state.players.has(norm(c.name))).length;
+  const sentCount = all.filter(c => state.sent[c.name]).length;
+  const noLink = all.filter(c => !messengerUrl(c.link)).length;
+  const rows = visibleRows();
+  const filters = [
+    ["all", "Wszyscy"], ["todo", "Do wysłania"], ["sent", "Wysłane"], ["in", "Zapisani"], ["nolink", "Bez linku"],
+  ];
+
+  let list;
+  if (!state.loadedOnce) list = `<div class="loading">Wczytuję graczy z arkusza…</div>`;
+  else if (!rows.length) list = `<div class="empty">Brak osób w tym widoku.</div>`;
+  else list = `<ul class="list">${rows.map(({ c, i, isIn, wasSent, hasLink }) => {
+      const busy = state.busy.has(norm(c.name));
+      const st = [];
+      if (isIn) st.push(`<span class="s-in">✓ zapisany</span>`);
+      if (wasSent) st.push(`<span class="s-sent">wysłano ${timeStr(state.sent[c.name])}</span>`);
+      if (!hasLink) st.push(`<span class="s-nolink">brak linku w kol. C</span>`);
+      if (c.msg) st.push(`<span>własna wiadomość</span>`);
+      return `
+        <li class="row${isIn ? " is-in" : ""}">
+          <div class="who">
+            <div class="name">${esc(c.name)}</div>
+            <div class="status">${st.join(" · ") || "&nbsp;"}</div>
+          </div>
+          <button class="send${wasSent ? " was-sent" : ""}" data-send="${i}" ${hasLink ? "" : "disabled"} aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</button>
+          <button class="toggle${isIn ? " on" : ""}${busy ? " busy" : ""}" data-toggle="${i}" aria-pressed="${isIn}" aria-label="Zapisany na ${state.date.long} ${state.date.label}">
+            <span class="box">${isIn ? "✓" : ""}</span>Gra
+          </button>
+        </li>`;
+    }).join("")}</ul>`;
+
+  return `
+    <header>
+      <div class="wrap">
+        <div class="titlebar">
+          <h1>PANEL <span>MESSENGER</span></h1>
+          <div style="display:flex;gap:6px">
+            <button class="icon-btn" id="tplBtn" title="Treść wiadomości" aria-label="Edytuj treść wiadomości">✏️</button>
+            <button class="icon-btn" id="refreshBtn" title="Odśwież z arkusza" aria-label="Odśwież">${state.loading ? "⏳" : "↻"}</button>
+          </div>
+        </div>
+        <div class="dates">
+          ${dates.map((d, idx) => `
+            <button class="date-chip${d === state.date ? " active" : ""}" data-date="${idx}">
+              ${d.short} ${d.label}<small>${d.long}</small>
+            </button>`).join("")}
+        </div>
+        <div class="stats">
+          <span class="ok">Zapisani <b>${inCount}</b></span>
+          <span class="sent">Wysłano <b>${sentCount}</b></span>
+          <span>Graczy <b>${all.length}</b></span>
+          ${noLink ? `<span>Bez linku <b>${noLink}</b></span>` : ""}
+        </div>
+        <div class="tools">
+          <input class="search" id="search" type="search" placeholder="Szukaj gracza…" value="${esc(state.search)}" />
+        </div>
+        <div class="filters">
+          ${filters.map(([k, l]) => `<button class="filter${state.filter === k ? " active" : ""}" data-filter="${k}">${l}</button>`).join("")}
+        </div>
+      </div>
+    </header>
+    <main class="wrap">
+      <div class="tpl${state.tplOpen ? " open" : ""}">
+        <textarea id="tplInp" aria-label="Szablon wiadomości">${esc(state.template)}</textarea>
+        <p>Zmienne: <code>{imie}</code> → Marek, <code>{dzien}</code> → ${esc(state.date.phrase)}, <code>{data}</code> → ${esc(state.date.label)}.
+           Jeśli gracz ma tekst w kolumnie D, użyty zostanie on (zmienne też działają).<br>
+           Podgląd: <i>${esc(buildMessage({ name: "Marek Nowak", msg: "" }, state.date))}</i></p>
+      </div>
+      ${state.locked ? `<div class="banner">🔒 Zapisy na ${esc(state.date.short)} ${esc(state.date.label)} są zamknięte na stronie — panel nadal może dopisywać i usuwać graczy.</div>` : ""}
+      ${list}
+    </main>`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const active = document.activeElement;
+  const focusId = active && active.id;
+  const selStart = active && active.selectionStart, selEnd = active && active.selectionEnd;
+  app.innerHTML = state.password ? renderPanel() : renderLogin();
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el) { el.focus(); try { el.setSelectionRange(selStart, selEnd); } catch (e) {} }
+  }
+}
+
+/* ---------- zdarzenia (delegacja) ---------- */
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.send !== undefined) return sendTo(+b.dataset.send);
+  if (b.dataset.toggle !== undefined) return togglePlayer(+b.dataset.toggle);
+  if (b.dataset.date !== undefined) return selectDate(+b.dataset.date);
+  if (b.dataset.filter) { state.filter = b.dataset.filter; lsSet(LS.filter, state.filter); return render(); }
+  if (b.id === "refreshBtn") return refresh();
+  if (b.id === "tplBtn") { state.tplOpen = !state.tplOpen; return render(); }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id === "search") { state.search = e.target.value; render(); }
+  if (e.target.id === "tplInp") {
+    state.template = e.target.value || DEFAULT_TEMPLATE;
+    lsSet(LS.tpl, e.target.value);
+    const p = e.target.parentElement.querySelector("i");
+    if (p) p.textContent = buildMessage({ name: "Marek Nowak", msg: "" }, state.date);
+  }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "loginForm") {
+    e.preventDefault();
+    const v = document.getElementById("passInp").value;
+    if (v) login(v);
+  }
+});
+// Po powrocie z Messengera odśwież listę zapisanych (ktoś mógł się zapisać przez stronę).
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && state.password && !state.loading) refresh();
+});
+
+/* ---------- start ---------- */
+if (state.password) { loadLocal(); render(); refresh(); }
+else render();
+</script>
+</body>
+</html>
