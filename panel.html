@@ -321,7 +321,7 @@ const state = {
   search: "",
   filter: lsGet(LS.filter, "all"),
 };
-/* ---------- szablony wiadomości (zapisane w tym telefonie) ---------- */
+/* ---------- szablony wiadomości (wspólne — zapisane w Apps Script, kopia w localStorage) ---------- */
 const DEFAULT_TEMPLATES = [
   { id: "t1", name: "Zaproszenie", text: DEFAULT_TEMPLATE },
   { id: "t2", name: "Ostatnie miejsca", text: "Hej {imie}! Zostały ostatnie wolne miejsca na {dzien} {data} 🎾 Wpadasz?" },
@@ -337,9 +337,55 @@ function loadTemplates() {
   const act = lsGet(LS.tplActive, "");
   state.activeTpl = list.some(t => t.id === act) ? act : list[0].id;
 }
-function saveTemplates() {
+function saveTemplatesLocal() {
   lsSet(LS.tpls, JSON.stringify(state.templates));
   lsSet(LS.tplActive, state.activeTpl);
+}
+// Zapis lokalny od razu + wysyłka do arkusza (Apps Script) po chwili bezczynności,
+// żeby telefon i komputer miały te same szablony.
+let tplSyncTimer = null;
+let tplDirty = false;
+function saveTemplates() {
+  saveTemplatesLocal();
+  tplDirty = true;
+  clearTimeout(tplSyncTimer);
+  tplSyncTimer = setTimeout(pushTemplates, 1200);
+}
+async function pushTemplates() {
+  clearTimeout(tplSyncTimer);
+  if (!state.password) return;
+  tplDirty = false;
+  try {
+    const res = await api({
+      action: "saveTemplates", password: state.password,
+      templates: JSON.stringify(state.templates), active: state.activeTpl,
+    }, 1);
+    if (!res.ok) throw new Error(res.error || "Błąd");
+  } catch (e) {
+    tplDirty = true;
+    toast("Nie udało się zapisać szablonów na serwerze — spróbuję ponownie", true);
+    tplSyncTimer = setTimeout(pushTemplates, 8000);
+  }
+}
+async function pullTemplates() {
+  if (!state.password || tplDirty) return;
+  try {
+    const res = await api({ action: "getTemplates", password: state.password }, 1);
+    if (!res.ok || tplDirty) return;
+    if (!Array.isArray(res.templates) || !res.templates.length) {
+      // Serwer nie ma jeszcze szablonów — wyślij te z tego urządzenia jako startowe.
+      return pushTemplates();
+    }
+    const same = JSON.stringify(res.templates) === JSON.stringify(state.templates) && res.active === state.activeTpl;
+    if (same) return;
+    // Nie nadpisuj w trakcie pisania w edytorze szablonów.
+    const a = document.activeElement;
+    if (a && (a.dataset.tplText || a.dataset.tplName)) return;
+    state.templates = res.templates;
+    state.activeTpl = res.templates.some(t => t.id === res.active) ? res.active : res.templates[0].id;
+    saveTemplatesLocal();
+    render();
+  } catch (e) { /* offline — zostają lokalne */ }
 }
 function activeTemplate() {
   return state.templates.find(t => t.id === state.activeTpl) || state.templates[0] || { name: "", text: DEFAULT_TEMPLATE };
@@ -386,6 +432,7 @@ function saveCache() {
 }
 
 async function refresh() {
+  pullTemplates();
   const forDate = dateKey();
   state.loading = true; render();
   try {
@@ -680,6 +727,7 @@ document.addEventListener("submit", (e) => {
 });
 // Po powrocie z Messengera odśwież listę zapisanych (ktoś mógł się zapisać przez stronę).
 document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && tplDirty) pushTemplates();   // nie zgub niezapisanych zmian szablonu
   if (document.visibilityState === "visible" && state.password && !state.loading) refresh();
 });
 
