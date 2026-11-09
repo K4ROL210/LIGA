@@ -562,6 +562,24 @@
   .add-btn:hover   { box-shadow: 0 4px 20px rgba(200,255,0,0.45); transform: translateY(-1px); }
   .add-btn:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
 
+  /* ── Podpowiedź pod plusem ── */
+  .signup-hint {
+    display: flex; flex-direction: column; align-items: flex-end;
+    padding: 0 14px 10px; margin-top: -6px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px;
+    line-height: 1.1; text-align: right; user-select: none;
+  }
+  .signup-hint .arrow { font-size: 20px; line-height: 1; margin-right: 10px; animation: hintBounce 1.4s ease-in-out infinite; }
+  @keyframes hintBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { .signup-hint .arrow { animation: none; } }
+
+  /* ── Znacznik REZERWA w widoku gracza ── */
+  .rez-badge { margin: 0 14px 10px; }
+  .me-row .me-rez {
+    font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px;
+    color: #0a0f08; background: var(--c2); padding: 2px 8px; border-radius: 6px;
+  }
+
   /* ── FOOTER ── */
   footer {
     text-align: center;
@@ -1487,6 +1505,15 @@ function mkCard(day) {
   inputRow.appendChild(inp); inputRow.appendChild(addB);
   card.appendChild(inputRow);
 
+  // Strzałka do góry + napis pod plusem
+  if (!isClosed) {
+    const hint = document.createElement("div");
+    hint.className = "signup-hint";
+    hint.style.color = day.color;
+    hint.innerHTML = `<span class="arrow">↑</span><span>ZAPISZ SIĘ NA LIGĘ</span>`;
+    card.appendChild(hint);
+  }
+
   // Pigułka dodatkowej opcji (tylko gdy lista otwarta)
   if (extraOpt && !isClosed) {
     const pillWrap = document.createElement("div");
@@ -1580,10 +1607,19 @@ function renderHiddenList(list, day, players, isClosed, loading, extraOpt) {
   }
   list.innerHTML = isClosed
     ? `<div class="closed-txt">🔒 Zapisy zamknięte</div>`
-    : `<div class="hidden-txt">🔒 Lista graczy ukryta</div>`;
+    : `<div class="hidden-txt">🕵️ Lista graczy ukryta</div>`;
 
   const mine = getMyNames();
   const rezIdx = players.findIndex(p => p.name === REZERWA_MARKER);
+
+  // Widoczny znacznik, gdy w arkuszu jest wpisana REZERWA (lista główna pełna)
+  if (rezIdx !== -1) {
+    const rez = document.createElement("div");
+    rez.className = "rezerwa-separator rez-badge";
+    rez.textContent = "▼  REZERWA  ▼";
+    rez.title = "Lista główna pełna — nowe zapisy trafiają na rezerwę";
+    list.appendChild(rez);
+  }
   players.forEach((p, i) => {
     if (p.name === REZERWA_MARKER || !mine.includes(normName(p.name))) return;
     const row = document.createElement("div");
@@ -1593,8 +1629,12 @@ function renderHiddenList(list, day, players, isClosed, loading, extraOpt) {
     const tag = document.createElement("span");
     tag.className = "me-tag"; tag.textContent = "✅ ZAPISANY";
     row.appendChild(nm); row.appendChild(tag);
+    if (rezIdx !== -1 && i > rezIdx) {
+      const rz = document.createElement("span");
+      rz.className = "me-rez"; rz.textContent = "REZERWA";
+      row.appendChild(rz);
+    }
     const extras = [];
-    if (rezIdx !== -1 && i > rezIdx) extras.push("rezerwa");
     if (p.hour) extras.push(p.hour + ":00");
     if (extraOpt && p.early18) extras.push(extraOpt.badge);
     if (extras.length) {
