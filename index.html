@@ -1199,7 +1199,7 @@ function renderTopBar() {
   const el = document.getElementById("topBar");
   el.innerHTML = "";
   if (state.adminMode) {
-    el.appendChild(mkBtn("Wyłącz admina","btn btn-red", () => { state.adminMode=false; render(); }));
+    el.appendChild(mkBtn("Wyłącz admina","btn btn-red", () => { state.adminMode=false; state.adminPassword=""; forgetAdmin(); render(); }));
   } else {
     el.appendChild(mkBtn("🔐 Admin","btn btn-dark", () => { state.showLogin=!state.showLogin; render(); }));
   }
@@ -1626,6 +1626,7 @@ async function tryLogin() {
     if (res.ok) {
       state.adminMode     = true;
       state.adminPassword = state.passInput;
+      rememberAdmin(state.passInput);
       state.showLogin     = false;
       state.passInput     = "";
       state.passErr       = false;
@@ -1639,6 +1640,29 @@ async function tryLogin() {
   }
   render();
 }
+
+// ── Zapamiętany admin na tym urządzeniu ──
+// Własny klucz + hasło z panelu Messengera (mp_pass), jeśli tam się logowałeś.
+const ADMIN_KEY = "adminPass";
+function rememberAdmin(p) { try { localStorage.setItem(ADMIN_KEY, p); } catch (e) {} }
+function forgetAdmin() {
+  try { localStorage.removeItem(ADMIN_KEY); localStorage.removeItem("mp_pass"); } catch (e) {}
+}
+(function restoreAdmin() {
+  let saved = "";
+  try { saved = localStorage.getItem(ADMIN_KEY) || localStorage.getItem("mp_pass") || ""; } catch (e) {}
+  if (!saved) return;
+  // Od razu tryb admina, a w tle sprawdzamy, czy hasło nadal jest aktualne.
+  state.adminMode = true;
+  state.adminPassword = saved;
+  api({ action: "checkPassword", password: saved }).then(res => {
+    if (res && res.ok) { rememberAdmin(saved); return; }
+    if (state.adminPassword !== saved) return;          // w międzyczasie zmieniono logowanie
+    forgetAdmin();
+    state.adminMode = false; state.adminPassword = "";
+    render();
+  }).catch(() => { /* brak sieci — zostajemy w trybie admina */ });
+})();
 
 render();
 async function loadDaysStaggered(days, batchSize) {
