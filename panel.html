@@ -108,6 +108,9 @@
   }
   .tpl-name:focus { border-bottom-color: var(--accent2); }
   .tpl-badge { flex: 0 0 auto; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .5px; }
+  .tpl-fixed { flex: 1; min-width: 0; padding: 4px 2px; font-weight: 700; }
+  .tpl-item.tpl-none { margin-bottom: 8px; }
+  .tpl-item.tpl-none .tpl-head { margin-bottom: 0; }
   .tpl-del { flex: 0 0 auto; background: transparent; border: 0; cursor: pointer; font-size: 16px; padding: 4px; opacity: .7; }
   .tpl-add {
     width: 100%; padding: 9px; border-radius: 10px; cursor: pointer; font-weight: 700;
@@ -273,6 +276,7 @@ function openUrl(raw) { return messengerUrl(raw); }
 /* ---------- wiadomość ---------- */
 function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
 function buildMessage(contact, date) {
+  if (state.activeTpl === NO_TPL) return "";   // szablon „Bez tekstu” — nic nie kopiujemy
   const tpl = contact.msg || activeTemplate().text || DEFAULT_TEMPLATE;
   return tpl
     .replace(/\{imie\}|\{imię\}/gi, firstName(contact.name))
@@ -322,6 +326,8 @@ const state = {
   filter: lsGet(LS.filter, "all"),
 };
 /* ---------- szablony wiadomości (wspólne — zapisane w Apps Script, kopia w localStorage) ---------- */
+const NO_TPL = "none";   // wbudowany pusty szablon: tylko otwiera czat, bez kopiowania
+function validTpl(id, list) { return id === NO_TPL || list.some(t => t.id === id); }
 const DEFAULT_TEMPLATES = [
   { id: "t1", name: "Zaproszenie", text: DEFAULT_TEMPLATE },
   { id: "t2", name: "Ostatnie miejsca", text: "Hej {imie}! Zostały ostatnie wolne miejsca na {dzien} {data} 🎾 Wpadasz?" },
@@ -335,7 +341,7 @@ function loadTemplates() {
   }
   state.templates = list;
   const act = lsGet(LS.tplActive, "");
-  state.activeTpl = list.some(t => t.id === act) ? act : list[0].id;
+  state.activeTpl = validTpl(act, list) ? act : list[0].id;
 }
 function saveTemplatesLocal() {
   lsSet(LS.tpls, JSON.stringify(state.templates));
@@ -382,12 +388,13 @@ async function pullTemplates() {
     const a = document.activeElement;
     if (a && (a.dataset.tplText || a.dataset.tplName)) return;
     state.templates = res.templates;
-    state.activeTpl = res.templates.some(t => t.id === res.active) ? res.active : res.templates[0].id;
+    state.activeTpl = validTpl(res.active, res.templates) ? res.active : res.templates[0].id;
     saveTemplatesLocal();
     render();
   } catch (e) { /* offline — zostają lokalne */ }
 }
 function activeTemplate() {
+  if (state.activeTpl === NO_TPL) return { id: NO_TPL, name: "Bez tekstu", text: "" };
   return state.templates.find(t => t.id === state.activeTpl) || state.templates[0] || { name: "", text: DEFAULT_TEMPLATE };
 }
 function addTemplate() {
@@ -403,10 +410,13 @@ function deleteTemplate(id) {
   const t = state.templates.find(x => x.id === id);
   if (!t || !confirm(`Usunąć szablon „${t.name}”?`)) return;
   state.templates = state.templates.filter(x => x.id !== id);
-  if (state.activeTpl === id) state.activeTpl = state.templates[0].id;
+  if (state.activeTpl === id) state.activeTpl = state.templates[0].id;   // (NO_TPL nie da się usunąć)
   saveTemplates(); render();
 }
-function previewText() { return buildMessage({ name: "Marek Nowak", msg: "" }, state.date); }
+function previewText() {
+  if (state.activeTpl === NO_TPL) return "(nic nie jest kopiowane — tylko otwiera czat)";
+  return buildMessage({ name: "Marek Nowak", msg: "" }, state.date);
+}
 loadTemplates();
 
 function norm(n) { return String(n).trim().toLowerCase(); }
@@ -478,10 +488,14 @@ function copyTextSync(text) {
 // to samo stuknięcie otwiera Messengera (Android wymaga gestu użytkownika).
 function onSendClick(i) {
   const c = state.contacts[i];
-  const copied = copyTextSync(buildMessage(c, state.date));
+  const text = buildMessage(c, state.date);
   state.sent[c.name] = Date.now();
   lsSet(LS.sent + dateKey(), JSON.stringify(state.sent));
-  toast(copied ? "📋 Skopiowano — wklej w czacie" : "⚠️ Nie udało się skopiować tekstu", !copied);
+  if (!text) toast("💬 Otwieram czat (bez kopiowania tekstu)");
+  else {
+    const copied = copyTextSync(text);
+    toast(copied ? "📋 Skopiowano — wklej w czacie" : "⚠️ Nie udało się skopiować tekstu", !copied);
+  }
   // Przerysowanie odkładamy, żeby nie usunąć klikniętego linku z DOM przed nawigacją.
   setTimeout(render, 600);
 }
@@ -611,7 +625,7 @@ function renderPanel() {
             <div class="status">${st.join(" · ") || "&nbsp;"}</div>
           </div>
           ${hasLink
-            ? `<a class="send${wasSent ? " was-sent" : ""}" data-send="${i}" href="${esc(openUrl(c.link))}" target="_blank" rel="noopener" aria-label="Kopiuj wiadomość i otwórz czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</a>`
+            ? `<a class="send${wasSent ? " was-sent" : ""}" data-send="${i}" href="${esc(openUrl(c.link))}" target="_blank" rel="noopener" aria-label="${state.activeTpl === NO_TPL ? "Otwórz" : "Kopiuj wiadomość i otwórz"} czat z ${esc(c.name)}">💬 ${wasSent ? "Jeszcze raz" : "Napisz"}</a>`
             : `<button class="send" disabled>💬 Napisz</button>`}
           <button class="toggle${isIn ? " on" : ""}${busy ? " busy" : ""}" data-toggle="${i}" aria-pressed="${isIn}" aria-label="Zapisany na ${state.date.long} ${state.date.label}">
             <span class="box">${isIn ? "✓" : ""}</span>Gra
@@ -652,6 +666,13 @@ function renderPanel() {
     </header>
     <main class="wrap">
       <div class="tpl${state.tplOpen ? " open" : ""}">
+        <div class="tpl-item tpl-none${state.activeTpl === NO_TPL ? " active" : ""}">
+          <div class="tpl-head">
+            <button class="tpl-radio" data-tpl-pick="${NO_TPL}" aria-pressed="${state.activeTpl === NO_TPL}" aria-label="Ustaw jako aktywny">${state.activeTpl === NO_TPL ? "●" : ""}</button>
+            <span class="tpl-fixed">Bez tekstu <small style="color:var(--muted);font-weight:400">— tylko otwiera czat</small></span>
+            ${state.activeTpl === NO_TPL ? `<span class="tpl-badge">AKTYWNY</span>` : ""}
+          </div>
+        </div>
         ${state.templates.map(t => {
           const on = t.id === state.activeTpl;
           return `
