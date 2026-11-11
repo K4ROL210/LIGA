@@ -277,7 +277,7 @@ function openUrl(raw) { return messengerUrl(raw); }
 function firstName(full) { return String(full).trim().split(/\s+/)[0] || full; }
 function buildMessage(contact, date) {
   if (state.activeTpl === NO_TPL) return "";   // szablon „Bez tekstu” — nic nie kopiujemy
-  const tpl = contact.msg || activeTemplate().text || DEFAULT_TEMPLATE;
+  const tpl = activeTemplate().text || DEFAULT_TEMPLATE;
   return tpl
     .replace(/\{imie\}|\{imię\}/gi, firstName(contact.name))
     .replace(/\{dzien\}|\{dzień\}/gi, date.phrase)
@@ -415,7 +415,7 @@ function deleteTemplate(id) {
 }
 function previewText() {
   if (state.activeTpl === NO_TPL) return "(nic nie jest kopiowane — tylko otwiera czat)";
-  return buildMessage({ name: "Marek Nowak", msg: "" }, state.date);
+  return buildMessage({ name: "Marek Nowak" }, state.date);
 }
 loadTemplates();
 
@@ -617,7 +617,6 @@ function renderPanel() {
       if (isIn) st.push(`<span class="s-in">✓ zapisany</span>`);
       if (wasSent) st.push(`<span class="s-sent">wysłano ${timeStr(state.sent[c.name])}</span>`);
       if (!hasLink) st.push(`<span class="s-nolink">${c.link ? "zły link w kol. C (to nie profil)" : "brak linku w kol. C"}</span>`);
-      if (c.msg) st.push(`<span>własna wiadomość</span>`);
       return `
         <li class="row${isIn ? " is-in" : ""}">
           <div class="who">
@@ -687,8 +686,7 @@ function renderPanel() {
           </div>`;
         }).join("")}
         <button class="tpl-add" id="tplAdd">+ Dodaj szablon</button>
-        <p>Zmienne: <code>{imie}</code> → Marek, <code>{dzien}</code> → ${esc(state.date.phrase)}, <code>{data}</code> → ${esc(state.date.label)}.
-           Jeśli gracz ma tekst w kolumnie D, użyty zostanie on zamiast szablonu (zmienne też działają).<br>
+        <p>Zmienne: <code>{imie}</code> → Marek, <code>{dzien}</code> → ${esc(state.date.phrase)}, <code>{data}</code> → ${esc(state.date.label)}.<br>
            Podgląd aktywnego: <i id="tplPreview">${esc(previewText())}</i></p>
       </div>
       ${state.locked ? `<div class="banner">🔒 Zapisy na ${esc(state.date.short)} ${esc(state.date.label)} są zamknięte na stronie — panel nadal może dopisywać i usuwać graczy.</div>` : ""}
